@@ -191,6 +191,7 @@ function newGame() {
     drone: { angle: 0, lastZap: 0 },
   };
   renderSkillBar();
+  overlay.classList.remove('show');
   waveFlashEl.classList.remove('show');
   document.getElementById('splash').classList.add('hidden');
 }
@@ -596,6 +597,7 @@ function step(dt) {
 
 function gameOver() {
   G.running = false;
+  overlay.classList.remove('show');
   if (G.wave > bestWave) bestWave = G.wave;
   document.getElementById('deadmsg').textContent = `CORE BREACHED · WAVE ${G.wave} · LV ${G.level}`;
   document.getElementById('killcount').textContent = G.kills > 0 ? `KILLS  ${G.kills}` : '';
