@@ -6,6 +6,14 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
+- [ ] Scale XP by enemy strength: tougher enemies award more XP on kill. Done =
+      `xpForKill(stats, enemy)` in `engine.js` accepts an optional `enemy` object and
+      returns `CONFIG.xpPerKill × multiplier × (1 + magnet)`, where multiplier is 1 for
+      normal, 2 for tanky (`enemy.tanky`), 1.5 for splitter (`enemy.splitter`), and 5
+      for boss (`enemy.boss`); existing call-sites in `index.html` pass the enemy object;
+      tests assert each multiplier value (normal=1, tanky=2, splitter=1.5, boss=5) at
+      default stats; backward-compat: calling with no enemy still returns base XP.
+
 - [ ] Grant XP when a skill is used: each skill activation awards a fixed amount of XP
       so that active play is rewarded even between kills. Done = `CONFIG.xpPerSkillUse`
       exists in `engine.js` (value ≥ 1); `index.html` calls `gainXp` with
