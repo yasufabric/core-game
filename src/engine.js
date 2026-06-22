@@ -13,6 +13,7 @@ export const CONFIG = {
   xpBase: 5,
   xpGrowth: 1.35,
   waveSeconds: 20,           // each wave lasts this long, then difficulty ramps
+  doublePickChance: 0.15,    // probability per level-up of choosing two cards
 };
 
 // --- leveling -------------------------------------------------------------

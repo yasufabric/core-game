@@ -382,27 +382,38 @@ function updateSkillBar() {
 // --- level up ------------------------------------------------------------
 const overlay = document.getElementById('overlay');
 const cardsEl = document.getElementById('cards');
-function openLevelUp() {
+function openLevelUp(picksRemaining) {
+  if (picksRemaining === undefined) {
+    picksRemaining = Math.random() < CONFIG.doublePickChance ? 2 : 1;
+  }
   G.paused = true;
   setAiming(null);
   const offers = rollOffers(G.unlocked, Math.random);
+  const isDouble = picksRemaining === 2;
   cardsEl.innerHTML = '';
+  const header = document.querySelector('#overlay h2');
+  if (header) header.textContent = isDouble ? 'DOUBLE PICK!' : 'LEVEL UP';
   for (const o of offers) {
     const el = document.createElement('button');
     el.className = 'pick ' + o.kind;
     const badge = o.kind === 'skill' ? (o.tap === 2 ? 'SKILL·AIM' : 'SKILL') : 'STAT';
     el.innerHTML = `<div class="h"><span class="name">${o.name}</span><span class="badge">${badge}</span></div><div class="d">${o.desc}</div>`;
-    el.addEventListener('click', () => choose(o));
+    el.addEventListener('click', () => choose(o, picksRemaining));
     cardsEl.appendChild(el);
   }
   overlay.classList.add('show');
 }
-function choose(o) {
+function choose(o, picksRemaining) {
   if (o.kind === 'stat') {
     G.stats = applyStatCard(G.stats, o.id);
   } else {
     if (!G.unlocked.includes(o.id)) G.unlocked.push(o.id);
     renderSkillBar();
+  }
+  const remaining = picksRemaining - 1;
+  if (remaining > 0) {
+    openLevelUp(remaining);
+    return;
   }
   overlay.classList.remove('show');
   G.paused = false;

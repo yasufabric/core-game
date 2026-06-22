@@ -142,6 +142,12 @@ describe('stats', () => {
     expect(xpForKill(stats)).toBeCloseTo(1.2);
   });
 
+  it('CONFIG.doublePickChance is a number between 0 and 1', () => {
+    expect(typeof CONFIG.doublePickChance).toBe('number');
+    expect(CONFIG.doublePickChance).toBeGreaterThan(0);
+    expect(CONFIG.doublePickChance).toBeLessThan(1);
+  });
+
   it('xpForKill gives base XP for normal enemy', () => {
     expect(xpForKill(defaultStats(), {})).toBeCloseTo(CONFIG.xpPerKill);
   });

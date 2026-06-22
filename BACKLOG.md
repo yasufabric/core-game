@@ -33,7 +33,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       tests assert each multiplier value (normal=1, tanky=2, splitter=1.5, boss=5) at
       default stats; backward-compat: calling with no enemy still returns base XP.
 
-- [ ] Rare double-pick on level-up: each level-up has a 15% chance to let the player
+- [x] Rare double-pick on level-up: each level-up has a 15% chance to let the player
       choose two cards instead of one. Done = `CONFIG.doublePickChance` exists in
       `engine.js` with value 0.15; test asserting it is a number between 0 and 1
       (exclusive); in `index.html` `openLevelUp()` rolls `Math.random() <
