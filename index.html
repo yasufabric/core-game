@@ -530,9 +530,11 @@ function step(dt) {
   // move enemies toward core
   let killed = 0;
   const spawnedFromSplitters = [];
+  const killedEnemies = [];
   for (const e of G.enemies) {
     if (e.hp <= 0) {
       killed++;
+      killedEnemies.push(e);
       const col = e.boss ? '#ffd700' : e.tanky ? '#ff8a4d' : e.splitter ? '#f277ff' : getCss('--enemy');
       G.fx.push({ kind: 'burst', x: e.x, y: e.y, color: col, born: G.t, life: 0.4, n: 7 });
       spawnedFromSplitters.push(...splitterChildren(e));
@@ -555,7 +557,8 @@ function step(dt) {
   G.enemies.push(...spawnedFromSplitters);
   if (removed > 0) {
     G.kills += removed;
-    const res = gainXp({ level: G.level, xp: G.xp }, removed * xpForKill(G.stats));
+    const totalXp = killedEnemies.reduce((sum, e) => sum + xpForKill(G.stats, e), 0);
+    const res = gainXp({ level: G.level, xp: G.xp }, totalXp);
     const ups = res.leveledUp;
     G.level = res.level; G.xp = res.xp; G.xpNeeded = res.xpNeeded;
     if (ups > 0) { G.pendingLevels = (G.pendingLevels || 0) + ups - 1; openLevelUp(); }

@@ -155,8 +155,11 @@ export function splitterChildren(enemy) {
   ];
 }
 
-export function xpForKill(stats) {
-  return CONFIG.xpPerKill * (1 + (stats.magnet || 0));
+export function xpForKill(stats, enemy) {
+  const mult = enemy
+    ? (enemy.boss ? 5 : enemy.tanky ? 2 : enemy.splitter ? 1.5 : 1)
+    : 1;
+  return CONFIG.xpPerKill * mult * (1 + (stats.magnet || 0));
 }
 
 export function waveForTime(elapsedSec) {

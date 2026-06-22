@@ -25,7 +25,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       overlays a `rgba(255,80,0,0.08)` full-canvas tint for the same duration;
       `G.bossAnnounced` resets to false in `newGame()`. Rendering-only; no test needed.
 
-- [ ] Scale XP by enemy strength: tougher enemies award more XP on kill. Done =
+- [x] Scale XP by enemy strength: tougher enemies award more XP on kill. Done =
       `xpForKill(stats, enemy)` in `engine.js` accepts an optional `enemy` object and
       returns `CONFIG.xpPerKill × multiplier × (1 + magnet)`, where multiplier is 1 for
       normal, 2 for tanky (`enemy.tanky`), 1.5 for splitter (`enemy.splitter`), and 5

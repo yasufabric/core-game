@@ -141,6 +141,22 @@ describe('stats', () => {
     expect(stats.magnet).toBeCloseTo(0.2);
     expect(xpForKill(stats)).toBeCloseTo(1.2);
   });
+
+  it('xpForKill gives base XP for normal enemy', () => {
+    expect(xpForKill(defaultStats(), {})).toBeCloseTo(CONFIG.xpPerKill);
+  });
+
+  it('xpForKill gives 2× for tanky enemy', () => {
+    expect(xpForKill(defaultStats(), { tanky: true })).toBeCloseTo(CONFIG.xpPerKill * 2);
+  });
+
+  it('xpForKill gives 1.5× for splitter enemy', () => {
+    expect(xpForKill(defaultStats(), { splitter: true })).toBeCloseTo(CONFIG.xpPerKill * 1.5);
+  });
+
+  it('xpForKill gives 5× for boss enemy', () => {
+    expect(xpForKill(defaultStats(), { boss: true })).toBeCloseTo(CONFIG.xpPerKill * 5);
+  });
 });
 
 describe('SKILLS', () => {
