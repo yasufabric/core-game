@@ -161,7 +161,7 @@ function newGame() {
     lastAuto: 0,
     unlocked: [],            // skill ids
     cooldowns: {},           // id -> ready time
-    slowUntil: 0, shieldUntil: 0,
+    slowUntil: 0, shieldUntil: 0, shakeUntil: 0,
     aiming: null,            // skill id awaiting 2nd tap
     paused: false,
     lastBossWave: 0,         // last wave number a boss was spawned on
@@ -390,7 +390,7 @@ function step(dt) {
     e.x += Math.cos(ang) * e.spd * slow * dt;
     e.y += Math.sin(ang) * e.spd * slow * dt;
     if (enemyHitsCore(e, c)) {
-      if (G.t >= G.shieldUntil) c.hp -= e.tanky ? 14 : 7;
+      if (G.t >= G.shieldUntil) { c.hp -= e.tanky ? 14 : 7; G.shakeUntil = G.t + 0.25; }
       e.hp = 0; killed++;
       G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 18, born: G.t, life: .3, color: '#ff5d73' });
     }
@@ -430,7 +430,16 @@ function gameOver() {
 
 // --- draw ----------------------------------------------------------------
 function draw() {
-  ctx.clearRect(0, 0, W, H);
+  // apply screen shake — translate before clearing so edges stay clean
+  let sx = 0, sy = 0;
+  if (G.t < G.shakeUntil) {
+    const k = (G.shakeUntil - G.t) / 0.25;
+    const mag = 7 * k;
+    sx = (Math.random() - 0.5) * 2 * mag;
+    sy = (Math.random() - 0.5) * 2 * mag;
+  }
+  ctx.setTransform(DPR, 0, 0, DPR, sx * DPR, sy * DPR);
+  ctx.clearRect(-10, -10, W + 20, H + 20);
   // grid
   ctx.strokeStyle = getCss('--grid'); ctx.lineWidth = 1;
   const gs = 36;

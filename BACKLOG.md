@@ -14,7 +14,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       a `waveForTime`/spawn test asserting boss cadence.
 - [x] Persist best score (wave reached) in memory for the session and show it on the
       splash. Done = best updates on game over, shown on RETRY screen. (No localStorage.)
-- [ ] Add a brief screen-shake on core hit. Rendering-only; no test needed.
+- [x] Add a brief screen-shake on core hit. Rendering-only; no test needed.
 
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
@@ -22,3 +22,4 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] Bomb skill: `SKILLS.bomb` (1-tap, 20s cooldown), deals 15×power to all on-screen enemies, white screen-flash fx; 3 tests added.
 - [x] Boss enemy: `isBossWave(wave)` exported, one 8-sided gold boss (r=28, 8×hp, 0.35×speed) spawns once per 5th wave; 4 tests asserting cadence.
 - [x] Best score: `bestWave` session variable updated on game over; `#bestscore` element shows "BEST  WAVE N" on RETRY splash (empty on first load).
+- [x] Screen shake: `G.shakeUntil` set on shielded core hit; `draw()` applies decaying random translate via `setTransform` for 0.25s.
