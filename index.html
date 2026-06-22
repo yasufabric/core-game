@@ -39,6 +39,12 @@
   .stat b { color: var(--ink); font-weight: 600; }
   .xpbar { position: absolute; top: max(112px, calc(48px + env(safe-area-inset-top))); left: 16px; right: 16px; height: 3px; background: #1a2230; border-radius: 2px; }
   .xpbar > i { display: block; height: 100%; width: 0; background: var(--xp); border-radius: 2px; transition: width .12s linear; }
+  #waveflash {
+    position: absolute; left: 50%; top: 34%; transform: translate(-50%, -50%) scale(.96);
+    color: var(--core); font-size: 18px; font-weight: 700; letter-spacing: .28em;
+    text-shadow: 0 0 18px var(--core-dim); opacity: 0; transition: opacity .18s, transform .18s;
+  }
+  #waveflash.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
   /* skill buttons (thumb zone, bottom) */
   #skills {
@@ -115,6 +121,7 @@
       <div class="stat">CORE <b id="hp">100</b></div>
     </div>
     <div class="xpbar"><i id="xpfill"></i></div>
+    <div id="waveflash"></div>
     <div id="skills"></div>
   </div>
 
@@ -141,6 +148,7 @@ import {
 
 const cv = document.getElementById('c');
 const ctx = cv.getContext('2d');
+const waveFlashEl = document.getElementById('waveflash');
 let W = 0, H = 0, DPR = 1;
 function resize() {
   DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -154,6 +162,7 @@ window.addEventListener('resize', resize);
 // --- game state ----------------------------------------------------------
 let G = null;
 let bestWave = 0; // session best, not persisted across page reloads
+let waveFlashTimer = 0;
 function newGame() {
   resize();
   G = {
@@ -173,7 +182,15 @@ function newGame() {
     lastBossWave: 0,         // last wave number a boss was spawned on
   };
   renderSkillBar();
+  waveFlashEl.classList.remove('show');
   document.getElementById('splash').classList.add('hidden');
+}
+
+function announceWave(wave) {
+  waveFlashEl.textContent = `WAVE ${wave}`;
+  waveFlashEl.classList.add('show');
+  clearTimeout(waveFlashTimer);
+  waveFlashTimer = setTimeout(() => waveFlashEl.classList.remove('show'), 850);
 }
 
 // --- spawning ------------------------------------------------------------
@@ -367,7 +384,11 @@ function frame(now) {
 }
 function step(dt) {
   G.t += dt;
-  G.wave = waveForTime(G.t);
+  const nextWave = waveForTime(G.t);
+  if (nextWave !== G.wave) {
+    G.wave = nextWave;
+    announceWave(G.wave);
+  }
   const d = derive(G.stats, G.wave);
   const c = G.core;
 

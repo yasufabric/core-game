@@ -29,7 +29,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       exists in `defaultStats`/`STAT_CARDS`, `xpForKill(stats)` helper exists, kill XP
       uses it, and tests pin default/boosted values.
 
-- [ ] Add wave announcement feedback when a new wave starts. Done = renderer detects
+- [x] Add wave announcement feedback when a new wave starts. Done = renderer detects
       wave changes, shows a short centered "WAVE N" flash, and does not pause gameplay.
       Rendering-only; no test needed.
 
@@ -100,6 +100,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 <!-- the loop appends finished items here with a one-line note -->
 - [x] Armor stat: added capped `armor` upgrades plus `coreDamageTaken`; enemy core hits now use the helper and tests cover default, upgrade, reduction, and cap behavior.
 - [x] Magnet stat: added `magnet` upgrades and `xpForKill(stats)`; kill XP now routes through the helper with tests for baseline and boosted XP.
+- [x] Wave announcement: renderer now flashes centered "WAVE N" text on wave changes without pausing gameplay; Playwright confirmed wave 2 flash.
 - [x] crit stat: added `crit: 0` to defaultStats, `critChance` to derive, `+Crit` STAT_CARD, auto-shot rolls double damage on crit; crit shots render larger/white.
 - [x] Bomb skill: `SKILLS.bomb` (1-tap, 20s cooldown), deals 15×power to all on-screen enemies, white screen-flash fx; 3 tests added.
 - [x] Boss enemy: `isBossWave(wave)` exported, one 8-sided gold boss (r=28, 8×hp, 0.35×speed) spawns once per 5th wave; 4 tests asserting cadence.
