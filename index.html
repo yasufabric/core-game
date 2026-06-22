@@ -136,7 +136,7 @@
 <script type="module">
 import {
   CONFIG, xpForLevel, gainXp, defaultStats, derive,
-  rollOffers, applyStatCard, dist, enemyHitsCore, waveForTime, clamp, SKILLS, isBossWave,
+  rollOffers, applyStatCard, dist, enemyHitsCore, coreDamageTaken, waveForTime, clamp, SKILLS, isBossWave,
 } from './src/engine.js';
 
 const cv = document.getElementById('c');
@@ -396,7 +396,7 @@ function step(dt) {
     e.x += Math.cos(ang) * e.spd * slow * dt;
     e.y += Math.sin(ang) * e.spd * slow * dt;
     if (enemyHitsCore(e, c)) {
-      if (G.t >= G.shieldUntil) { c.hp -= e.tanky ? 14 : 7; G.shakeUntil = G.t + 0.25; }
+      if (G.t >= G.shieldUntil) { c.hp -= coreDamageTaken(G.stats, e.tanky ? 14 : 7); G.shakeUntil = G.t + 0.25; }
       e.hp = 0; killed++;
       G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 18, born: G.t, life: .3, color: '#ff5d73' });
     }

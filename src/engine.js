@@ -46,6 +46,7 @@ export function defaultStats() {
     regen: 0,      // core hp regenerated per second
     cooldown: 1,   // skill cooldown multiplier (lower = faster); applied as 1/cooldown
     crit: 0,       // probability per auto-shot to deal double damage (0–1)
+    armor: 0,      // fraction of incoming core damage prevented (0–0.75)
   };
 }
 
@@ -81,6 +82,7 @@ export const STAT_CARDS = [
   { id: 'regen',  name: '+Regen',  apply: s => ({ ...s, regen: +(s.regen + 1).toFixed(2) }),     desc: 'Core regen +1/s' },
   { id: 'cooldn', name: '+Haste',  apply: s => ({ ...s, cooldown: +(Math.max(0.4, s.cooldown - 0.12)).toFixed(2) }), desc: 'Skill cooldown -12%' },
   { id: 'crit',   name: '+Crit',   apply: s => ({ ...s, crit: +(Math.min(0.9, s.crit + 0.12)).toFixed(2) }),          desc: 'Crit chance +12% (double damage)' },
+  { id: 'armor',  name: '+Armor',  apply: s => ({ ...s, armor: +(Math.min(0.75, s.armor + 0.15)).toFixed(2) }),       desc: 'Core damage -15% (max 75%)' },
 ];
 
 // Deterministic offer generation given an rng function (0..1).
@@ -122,6 +124,11 @@ export function dist(ax, ay, bx, by) {
 // An enemy reaching the core deals damage and is consumed.
 export function enemyHitsCore(enemy, core) {
   return dist(enemy.x, enemy.y, core.x, core.y) <= CONFIG.coreRadius + enemy.r;
+}
+
+export function coreDamageTaken(stats, baseDamage) {
+  const armor = clamp(stats.armor || 0, 0, 0.75);
+  return baseDamage * (1 - armor);
 }
 
 export function waveForTime(elapsedSec) {

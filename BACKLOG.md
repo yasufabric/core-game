@@ -6,6 +6,11 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
+- [x] Add an `armor` stat card: reduces core damage taken from enemies, capped so the
+      core can never become invulnerable from stats alone. Done = `armor` exists in
+      `defaultStats`/`STAT_CARDS`, a pure helper computes incoming core damage, renderer
+      uses it on enemy contact, and tests cover the cap.
+
 - [x] Add a `crit` stat card: chance for auto-shots to deal double damage. Done = `crit`
       stat exists in `defaultStats`/`STAT_CARDS`, affects `derive`, has a test.
 - [x] Add a `Bomb` 1-tap skill: damages all enemies on screen, long cooldown. Done =
@@ -54,6 +59,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
+- [x] Armor stat: added capped `armor` upgrades plus `coreDamageTaken`; enemy core hits now use the helper and tests cover default, upgrade, reduction, and cap behavior.
 - [x] crit stat: added `crit: 0` to defaultStats, `critChance` to derive, `+Crit` STAT_CARD, auto-shot rolls double damage on crit; crit shots render larger/white.
 - [x] Bomb skill: `SKILLS.bomb` (1-tap, 20s cooldown), deals 15×power to all on-screen enemies, white screen-flash fx; 3 tests added.
 - [x] Boss enemy: `isBossWave(wave)` exported, one 8-sided gold boss (r=28, 8×hp, 0.35×speed) spawns once per 5th wave; 4 tests asserting cadence.

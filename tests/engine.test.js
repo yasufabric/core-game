@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   xpForLevel, gainXp, defaultStats, derive, rollOffers,
-  applyStatCard, dist, enemyHitsCore, waveForTime, clamp, SKILLS, CONFIG, isBossWave,
+  applyStatCard, dist, enemyHitsCore, coreDamageTaken, waveForTime, clamp, SKILLS, CONFIG, isBossWave,
 } from '../src/engine.js';
 
 describe('xp / leveling', () => {
@@ -83,6 +83,10 @@ describe('stats', () => {
     expect(defaultStats().crit).toBe(0);
   });
 
+  it('defaultStats has armor at 0', () => {
+    expect(defaultStats().armor).toBe(0);
+  });
+
   it('applyStatCard crit increases crit chance', () => {
     const s = applyStatCard(defaultStats(), 'crit');
     expect(s.crit).toBeCloseTo(0.12);
@@ -97,6 +101,27 @@ describe('stats', () => {
   it('derive passes critChance from stats', () => {
     const stats = { ...defaultStats(), crit: 0.25 };
     expect(derive(stats, 1).critChance).toBeCloseTo(0.25);
+  });
+
+  it('applyStatCard armor increases armor', () => {
+    const s = applyStatCard(defaultStats(), 'armor');
+    expect(s.armor).toBeCloseTo(0.15);
+  });
+
+  it('armor never exceeds 0.75 after many upgrades', () => {
+    let s = defaultStats();
+    for (let i = 0; i < 20; i++) s = applyStatCard(s, 'armor');
+    expect(s.armor).toBeLessThanOrEqual(0.75);
+  });
+
+  it('coreDamageTaken applies armor reduction', () => {
+    const stats = { ...defaultStats(), armor: 0.3 };
+    expect(coreDamageTaken(stats, 10)).toBeCloseTo(7);
+  });
+
+  it('coreDamageTaken keeps at least 25% incoming damage through armor cap', () => {
+    const stats = { ...defaultStats(), armor: 2 };
+    expect(coreDamageTaken(stats, 20)).toBeCloseTo(5);
   });
 });
 
