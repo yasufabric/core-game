@@ -6,6 +6,15 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
+- [ ] Extract the renderer into `src/renderer.js` to make `index.html` easier to
+      navigate. The inline `<script type="module">` is ~750 lines; `draw()` alone is
+      ~180 lines. Done = `src/renderer.js` exists and exports a single `draw(G, ctx,
+      W, H, getCss)` function; `index.html` imports and calls it; all other code
+      (game loop, `step()`, input handlers, skill triggers, HUD updates) stays in
+      `index.html`; no game rules change; game boots and `window.__CORE().running ===
+      true` after START; all 55 tests still pass. Rendering-only restructure; no new
+      test needed.
+
 - [ ] Add a dramatic boss arrival announcement: when a boss spawns, flash a centred
       "⚠ BOSS" warning text on screen for 2s and briefly tint the canvas red to signal
       danger. Done = `index.html` detects the moment a boss is added to `G.enemies`
