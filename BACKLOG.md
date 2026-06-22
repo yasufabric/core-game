@@ -43,6 +43,15 @@ Keep items small and verifiable. A good item names *what done looks like*.
       to assert the new values; `derive(defaultStats(), 5)` still harder than wave 1
       (existing invariant must hold).
 
+- [x] Wave-2 enemy HP spike is still too steep: hp jumps from 3 to 5 between wave 1 and
+      wave 2 because the hardcoded `1.5` scaling factor uses `floor(wave * 1.5)`.
+      Introduce `CONFIG.enemyHpScale` (replaces the hardcoded `1.5` in `derive`) and
+      set it to `1.0`, so wave-2 hp drops to 4 and the ramp is smoother.
+      Done = `CONFIG.enemyHpScale` exists in `engine.js`; `derive` uses
+      `CONFIG.baseEnemyHp + Math.floor(wave * CONFIG.enemyHpScale)`; test asserting
+      `derive(defaultStats(), 2).enemyHp` equals 4; difficulty-rises invariant still
+      holds (`derive(defaultStats(), 5).enemyHp > derive(defaultStats(), 1).enemyHp`).
+
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
 - [x] crit stat: added `crit: 0` to defaultStats, `critChance` to derive, `+Crit` STAT_CARD, auto-shot rolls double damage on crit; crit shots render larger/white.
@@ -54,3 +63,4 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] iPhone 17 max() hardening: `.topbar` padding-top `max(78px, …)`, `.xpbar` top `max(112px, …)`; Playwright iPhone 12 check confirms paddingTop ≥ 78px.
 - [x] Level-up overlay fix: `#overlay` gets `overflow-y: auto` + safe-area padding + `justify-content: safe center`; `.cards` gets `max-height` bounded to viewport; Playwright confirms all 3 picks within scrollHeight.
 - [x] Early difficulty balance: `baseEnemyHp` 3→2, `baseSpawnInterval` 1.1→1.4; wave-1 hp=3, interval≈1.34 pinned in new tests; difficulty-rises invariant still holds.
+- [x] Wave-2 hp spike fix: `CONFIG.enemyHpScale` 1.5→1.0; wave-2 hp 5→4; new test pins wave-2 hp=4; difficulty-rises invariant holds.

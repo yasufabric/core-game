@@ -5,6 +5,7 @@ export const CONFIG = {
   coreHp: 100,
   coreRadius: 26,
   baseEnemyHp: 2,
+  enemyHpScale: 1.0,         // hp added per wave number
   baseEnemySpeed: 28,        // px/sec at wave 1
   baseSpawnInterval: 1.4,    // sec between spawns at wave 1
   xpPerKill: 1,
@@ -55,7 +56,7 @@ export function derive(stats, wave) {
     autoRate: 1.2 * stats.rate,        // shots/sec
     autoRange: 140 * stats.range,      // px
     regenPerSec: stats.regen,
-    enemyHp: CONFIG.baseEnemyHp + Math.floor(wave * 1.5),
+    enemyHp: CONFIG.baseEnemyHp + Math.floor(wave * CONFIG.enemyHpScale),
     enemySpeed: CONFIG.baseEnemySpeed + wave * 6,
     spawnInterval: Math.max(0.28, CONFIG.baseSpawnInterval - wave * 0.06),
     critChance: stats.crit,
