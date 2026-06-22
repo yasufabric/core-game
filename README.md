@@ -11,6 +11,10 @@ unit-tested functions so Claude Code can verify its own changes.
 
 ## Play
 
+Play the hosted version:
+
+https://yasufabric.github.io/core-game/
+
 No build step. Serve the folder and open it on your phone (same Wi-Fi):
 
 ```
