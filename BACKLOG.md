@@ -14,13 +14,13 @@ Keep items small and verifiable. A good item names *what done looks like*.
       trigger; the Missile skill button is hidden from the thumb zone (not rendered in
       `#skills`) so it doesn't take up a slot. Rendering/input-only; no test needed.
 
-- [ ] Show enemy HP bars: render a small bar above each enemy that shrinks as HP drops,
+- [x] Show enemy HP bars: render a small bar above each enemy that shrinks as HP drops,
       so the player can see which enemies are nearly dead. Done = `draw()` draws a 1px
       tall bar (enemy width × hp/maxHp) above each enemy in red; bar is hidden when
       hp === maxHp (freshly spawned); boss bar is proportionally wider matching its
       larger radius. Rendering-only; no test needed.
 
-- [ ] Enemy death burst: when an enemy's hp drops to 0, push 5–8 tiny particle FX that
+- [x] Enemy death burst: when an enemy's hp drops to 0, push 5–8 tiny particle FX that
       scatter outward and fade over 0.4s, matching the enemy's colour. Done = kill
       detection in `step()` pushes `{ kind: 'burst', x, y, color }` entries to `G.fx`;
       `draw()` renders each burst as several small circles spreading from origin with
