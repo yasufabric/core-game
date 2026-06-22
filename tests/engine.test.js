@@ -176,7 +176,7 @@ describe('SKILLS', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
     expect(SKILLS.nova).toBeDefined();
     expect(SKILLS.nova.tap).toBe(2);
-    const offers = rollOffers([], seq([0.42, 0, 0.8]));
+    const offers = rollOffers([], seq([0.9, 0.1, 0.5])); // 0.9 → index 6 = nova in locked pool
     expect(offers).toContainEqual(expect.objectContaining({ kind: 'skill', id: 'nova', tap: 2 }));
   });
 });
@@ -189,6 +189,19 @@ describe('offers', () => {
     expect(offers).toHaveLength(3);
     const keys = offers.map(o => o.kind + ':' + o.id);
     expect(new Set(keys).size).toBe(3);
+  });
+
+  it('rollOffers always includes exactly 1 skill when locked skills exist', () => {
+    const offers = rollOffers([], seq([0.0, 0.5, 0.9, 0.1, 0.3]));
+    expect(offers.filter(o => o.kind === 'skill')).toHaveLength(1);
+    expect(offers.filter(o => o.kind === 'stat')).toHaveLength(2);
+  });
+
+  it('rollOffers returns 3 stat cards when all skills are unlocked', () => {
+    const allSkillIds = Object.keys(SKILLS);
+    const offers = rollOffers(allSkillIds, seq([0.0, 0.3, 0.7]));
+    expect(offers.filter(o => o.kind === 'skill')).toHaveLength(0);
+    expect(offers.filter(o => o.kind === 'stat')).toHaveLength(3);
   });
 
   it('rollOffers never offers an already-unlocked skill', () => {

@@ -104,6 +104,31 @@ Keep items small and verifiable. A good item names *what done looks like*.
       `derive(defaultStats(), 2).enemyHp` equals 4; difficulty-rises invariant still
       holds (`derive(defaultStats(), 5).enemyHp > derive(defaultStats(), 1).enemyHp`).
 
+- [x] Fix `rollOffers` to guarantee at least one skill card per level-up when locked
+      skills are still available. Currently ~10% of offers show zero skills because
+      the pool is purely random across 7 skills + 8 stat cards.
+      Done = `rollOffers` in `engine.js` always includes exactly 1 locked skill (and
+      2 stat cards) when `unlockedSkillIds.length < Object.keys(SKILLS).length`;
+      when all skills are unlocked it returns 3 stat cards without error; tests assert
+      both cases. Mixed — engine rule change with tests; no renderer change needed.
+
+- [ ] Add a `Blink` 2-tap skill: aim tap selects a destination, second tap teleports
+      the core there for 1.5s then snaps it back to the original position.
+      Done = `SKILLS.blink` exists in `engine.js` (tap: 2, cooldown ≥ 10); test
+      asserting `SKILLS.blink.tap === 2` and blink is not offered when unlocked;
+      `index.html` stores the home position in `G.blinkHome` on trigger, moves
+      `G.core.x/y` to the aim point, sets `G.blinkReturn = G.t + 1.5`, and in
+      `step()` snaps core back to `G.blinkHome` when `G.t >= G.blinkReturn`; ring
+      flash FX appears at departure and arrival on blink.
+
+- [ ] Add a `Missile` 1-tap skill: fires a slow homing projectile that steers toward the
+      nearest enemy each frame and deals high damage on impact. Done = `SKILLS.missile`
+      exists in `engine.js` (tap: 1, cooldown ≥ 5); test asserting `SKILLS.missile`
+      is defined and is not offered when already unlocked; `index.html` adds a missile
+      object `{ x, y, vx, vy, target }` to `G.missiles` on trigger, steers toward its
+      target enemy each frame, deals 25×power damage on contact with radius ≤ 10, and
+      renders as a bright magenta dot with a 3-segment fading tail.
+
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
 - [x] Armor stat: added capped `armor` upgrades plus `coreDamageTaken`; enemy core hits now use the helper and tests cover default, upgrade, reduction, and cap behavior.

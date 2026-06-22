@@ -89,22 +89,27 @@ export const STAT_CARDS = [
   { id: 'magnet', name: '+Magnet', apply: s => ({ ...s, magnet: +(s.magnet + 0.2).toFixed(2) }),                     desc: 'XP from kills +20%' },
 ];
 
-// Deterministic offer generation given an rng function (0..1).
-// Avoids offering already-unlocked skills. Always returns 3 distinct cards.
+// Offer generation: always 1 locked skill + 2 stat cards (when skills remain),
+// or 3 stat cards when all skills are unlocked.
 export function rollOffers(unlockedSkillIds, rng) {
   const lockedSkills = Object.values(SKILLS)
     .filter(sk => !unlockedSkillIds.includes(sk.id))
     .map(sk => ({ kind: 'skill', id: sk.id, name: sk.name, desc: sk.desc, tap: sk.tap }));
   const stats = STAT_CARDS.map(c => ({ kind: 'stat', id: c.id, name: c.name, desc: c.desc }));
-  const pool = [...lockedSkills, ...stats];
 
   const picks = [];
   const used = new Set();
+
+  if (lockedSkills.length > 0) {
+    const sk = lockedSkills[Math.floor(rng() * lockedSkills.length)];
+    used.add(sk.kind + ':' + sk.id);
+    picks.push(sk);
+  }
+
   let guard = 0;
   while (picks.length < 3 && guard < 100) {
     guard++;
-    const i = Math.floor(rng() * pool.length);
-    const card = pool[i];
+    const card = stats[Math.floor(rng() * stats.length)];
     if (used.has(card.kind + ':' + card.id)) continue;
     used.add(card.kind + ':' + card.id);
     picks.push(card);
