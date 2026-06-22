@@ -6,7 +6,13 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
-<!-- no items pending -->
+- [ ] Grant XP when a skill is used: each skill activation awards a fixed amount of XP
+      so that active play is rewarded even between kills. Done = `CONFIG.xpPerSkillUse`
+      exists in `engine.js` (value ≥ 1); `index.html` calls `gainXp` with
+      `CONFIG.xpPerSkillUse` inside `triggerSkill()` after every successful activation
+      and updates `G.level`/`G.xp`/`G.xpNeeded` accordingly (same pattern as kill XP);
+      a test asserts `CONFIG.xpPerSkillUse` is defined and greater than 0. Mixed —
+      config in `engine.js` with test; trigger in `index.html`.
 
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
