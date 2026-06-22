@@ -11,6 +11,45 @@ Keep items small and verifiable. A good item names *what done looks like*.
       `defaultStats`/`STAT_CARDS`, a pure helper computes incoming core damage, renderer
       uses it on enemy contact, and tests cover the cap.
 
+- [x] Fix level-up card width bug: `.pick skill` cards are 72px wide instead of full
+      width because the `.skill { width: 72px }` rule (for the skill bar) also matches
+      pick cards with class `pick skill`. Scope the `.skill` CSS rule to `#skills .skill`
+      so it no longer applies to pick cards.
+      Done = `.pick` buttons have `offsetWidth >= 260px` in the overlay; Playwright
+      1280×800 check injects 3 pick cards, shows overlay, and confirms each `.pick`
+      `getBoundingClientRect().width` is ≥ 260px (not the current 72px).
+      Rendering-only; no test needed.
+
+- [ ] Add a `Chain` 1-tap skill: zaps the nearest enemy, then jumps to a few nearby
+      enemies for reduced damage. Done = entry in `SKILLS`, offerable via `rollOffers`,
+      implemented in `index.html`, with a small visual arc effect.
+
+- [ ] Add a `magnet` stat card: increases XP pickup radius once pickups exist, but for
+      now boosts kill XP by a small percentage as a temporary pure rule. Done = stat
+      exists in `defaultStats`/`STAT_CARDS`, `xpForKill(stats)` helper exists, kill XP
+      uses it, and tests pin default/boosted values.
+
+- [ ] Add wave announcement feedback when a new wave starts. Done = renderer detects
+      wave changes, shows a short centered "WAVE N" flash, and does not pause gameplay.
+      Rendering-only; no test needed.
+
+- [ ] Add enemy splitters: a medium enemy can split into two small fast enemies when
+      killed. Done = pure helper defines splitter child stats, spawn/render logic uses
+      it, and tests assert child count, hp, radius, and speed.
+
+- [ ] Add a `Nova` 2-tap skill: aim point selects a blast center, then damages enemies
+      in that radius after a short delay. Done = entry in `SKILLS`, two-tap handling
+      reuses the existing aim flow, cooldown applies on cast, and the blast has a clear
+      warning ring.
+
+- [ ] Add a low-core warning pulse. Done = when core hp is below 30%, the core/HUD gets
+      a subtle red pulse; pulse stops after healing above the threshold. Rendering-only;
+      no test needed.
+
+- [ ] Add pause/resume on page visibility change. Done = hidden tab pauses simulation
+      without accumulating a giant `dt`, visible tab resumes cleanly, and manual gameplay
+      state is unchanged. Rendering/input-only; no test needed.
+
 - [x] Add a `crit` stat card: chance for auto-shots to deal double damage. Done = `crit`
       stat exists in `defaultStats`/`STAT_CARDS`, affects `derive`, has a test.
 - [x] Add a `Bomb` 1-tap skill: damages all enemies on screen, long cooldown. Done =
