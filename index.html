@@ -319,6 +319,11 @@ function triggerSkill(id, aimX, aimY) {
     c.y = clamp(aimY, 40, H - 40);
     G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
   }
+  // reward skill use with XP
+  const xpRes = gainXp({ level: G.level, xp: G.xp }, CONFIG.xpPerSkillUse);
+  const ups = xpRes.leveledUp;
+  G.level = xpRes.level; G.xp = xpRes.xp; G.xpNeeded = xpRes.xpNeeded;
+  if (ups > 0) { G.pendingLevels = (G.pendingLevels || 0) + ups - 1; openLevelUp(); }
   updateSkillBar();
 }
 function pointSegDist(px, py, ax, ay, bx, by) {

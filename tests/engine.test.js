@@ -142,6 +142,11 @@ describe('stats', () => {
     expect(xpForKill(stats)).toBeCloseTo(1.2);
   });
 
+  it('CONFIG.xpPerSkillUse is defined and greater than 0', () => {
+    expect(typeof CONFIG.xpPerSkillUse).toBe('number');
+    expect(CONFIG.xpPerSkillUse).toBeGreaterThan(0);
+  });
+
   it('CONFIG.doublePickChance is a number between 0 and 1', () => {
     expect(typeof CONFIG.doublePickChance).toBe('number');
     expect(CONFIG.doublePickChance).toBeGreaterThan(0);

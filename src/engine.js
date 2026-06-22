@@ -14,6 +14,7 @@ export const CONFIG = {
   xpGrowth: 1.35,
   waveSeconds: 20,           // each wave lasts this long, then difficulty ramps
   doublePickChance: 0.15,    // probability per level-up of choosing two cards
+  xpPerSkillUse: 2,          // XP awarded each time any skill is activated
 };
 
 // --- leveling -------------------------------------------------------------

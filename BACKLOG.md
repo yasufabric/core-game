@@ -6,50 +6,7 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
-- [x] Extract the renderer into `src/renderer.js` to make `index.html` easier to
-      navigate. The inline `<script type="module">` is ~750 lines; `draw()` alone is
-      ~180 lines. Done = `src/renderer.js` exists and exports a single `draw(G, ctx,
-      W, H, getCss)` function; `index.html` imports and calls it; all other code
-      (game loop, `step()`, input handlers, skill triggers, HUD updates) stays in
-      `index.html`; no game rules change; game boots and `window.__CORE().running ===
-      true` after START; all 55 tests still pass. Rendering-only restructure; no new
-      test needed.
-
-- [x] Add a dramatic boss arrival announcement: when a boss spawns, flash a centred
-      "⚠ BOSS" warning text on screen for 2s and briefly tint the canvas red to signal
-      danger. Done = `index.html` detects the moment a boss is added to `G.enemies`
-      (first frame where `G.enemies.some(e => e.boss)` becomes true and
-      `G.bossAnnounced` was false); sets `G.bossAnnounced = true` and stores
-      `G.bossFlashUntil = G.t + 2`; `draw()` renders a centred gold "⚠ BOSS"
-      text at ~40% canvas height with `globalAlpha` fading out over the 2s, and
-      overlays a `rgba(255,80,0,0.08)` full-canvas tint for the same duration;
-      `G.bossAnnounced` resets to false in `newGame()`. Rendering-only; no test needed.
-
-- [x] Scale XP by enemy strength: tougher enemies award more XP on kill. Done =
-      `xpForKill(stats, enemy)` in `engine.js` accepts an optional `enemy` object and
-      returns `CONFIG.xpPerKill × multiplier × (1 + magnet)`, where multiplier is 1 for
-      normal, 2 for tanky (`enemy.tanky`), 1.5 for splitter (`enemy.splitter`), and 5
-      for boss (`enemy.boss`); existing call-sites in `index.html` pass the enemy object;
-      tests assert each multiplier value (normal=1, tanky=2, splitter=1.5, boss=5) at
-      default stats; backward-compat: calling with no enemy still returns base XP.
-
-- [x] Rare double-pick on level-up: each level-up has a 15% chance to let the player
-      choose two cards instead of one. Done = `CONFIG.doublePickChance` exists in
-      `engine.js` with value 0.15; test asserting it is a number between 0 and 1
-      (exclusive); in `index.html` `openLevelUp()` rolls `Math.random() <
-      CONFIG.doublePickChance` to set `G.picksRemaining = 2` (else 1); after the player
-      picks a card the overlay re-opens with a fresh set of 3 offers if
-      `G.picksRemaining > 0`, then closes; when double-pick fires the overlay shows a
-      "DOUBLE PICK!" header line so the player knows they get two. Mixed — config in
-      `engine.js` with test; pick-count logic and header in `index.html`.
-
-- [ ] Grant XP when a skill is used: each skill activation awards a fixed amount of XP
-      so that active play is rewarded even between kills. Done = `CONFIG.xpPerSkillUse`
-      exists in `engine.js` (value ≥ 1); `index.html` calls `gainXp` with
-      `CONFIG.xpPerSkillUse` inside `triggerSkill()` after every successful activation
-      and updates `G.level`/`G.xp`/`G.xpNeeded` accordingly (same pattern as kill XP);
-      a test asserts `CONFIG.xpPerSkillUse` is defined and greater than 0. Mixed —
-      config in `engine.js` with test; trigger in `index.html`.
+<!-- no items pending -->
 
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
@@ -85,3 +42,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] Drone passive skill: `SKILLS.drone` (1-tap, 1.5s cooldown), cyan orbiting dot zaps nearest enemy within 140px; no button; 2 tests; nova fixture updated for 10-skill pool.
 - [x] Renderer extraction: `draw()` moved to `src/renderer.js` as `draw(G,ctx,W,H,DPR,getCss)`; index.html reduced by ~175 lines; all tests pass.
 - [x] Repulse skill: `SKILLS.repulse` (1-tap, 18s cooldown), normalised outward impulse ×220 to all enemies + white ring FX; 2 tests; nova fixture updated for 11-skill pool.
+- [x] Boss arrival announcement: `G.bossFlashUntil` set on first boss frame; renderer shows fading gold '⚠ BOSS' + red tint for 2s; resets on newGame().
+- [x] Enemy XP scaling: `xpForKill(stats, enemy)` — boss×5, tanky×2, splitter×1.5, normal×1; kill XP now per-enemy; 4 tests.
+- [x] Double-pick level-up: `CONFIG.doublePickChance=0.15`; `openLevelUp()` rolls chance, re-opens with fresh offers for 2nd pick; h2 shows 'DOUBLE PICK!'; 1 test.
+- [x] Skill-use XP: `CONFIG.xpPerSkillUse=2`; `triggerSkill()` calls `gainXp` after each activation; 1 test.
