@@ -67,12 +67,16 @@ describe('stats', () => {
     expect(derive(defaultStats(), 999).spawnInterval).toBeGreaterThanOrEqual(0.28);
   });
 
-  it('wave 1 enemyHp matches softened baseline', () => {
-    expect(derive(defaultStats(), 1).enemyHp).toBe(3); // baseEnemyHp(2) + floor(1*enemyHpScale)
+  it('wave 1 enemyHp is 2 with gentler hpScale', () => {
+    expect(derive(defaultStats(), 1).enemyHp).toBe(2); // 2 + floor(1*0.6) = 2
   });
 
-  it('wave 2 enemyHp is 4 with enemyHpScale=1.0 (no steep spike)', () => {
-    expect(derive(defaultStats(), 2).enemyHp).toBe(4); // 2 + floor(2*1.0)
+  it('wave 2 enemyHp is 3 with enemyHpScale=0.6 (gentler ramp)', () => {
+    expect(derive(defaultStats(), 2).enemyHp).toBe(3); // 2 + floor(2*0.6) = 3
+  });
+
+  it('wave 1 enemySpeed reflects lowered baseEnemySpeed', () => {
+    expect(derive(defaultStats(), 1).enemySpeed).toBe(28); // 22 + 1*6
   });
 
   it('wave 1 spawnInterval matches raised baseline', () => {

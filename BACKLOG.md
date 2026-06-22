@@ -6,7 +6,7 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
-- [ ] Early waves (2–3) are still too lethal before the player has any skills. Reduce
+- [x] Early waves (2–3) are still too lethal before the player has any skills. Reduce
       `CONFIG.enemyHpScale` from 1.0 to 0.6 and `CONFIG.baseEnemySpeed` from 28 to 22
       so hp ramps slower (wave 2 = 3, wave 3 = 3, wave 5 = 5) and enemies cross the
       screen less urgently at the start. Done = `CONFIG.enemyHpScale` is 0.6 and
@@ -41,3 +41,4 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] rollOffers guarantee: `rollOffers` now always picks 1 locked skill first then fills 2 stat cards; falls back to 3 stats when all skills unlocked; tests cover both cases.
 - [x] Blink skill: `SKILLS.blink` (2-tap, 12s cooldown), teleports core to aim point for 1.5s then snaps back; `G.blinkHome`/`G.blinkReturn` in step(); ring FX on departure and return; 2 engine tests added.
 - [x] Missile skill: `SKILLS.missile` (1-tap, 6s cooldown), homing steering with turn-rate cap, 25×power on impact, magenta dot + fading tail; 2 engine tests added; nova fixture updated for 9-skill pool.
+- [x] Wave 2–3 difficulty pass: `enemyHpScale` 1.0→0.6, `baseEnemySpeed` 28→22; wave-1 hp=2, wave-2 hp=3; hp/speed tests updated; difficulty-rises invariant holds.

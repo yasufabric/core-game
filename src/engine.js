@@ -5,8 +5,8 @@ export const CONFIG = {
   coreHp: 100,
   coreRadius: 26,
   baseEnemyHp: 2,
-  enemyHpScale: 1.0,         // hp added per wave number
-  baseEnemySpeed: 28,        // px/sec at wave 1
+  enemyHpScale: 0.6,         // hp added per wave number
+  baseEnemySpeed: 22,        // px/sec at wave 1
   baseSpawnInterval: 1.4,    // sec between spawns at wave 1
   xpPerKill: 1,
   // XP needed for level N = round(base * growth^(N-1))
