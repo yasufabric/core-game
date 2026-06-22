@@ -29,7 +29,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       device-emulation check (iPhone 12 viewport) confirms topbar paddingTop ≥ 78px.
       Rendering-only; no test needed.
 
-- [ ] Level-up card overlay sometimes clips or overflows on small/notched screens — not
+- [x] Level-up card overlay sometimes clips or overflows on small/notched screens — not
       all 3 pick cards are reachable. Make the overlay scrollable and safe-area-aware.
       Done = `#overlay` gains `overflow-y: auto` and safe-area padding on all sides;
       `.cards` has a `max-height` that keeps it within the visible viewport; Playwright
@@ -52,3 +52,4 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] Screen shake: `G.shakeUntil` set on shielded core hit; `draw()` applies decaying random translate via `setTransform` for 0.25s.
 - [x] iPhone safe-area fix: `.topbar` padding-top and `.xpbar` top now use `calc(N + env(safe-area-inset-top))`; mirrors existing bottom safe-area pattern.
 - [x] iPhone 17 max() hardening: `.topbar` padding-top `max(78px, …)`, `.xpbar` top `max(112px, …)`; Playwright iPhone 12 check confirms paddingTop ≥ 78px.
+- [x] Level-up overlay fix: `#overlay` gets `overflow-y: auto` + safe-area padding + `justify-content: safe center`; `.cards` gets `max-height` bounded to viewport; Playwright confirms all 3 picks within scrollHeight.

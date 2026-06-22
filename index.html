@@ -62,13 +62,18 @@
   /* level-up overlay */
   #overlay {
     position: absolute; inset: 0; background: rgba(6,9,13,.82); backdrop-filter: blur(3px);
-    display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
-    pointer-events: auto; padding: 24px;
+    display: none; flex-direction: column; align-items: center; justify-content: safe center; gap: 16px;
+    pointer-events: auto; overflow-y: auto;
+    padding: max(24px, calc(16px + env(safe-area-inset-top))) 24px max(24px, calc(16px + env(safe-area-inset-bottom)));
   }
   #overlay.show { display: flex; }
   #overlay h2 { margin: 0; font-size: 14px; letter-spacing: .3em; color: var(--core); font-weight: 600; }
   #overlay .sub { font-size: 11px; color: var(--muted); letter-spacing: .15em; margin-top: -8px; }
-  .cards { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 320px; }
+  .cards {
+    display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 320px;
+    max-height: calc(100vh - 220px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
   .pick {
     background: var(--card); border: 1px solid #1e2836; border-radius: 16px; padding: 16px 18px;
     text-align: left; color: var(--ink); cursor: pointer; transition: border-color .12s, transform .08s;
