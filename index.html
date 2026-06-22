@@ -720,6 +720,20 @@ function draw() {
     ctx.beginPath(); ctx.arc(0, 0, CONFIG.coreRadius + 14 + pulse * 4, 0, Math.PI * 2); ctx.stroke();
   }
   ctx.restore();
+
+  // boss HP bar
+  const boss = G.enemies.find(e => e.boss && e.hp > 0);
+  if (boss) {
+    const bw = W * 0.5, bh = 6, bx = (W - bw) / 2, by = 148;
+    ctx.fillStyle = 'rgba(0,0,0,.5)';
+    ctx.fillRect(bx - 1, by - 1, bw + 2, bh + 2);
+    ctx.fillStyle = '#ffd700';
+    ctx.fillRect(bx, by, bw * (boss.hp / boss.maxHp), bh);
+    ctx.fillStyle = '#fff';
+    ctx.font = '10px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('BOSS', W / 2, by - 4);
+  }
 }
 
 const cssCache = {};

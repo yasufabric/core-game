@@ -26,7 +26,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       `draw()` renders each burst as several small circles spreading from origin with
       `globalAlpha` fading to 0 over the particle lifetime. Rendering-only; no test needed.
 
-- [ ] Boss HP bar at top of screen: when a boss is alive (enemy with `boss: true` in
+- [x] Boss HP bar at top of screen: when a boss is alive (enemy with `boss: true` in
       `G.enemies`), render a wide red bar near the top of the canvas labelled "BOSS"
       showing its remaining HP fraction. Done = `draw()` detects any enemy with
       `boss === true`, renders a centred bar `(canvas width × 0.5)` wide below the
