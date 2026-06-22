@@ -183,6 +183,7 @@ function newGame() {
     slowUntil: 0, shieldUntil: 0, shakeUntil: 0,
     aiming: null,            // skill id awaiting 2nd tap
     paused: false,
+    pageHidden: document.hidden,
     lastBossWave: 0,         // last wave number a boss was spawned on
   };
   renderSkillBar();
@@ -386,7 +387,7 @@ function frame(now) {
   if (!G || !G.running) return;
   const dt = Math.min(0.05, (now - prev) / 1000 || 0);
   prev = now;
-  if (!G.paused) step(dt);
+  if (!G.paused && !G.pageHidden) step(dt);
   draw();
 }
 function step(dt) {
@@ -620,6 +621,11 @@ function getCss(v) {
 }
 
 document.getElementById('start').addEventListener('click', () => { newGame(); });
+document.addEventListener('visibilitychange', () => {
+  if (!G) return;
+  G.pageHidden = document.hidden;
+  if (!document.hidden) prev = performance.now();
+});
 requestAnimationFrame(frame);
 
 // expose for headless/e2e probing (loop verification can read window.__CORE)

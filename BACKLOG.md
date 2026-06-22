@@ -46,7 +46,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       a subtle red pulse; pulse stops after healing above the threshold. Rendering-only;
       no test needed.
 
-- [ ] Add pause/resume on page visibility change. Done = hidden tab pauses simulation
+- [x] Add pause/resume on page visibility change. Done = hidden tab pauses simulation
       without accumulating a giant `dt`, visible tab resumes cleanly, and manual gameplay
       state is unchanged. Rendering/input-only; no test needed.
 
@@ -104,6 +104,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] Enemy splitters: added pure `splitterChildren`, random medium splitter spawns, two fast children on kill, distinct rendering, and tests for child stats/consumed enemies.
 - [x] Nova skill: added `SKILLS.nova` as a 2-tap offer, delayed warning-ring blast, area damage after arming, and tests for offerability.
 - [x] Low-core warning: HUD/core now pulse red below 30% hp and clear above threshold; Playwright confirmed the class toggles off after healing.
+- [x] Visibility pause/resume: hidden tabs set a separate `pageHidden` flag so simulation time freezes without changing manual pause state; visible tabs reset timing and resume cleanly.
 - [x] crit stat: added `crit: 0` to defaultStats, `critChance` to derive, `+Crit` STAT_CARD, auto-shot rolls double damage on crit; crit shots render larger/white.
 - [x] Bomb skill: `SKILLS.bomb` (1-tap, 20s cooldown), deals 15×power to all on-screen enemies, white screen-flash fx; 3 tests added.
 - [x] Boss enemy: `isBossWave(wave)` exported, one 8-sided gold boss (r=28, 8×hp, 0.35×speed) spawns once per 5th wave; 4 tests asserting cadence.
