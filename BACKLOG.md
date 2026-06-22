@@ -33,7 +33,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       wave/level HUD that scales with `hp / maxHp`; bar disappears when no boss exists.
       Rendering-only; no test needed.
 
-- [ ] Kill counter: track total enemies killed in `G.kills` (increment on each enemy
+- [x] Kill counter: track total enemies killed in `G.kills` (increment on each enemy
       death in `step()`), display it on the game-over / RETRY screen alongside wave.
       Done = `G.kills` is initialised to 0 in `newGame()` and incremented each time an
       enemy is removed as dead; the RETRY splash shows "KILLS  N" beneath "WAVE N".

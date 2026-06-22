@@ -138,6 +138,7 @@
     <div class="logo">CORE</div>
     <div class="tag">PROTECT THE CENTER · ONE THUMB</div>
     <div class="dead" id="deadmsg"></div>
+    <div class="best" id="killcount"></div>
     <div class="best" id="bestscore"></div>
     <button class="go" id="start">START</button>
   </div>
@@ -186,6 +187,7 @@ function newGame() {
     pageHidden: document.hidden,
     lastBossWave: 0,         // last wave number a boss was spawned on
     blinkHome: null, blinkReturn: 0,
+    kills: 0,
   };
   renderSkillBar();
   waveFlashEl.classList.remove('show');
@@ -540,6 +542,7 @@ function step(dt) {
   G.enemies = survivors;
   G.enemies.push(...spawnedFromSplitters);
   if (removed > 0) {
+    G.kills += removed;
     const res = gainXp({ level: G.level, xp: G.xp }, removed * xpForKill(G.stats));
     const ups = res.leveledUp;
     G.level = res.level; G.xp = res.xp; G.xpNeeded = res.xpNeeded;
@@ -564,6 +567,7 @@ function gameOver() {
   G.running = false;
   if (G.wave > bestWave) bestWave = G.wave;
   document.getElementById('deadmsg').textContent = `CORE BREACHED · WAVE ${G.wave} · LV ${G.level}`;
+  document.getElementById('killcount').textContent = G.kills > 0 ? `KILLS  ${G.kills}` : '';
   document.getElementById('bestscore').textContent = bestWave > 0 ? `BEST  WAVE ${bestWave}` : '';
   document.getElementById('start').textContent = 'RETRY';
   document.getElementById('splash').classList.remove('hidden');
