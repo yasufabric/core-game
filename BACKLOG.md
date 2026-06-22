@@ -6,7 +6,7 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
-- [ ] Make the Missile skill auto-fire: once unlocked, it launches a homing missile at
+- [x] Make the Missile skill auto-fire: once unlocked, it launches a homing missile at
       the nearest enemy automatically whenever its cooldown is ready, with no tap
       required. Done = in `index.html` `step()`, if `missile` is in `G.unlocked` and
       its cooldown has expired and at least one enemy exists, a missile is pushed to
@@ -40,3 +40,4 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] Blink skill: `SKILLS.blink` (2-tap, 12s cooldown), teleports core to aim point for 1.5s then snaps back; `G.blinkHome`/`G.blinkReturn` in step(); ring FX on departure and return; 2 engine tests added.
 - [x] Missile skill: `SKILLS.missile` (1-tap, 6s cooldown), homing steering with turn-rate cap, 25×power on impact, magenta dot + fading tail; 2 engine tests added; nova fixture updated for 9-skill pool.
 - [x] Wave 2–3 difficulty pass: `enemyHpScale` 1.0→0.6, `baseEnemySpeed` 28→22; wave-1 hp=2, wave-2 hp=3; hp/speed tests updated; difficulty-rises invariant holds.
+- [x] Missile auto-fire: skips skill button, fires automatically in `step()` whenever cooldown ready and enemies exist; identical homing/damage logic retained.

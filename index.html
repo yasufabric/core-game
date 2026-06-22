@@ -332,6 +332,7 @@ const skillsEl = document.getElementById('skills');
 function renderSkillBar() {
   skillsEl.innerHTML = '';
   for (const id of G.unlocked) {
+    if (id === 'missile') continue; // auto-fires; no button needed
     const sk = SKILLS[id];
     const b = document.createElement('button');
     b.className = 'skill';
@@ -474,6 +475,14 @@ function step(dt) {
     }
   }
   G.shots = G.shots.filter(s => s.life > 0 && s.x > -20 && s.x < W + 20 && s.y > -20 && s.y < H + 20);
+
+  // missile auto-fire
+  if (G.unlocked.includes('missile') && skillReady('missile') && G.enemies.length > 0) {
+    let target = null, targetD = Infinity;
+    for (const e of G.enemies) { const dd = dist(e.x, e.y, c.x, c.y); if (dd < targetD) { targetD = dd; target = e; } }
+    G.missiles.push({ x: c.x, y: c.y, vx: 0, vy: -120, target, tail: [], life: 8 });
+    G.cooldowns['missile'] = G.t + SKILLS.missile.cooldown * G.stats.cooldown;
+  }
 
   // missiles — homing
   for (const m of G.missiles) {
