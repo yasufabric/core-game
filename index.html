@@ -240,6 +240,31 @@ function triggerSkill(id, aimX, aimY) {
   } else if (id === 'bomb') {
     for (const e of G.enemies) e.hp -= 15 * G.stats.power;
     G.fx.push({ kind: 'flash', born: G.t, life: .35 });
+  } else if (id === 'chain') {
+    let first = null, firstD = Infinity;
+    for (const e of G.enemies) {
+      const dd = dist(e.x, e.y, c.x, c.y);
+      if (dd < firstD) { firstD = dd; first = e; }
+    }
+    if (first) {
+      first.hp -= 10 * G.stats.power;
+      G.fx.push({ kind: 'arc', x1: c.x, y1: c.y, x2: first.x, y2: first.y, born: G.t, life: .3 });
+      const chained = new Set([first]);
+      let prev = first;
+      for (let i = 0; i < 3; i++) {
+        let next = null, nextD = 120;
+        for (const e of G.enemies) {
+          if (chained.has(e)) continue;
+          const dd = dist(e.x, e.y, prev.x, prev.y);
+          if (dd < nextD) { nextD = dd; next = e; }
+        }
+        if (!next) break;
+        next.hp -= 6 * G.stats.power;
+        G.fx.push({ kind: 'arc', x1: prev.x, y1: prev.y, x2: next.x, y2: next.y, born: G.t, life: .3 });
+        chained.add(next);
+        prev = next;
+      }
+    }
   }
   updateSkillBar();
 }
@@ -477,6 +502,9 @@ function draw() {
     } else if (f.kind === 'flash') {
       ctx.fillStyle = '#fff'; ctx.globalAlpha = (1 - k) * 0.28;
       ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
+    } else if (f.kind === 'arc') {
+      ctx.strokeStyle = '#ffe066'; ctx.globalAlpha = (1 - k) * 0.9; ctx.lineWidth = 2.5 * (1 - k) + 0.5;
+      ctx.beginPath(); ctx.moveTo(f.x1, f.y1); ctx.lineTo(f.x2, f.y2); ctx.stroke(); ctx.globalAlpha = 1;
     }
   }
 

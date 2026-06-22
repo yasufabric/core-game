@@ -20,7 +20,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       `getBoundingClientRect().width` is ≥ 260px (not the current 72px).
       Rendering-only; no test needed.
 
-- [ ] Add a `Chain` 1-tap skill: zaps the nearest enemy, then jumps to a few nearby
+- [x] Add a `Chain` 1-tap skill: zaps the nearest enemy, then jumps to a few nearby
       enemies for reduced damage. Done = entry in `SKILLS`, offerable via `rollOffers`,
       implemented in `index.html`, with a small visual arc effect.
 

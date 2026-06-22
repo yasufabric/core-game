@@ -140,6 +140,18 @@ describe('SKILLS', () => {
     expect(Object.keys(SKILLS)).toContain('bomb');
   });
 
+  it('chain exists as a 1-tap skill', () => {
+    expect(SKILLS.chain).toBeDefined();
+    expect(SKILLS.chain.tap).toBe(1);
+    expect(SKILLS.chain.cooldown).toBeGreaterThan(0);
+  });
+
+  it('chain is not offered when already unlocked', () => {
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers(['chain'], seq([0, 0.1, 0.2, 0.4, 0.6, 0.8]));
+    expect(offers.filter(o => o.id === 'chain')).toHaveLength(0);
+  });
+
   it('bomb is not offered when already unlocked', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
     const offers = rollOffers(['bomb'], seq([0, 0.1, 0.2, 0.4, 0.6, 0.8]));

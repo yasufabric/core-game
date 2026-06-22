@@ -73,6 +73,7 @@ export const SKILLS = {
   shield:  { id: 'shield',  name: 'Shield',   tap: 1, cooldown: 14, desc: 'Block all damage for 2.5s' },
   lance:   { id: 'lance',   name: 'Lance',    tap: 2, cooldown: 4,  desc: 'Aim, then fire a piercing beam' },
   bomb:    { id: 'bomb',    name: 'Bomb',     tap: 1, cooldown: 20, desc: 'Damage all enemies on screen' },
+  chain:   { id: 'chain',  name: 'Chain',    tap: 1, cooldown: 8,  desc: 'Zap nearest enemy, arc to 3 nearby foes' },
 };
 
 export const STAT_CARDS = [
