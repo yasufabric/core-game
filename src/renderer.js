@@ -163,6 +163,20 @@ export function draw(G, ctx, W, H, DPR, getCss) {
   }
   ctx.restore();
 
+  // boss arrival flash
+  if (G.bossFlashUntil > G.t) {
+    const k = (G.bossFlashUntil - G.t) / 2;
+    ctx.fillStyle = `rgba(255,80,0,${0.08 * k})`;
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = k;
+    ctx.fillStyle = '#ffd700';
+    ctx.font = `bold ${Math.round(H * 0.06)}px system-ui`;
+    ctx.textAlign = 'center';
+    ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 24;
+    ctx.fillText('⚠ BOSS', W / 2, H * 0.4);
+    ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+  }
+
   // boss HP bar
   const boss = G.enemies.find(e => e.boss && e.hp > 0);
   if (boss) {

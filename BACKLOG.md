@@ -15,7 +15,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       true` after START; all 55 tests still pass. Rendering-only restructure; no new
       test needed.
 
-- [ ] Add a dramatic boss arrival announcement: when a boss spawns, flash a centred
+- [x] Add a dramatic boss arrival announcement: when a boss spawns, flash a centred
       "⚠ BOSS" warning text on screen for 2s and briefly tint the canvas red to signal
       danger. Done = `index.html` detects the moment a boss is added to `G.enemies`
       (first frame where `G.enemies.some(e => e.boss)` becomes true and

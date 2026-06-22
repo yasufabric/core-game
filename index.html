@@ -190,6 +190,7 @@ function newGame() {
     blinkHome: null, blinkReturn: 0,
     kills: 0,
     drone: { angle: 0, lastZap: 0 },
+    bossAnnounced: false, bossFlashUntil: 0,
   };
   renderSkillBar();
   overlay.classList.remove('show');
@@ -580,6 +581,12 @@ function step(dt) {
         G.drone.lastZap = G.t;
       }
     }
+  }
+
+  // boss arrival announcement
+  if (!G.bossAnnounced && G.enemies.some(e => e.boss)) {
+    G.bossAnnounced = true;
+    G.bossFlashUntil = G.t + 2;
   }
 
   // fx ttl
