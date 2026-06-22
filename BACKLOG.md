@@ -6,15 +6,13 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
-- [x] Early waves (2–3) are still too lethal before the player has any skills. Reduce
-      `CONFIG.enemyHpScale` from 1.0 to 0.6 and `CONFIG.baseEnemySpeed` from 28 to 22
-      so hp ramps slower (wave 2 = 3, wave 3 = 3, wave 5 = 5) and enemies cross the
-      screen less urgently at the start. Done = `CONFIG.enemyHpScale` is 0.6 and
-      `CONFIG.baseEnemySpeed` is 22 in `engine.js`; existing `derive` wave-1 and wave-2
-      hp tests updated to assert new values (wave-1 hp = 2, wave-2 hp = 3); a new test
-      asserts `derive(defaultStats(), 1).enemySpeed` equals 28 (22 + 1×6); the
-      difficulty-rises invariant still holds (`derive(defaultStats(),5).enemyHp >
-      derive(defaultStats(),1).enemyHp`).
+- [ ] Make the Missile skill auto-fire: once unlocked, it launches a homing missile at
+      the nearest enemy automatically whenever its cooldown is ready, with no tap
+      required. Done = in `index.html` `step()`, if `missile` is in `G.unlocked` and
+      its cooldown has expired and at least one enemy exists, a missile is pushed to
+      `G.missiles` and the cooldown reset — identical projectile behaviour to the manual
+      trigger; the Missile skill button is hidden from the thumb zone (not rendered in
+      `#skills`) so it doesn't take up a slot. Rendering/input-only; no test needed.
 
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
