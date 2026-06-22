@@ -6,7 +6,7 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
-- [ ] Add a `crit` stat card: chance for auto-shots to deal double damage. Done = `crit`
+- [x] Add a `crit` stat card: chance for auto-shots to deal double damage. Done = `crit`
       stat exists in `defaultStats`/`STAT_CARDS`, affects `derive`, has a test.
 - [ ] Add a `Bomb` 1-tap skill: damages all enemies on screen, long cooldown. Done =
       entry in `SKILLS`, offerable via `rollOffers`, triggers in `index.html`.
@@ -18,3 +18,4 @@ Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
+- [x] crit stat: added `crit: 0` to defaultStats, `critChance` to derive, `+Crit` STAT_CARD, auto-shot rolls double damage on crit; crit shots render larger/white.

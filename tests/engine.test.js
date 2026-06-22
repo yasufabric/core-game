@@ -66,6 +66,26 @@ describe('stats', () => {
   it('spawnInterval never goes below floor', () => {
     expect(derive(defaultStats(), 999).spawnInterval).toBeGreaterThanOrEqual(0.28);
   });
+
+  it('defaultStats has crit at 0', () => {
+    expect(defaultStats().crit).toBe(0);
+  });
+
+  it('applyStatCard crit increases crit chance', () => {
+    const s = applyStatCard(defaultStats(), 'crit');
+    expect(s.crit).toBeCloseTo(0.12);
+  });
+
+  it('crit never exceeds 0.9 after many upgrades', () => {
+    let s = defaultStats();
+    for (let i = 0; i < 30; i++) s = applyStatCard(s, 'crit');
+    expect(s.crit).toBeLessThanOrEqual(0.9);
+  });
+
+  it('derive passes critChance from stats', () => {
+    const stats = { ...defaultStats(), crit: 0.25 };
+    expect(derive(stats, 1).critChance).toBeCloseTo(0.25);
+  });
 });
 
 describe('offers', () => {

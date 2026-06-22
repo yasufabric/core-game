@@ -44,6 +44,7 @@ export function defaultStats() {
     range: 1,      // auto-fire range multiplier
     regen: 0,      // core hp regenerated per second
     cooldown: 1,   // skill cooldown multiplier (lower = faster); applied as 1/cooldown
+    crit: 0,       // probability per auto-shot to deal double damage (0–1)
   };
 }
 
@@ -57,6 +58,7 @@ export function derive(stats, wave) {
     enemyHp: CONFIG.baseEnemyHp + Math.floor(wave * 1.5),
     enemySpeed: CONFIG.baseEnemySpeed + wave * 6,
     spawnInterval: Math.max(0.28, CONFIG.baseSpawnInterval - wave * 0.06),
+    critChance: stats.crit,
   };
 }
 
@@ -76,6 +78,7 @@ export const STAT_CARDS = [
   { id: 'range',  name: '+Range',  apply: s => ({ ...s, range: +(s.range + 0.2).toFixed(2) }),   desc: 'Range +20%' },
   { id: 'regen',  name: '+Regen',  apply: s => ({ ...s, regen: +(s.regen + 1).toFixed(2) }),     desc: 'Core regen +1/s' },
   { id: 'cooldn', name: '+Haste',  apply: s => ({ ...s, cooldown: +(Math.max(0.4, s.cooldown - 0.12)).toFixed(2) }), desc: 'Skill cooldown -12%' },
+  { id: 'crit',   name: '+Crit',   apply: s => ({ ...s, crit: +(Math.min(0.9, s.crit + 0.12)).toFixed(2) }),          desc: 'Crit chance +12% (double damage)' },
 ];
 
 // Deterministic offer generation given an rng function (0..1).

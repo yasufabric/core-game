@@ -336,7 +336,8 @@ function step(dt) {
     }
     if (best) {
       const ang = Math.atan2(best.y - c.y, best.x - c.x);
-      G.shots.push({ x: c.x, y: c.y, vx: Math.cos(ang) * 420, vy: Math.sin(ang) * 420, dmg: d.autoDamage, life: 1.2 });
+      const isCrit = Math.random() < d.critChance;
+      G.shots.push({ x: c.x, y: c.y, vx: Math.cos(ang) * 420, vy: Math.sin(ang) * 420, dmg: isCrit ? d.autoDamage * 2 : d.autoDamage, crit: isCrit, life: 1.2 });
       G.lastAuto = G.t;
     }
   }
@@ -455,8 +456,10 @@ function draw() {
   }
 
   // shots
-  ctx.fillStyle = getCss('--core');
-  for (const s of G.shots) { ctx.beginPath(); ctx.arc(s.x, s.y, 2.5, 0, Math.PI * 2); ctx.fill(); }
+  for (const s of G.shots) {
+    ctx.fillStyle = s.crit ? '#fff' : getCss('--core');
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.crit ? 4 : 2.5, 0, Math.PI * 2); ctx.fill();
+  }
 
   // core
   const shielded = G.t < G.shieldUntil;
@@ -489,3 +492,6 @@ requestAnimationFrame(frame);
 
 // expose for headless/e2e probing (loop verification can read window.__CORE)
 window.__CORE = () => G;
+</script>
+</body>
+</html>
