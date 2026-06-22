@@ -78,6 +78,7 @@ export const SKILLS = {
   nova:    { id: 'nova',   name: 'Nova',     tap: 2, cooldown: 12, desc: 'Aim a delayed area blast' },
   blink:   { id: 'blink',   name: 'Blink',   tap: 2, cooldown: 12, desc: 'Teleport core to aim point for 1.5s, then snap back' },
   missile: { id: 'missile', name: 'Missile', tap: 1, cooldown: 6,  desc: 'Fire a homing missile that tracks the nearest enemy' },
+  drone:   { id: 'drone',   name: 'Drone',   tap: 1, cooldown: 1.5, desc: 'Orbiting satellite that auto-zaps the nearest enemy in range' },
 };
 
 export const STAT_CARDS = [

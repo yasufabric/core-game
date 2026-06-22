@@ -39,7 +39,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       enemy is removed as dead; the RETRY splash shows "KILLS  N" beneath "WAVE N".
       Rendering/input-only; no test needed.
 
-- [ ] Add a `Drone` passive skill: once unlocked an orbiting satellite rotates around
+- [x] Add a `Drone` passive skill: once unlocked an orbiting satellite rotates around
       the core and zaps the nearest enemy within 140px every 1.5s for 1×power damage.
       Done = `SKILLS.drone` exists in `engine.js` (tap: 1, cooldown: 0, desc mentions
       orbit); test asserting `SKILLS.drone` is defined and not offered when unlocked;

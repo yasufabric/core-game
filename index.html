@@ -188,6 +188,7 @@ function newGame() {
     lastBossWave: 0,         // last wave number a boss was spawned on
     blinkHome: null, blinkReturn: 0,
     kills: 0,
+    drone: { angle: 0, lastZap: 0 },
   };
   renderSkillBar();
   waveFlashEl.classList.remove('show');
@@ -335,6 +336,7 @@ function renderSkillBar() {
   skillsEl.innerHTML = '';
   for (const id of G.unlocked) {
     if (id === 'missile') continue; // auto-fires; no button needed
+    if (id === 'drone') continue;   // passive orbit; no button needed
     const sk = SKILLS[id];
     const b = document.createElement('button');
     b.className = 'skill';
@@ -549,6 +551,28 @@ function step(dt) {
     if (ups > 0) { G.pendingLevels = (G.pendingLevels || 0) + ups - 1; openLevelUp(); }
   }
 
+  // drone auto-zap
+  if (G.unlocked.includes('drone')) {
+    G.drone.angle += 1.4 * dt;
+    const dr = CONFIG.coreRadius + 20;
+    const dx = c.x + Math.cos(G.drone.angle) * dr;
+    const dy = c.y + Math.sin(G.drone.angle) * dr;
+    const zapInterval = SKILLS.drone.cooldown * G.stats.cooldown;
+    if (G.t - G.drone.lastZap >= zapInterval) {
+      let best = null, bestD = Infinity;
+      for (const e of G.enemies) {
+        if (e.hp <= 0) continue;
+        const d = dist(dx, dy, e.x, e.y);
+        if (d < 140 && d < bestD) { bestD = d; best = e; }
+      }
+      if (best) {
+        best.hp -= 1 * G.stats.power;
+        G.fx.push({ kind: 'arc', x1: dx, y1: dy, x2: best.x, y2: best.y, born: G.t, life: .25 });
+        G.drone.lastZap = G.t;
+      }
+    }
+  }
+
   // fx ttl
   G.fx = G.fx.filter(f => G.t - f.born < f.life);
 
@@ -682,6 +706,17 @@ function draw() {
     ctx.fillStyle = '#ff4dff';
     ctx.shadowColor = '#ff4dff'; ctx.shadowBlur = 8;
     ctx.beginPath(); ctx.arc(m.x, m.y, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  // drone
+  if (G.unlocked.includes('drone')) {
+    const dr = CONFIG.coreRadius + 20;
+    const dx = c.x + Math.cos(G.drone.angle) * dr;
+    const dy = c.y + Math.sin(G.drone.angle) * dr;
+    ctx.fillStyle = '#7df9ff';
+    ctx.shadowColor = '#7df9ff'; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.arc(dx, dy, 4, 0, Math.PI * 2); ctx.fill();
     ctx.shadowBlur = 0;
   }
 
