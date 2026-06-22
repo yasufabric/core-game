@@ -6,6 +6,16 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
+- [ ] Add a dramatic boss arrival announcement: when a boss spawns, flash a centred
+      "⚠ BOSS" warning text on screen for 2s and briefly tint the canvas red to signal
+      danger. Done = `index.html` detects the moment a boss is added to `G.enemies`
+      (first frame where `G.enemies.some(e => e.boss)` becomes true and
+      `G.bossAnnounced` was false); sets `G.bossAnnounced = true` and stores
+      `G.bossFlashUntil = G.t + 2`; `draw()` renders a centred gold "⚠ BOSS"
+      text at ~40% canvas height with `globalAlpha` fading out over the 2s, and
+      overlays a `rgba(255,80,0,0.08)` full-canvas tint for the same duration;
+      `G.bossAnnounced` resets to false in `newGame()`. Rendering-only; no test needed.
+
 - [ ] Scale XP by enemy strength: tougher enemies award more XP on kill. Done =
       `xpForKill(stats, enemy)` in `engine.js` accepts an optional `enemy` object and
       returns `CONFIG.xpPerKill × multiplier × (1 + magnet)`, where multiplier is 1 for
