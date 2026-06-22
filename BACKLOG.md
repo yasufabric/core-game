@@ -33,7 +33,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       wave changes, shows a short centered "WAVE N" flash, and does not pause gameplay.
       Rendering-only; no test needed.
 
-- [ ] Add enemy splitters: a medium enemy can split into two small fast enemies when
+- [x] Add enemy splitters: a medium enemy can split into two small fast enemies when
       killed. Done = pure helper defines splitter child stats, spawn/render logic uses
       it, and tests assert child count, hp, radius, and speed.
 
@@ -101,6 +101,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] Armor stat: added capped `armor` upgrades plus `coreDamageTaken`; enemy core hits now use the helper and tests cover default, upgrade, reduction, and cap behavior.
 - [x] Magnet stat: added `magnet` upgrades and `xpForKill(stats)`; kill XP now routes through the helper with tests for baseline and boosted XP.
 - [x] Wave announcement: renderer now flashes centered "WAVE N" text on wave changes without pausing gameplay; Playwright confirmed wave 2 flash.
+- [x] Enemy splitters: added pure `splitterChildren`, random medium splitter spawns, two fast children on kill, distinct rendering, and tests for child stats/consumed enemies.
 - [x] crit stat: added `crit: 0` to defaultStats, `critChance` to derive, `+Crit` STAT_CARD, auto-shot rolls double damage on crit; crit shots render larger/white.
 - [x] Bomb skill: `SKILLS.bomb` (1-tap, 20s cooldown), deals 15×power to all on-screen enemies, white screen-flash fx; 3 tests added.
 - [x] Boss enemy: `isBossWave(wave)` exported, one 8-sided gold boss (r=28, 8×hp, 0.35×speed) spawns once per 5th wave; 4 tests asserting cadence.

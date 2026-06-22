@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   xpForLevel, gainXp, defaultStats, derive, rollOffers,
-  applyStatCard, dist, enemyHitsCore, coreDamageTaken, xpForKill, waveForTime, clamp, SKILLS, CONFIG, isBossWave,
+  applyStatCard, dist, enemyHitsCore, coreDamageTaken, splitterChildren, xpForKill, waveForTime, clamp, SKILLS, CONFIG, isBossWave,
 } from '../src/engine.js';
 
 describe('xp / leveling', () => {
@@ -224,6 +224,26 @@ describe('geometry / collision', () => {
     expect(clamp(-5, 0, 10)).toBe(0);
     expect(clamp(15, 0, 10)).toBe(10);
     expect(clamp(5, 0, 10)).toBe(5);
+  });
+});
+
+describe('splitter enemies', () => {
+  it('splitterChildren returns two smaller faster children', () => {
+    const parent = { x: 100, y: 120, r: 12, maxHp: 10, spd: 40, splitter: true };
+    const children = splitterChildren(parent);
+    expect(children).toHaveLength(2);
+    for (const child of children) {
+      expect(child.hp).toBeCloseTo(3.5);
+      expect(child.maxHp).toBeCloseTo(3.5);
+      expect(child.r).toBeCloseTo(6.6);
+      expect(child.spd).toBeCloseTo(54);
+      expect(child.tanky).toBe(false);
+    }
+  });
+
+  it('splitterChildren returns no children for non-splitters or consumed enemies', () => {
+    expect(splitterChildren({ splitter: false })).toEqual([]);
+    expect(splitterChildren({ splitter: true, consumed: true })).toEqual([]);
   });
 });
 

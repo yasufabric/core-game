@@ -134,6 +134,17 @@ export function coreDamageTaken(stats, baseDamage) {
   return baseDamage * (1 - armor);
 }
 
+export function splitterChildren(enemy) {
+  if (!enemy.splitter || enemy.consumed) return [];
+  const childHp = Math.max(1, enemy.maxHp * 0.35);
+  const childR = Math.max(5, enemy.r * 0.55);
+  const childSpd = enemy.spd * 1.35;
+  return [
+    { x: enemy.x - childR, y: enemy.y, r: childR, hp: childHp, maxHp: childHp, spd: childSpd, tanky: false },
+    { x: enemy.x + childR, y: enemy.y, r: childR, hp: childHp, maxHp: childHp, spd: childSpd, tanky: false },
+  ];
+}
+
 export function xpForKill(stats) {
   return CONFIG.xpPerKill * (1 + (stats.magnet || 0));
 }
