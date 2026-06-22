@@ -112,7 +112,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       when all skills are unlocked it returns 3 stat cards without error; tests assert
       both cases. Mixed — engine rule change with tests; no renderer change needed.
 
-- [ ] Add a `Blink` 2-tap skill: aim tap selects a destination, second tap teleports
+- [x] Add a `Blink` 2-tap skill: aim tap selects a destination, second tap teleports
       the core there for 1.5s then snaps it back to the original position.
       Done = `SKILLS.blink` exists in `engine.js` (tap: 2, cooldown ≥ 10); test
       asserting `SKILLS.blink.tap === 2` and blink is not offered when unlocked;

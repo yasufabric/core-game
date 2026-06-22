@@ -172,11 +172,23 @@ describe('SKILLS', () => {
     expect(offers.filter(o => o.id === 'bomb')).toHaveLength(0);
   });
 
+  it('blink exists as a 2-tap skill with cooldown >= 10', () => {
+    expect(SKILLS.blink).toBeDefined();
+    expect(SKILLS.blink.tap).toBe(2);
+    expect(SKILLS.blink.cooldown).toBeGreaterThanOrEqual(10);
+  });
+
+  it('blink is not offered when already unlocked', () => {
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers(['blink'], seq([0, 0.1, 0.4, 0.7]));
+    expect(offers.filter(o => o.id === 'blink')).toHaveLength(0);
+  });
+
   it('nova exists as a 2-tap skill and is offerable', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
     expect(SKILLS.nova).toBeDefined();
     expect(SKILLS.nova.tap).toBe(2);
-    const offers = rollOffers([], seq([0.9, 0.1, 0.5])); // 0.9 → index 6 = nova in locked pool
+    const offers = rollOffers([], seq([0.8, 0.1, 0.5])); // 0.8 → index 6 = nova in 8-skill pool
     expect(offers).toContainEqual(expect.objectContaining({ kind: 'skill', id: 'nova', tap: 2 }));
   });
 });

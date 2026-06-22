@@ -185,6 +185,7 @@ function newGame() {
     paused: false,
     pageHidden: document.hidden,
     lastBossWave: 0,         // last wave number a boss was spawned on
+    blinkHome: null, blinkReturn: 0,
   };
   renderSkillBar();
   waveFlashEl.classList.remove('show');
@@ -290,6 +291,13 @@ function triggerSkill(id, aimX, aimY) {
     }
   } else if (id === 'nova') {
     G.fx.push({ kind: 'nova', x: aimX, y: aimY, r: 0, max: 120, born: G.t, life: .85, hitAt: G.t + .45, hit: false, damage: 18 * G.stats.power });
+  } else if (id === 'blink') {
+    G.blinkHome = { x: c.x, y: c.y };
+    G.blinkReturn = G.t + 1.5;
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
+    c.x = clamp(aimX, 40, W - 40);
+    c.y = clamp(aimY, 40, H - 40);
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
   }
   updateSkillBar();
 }
@@ -402,6 +410,14 @@ function step(dt) {
 
   // regen
   if (G.stats.regen) c.hp = clamp(c.hp + G.stats.regen * dt, 0, CONFIG.coreHp);
+
+  // blink snap-back
+  if (G.blinkHome && G.t >= G.blinkReturn) {
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
+    c.x = G.blinkHome.x; c.y = G.blinkHome.y;
+    G.blinkHome = null; G.blinkReturn = 0;
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
+  }
 
   // boss spawn — one per 5th wave
   if (isBossWave(G.wave) && G.wave > G.lastBossWave) {

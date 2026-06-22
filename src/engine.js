@@ -76,6 +76,7 @@ export const SKILLS = {
   bomb:    { id: 'bomb',    name: 'Bomb',     tap: 1, cooldown: 20, desc: 'Damage all enemies on screen' },
   chain:   { id: 'chain',  name: 'Chain',    tap: 1, cooldown: 8,  desc: 'Zap nearest enemy, arc to 3 nearby foes' },
   nova:    { id: 'nova',   name: 'Nova',     tap: 2, cooldown: 12, desc: 'Aim a delayed area blast' },
+  blink:   { id: 'blink',  name: 'Blink',    tap: 2, cooldown: 12, desc: 'Teleport core to aim point for 1.5s, then snap back' },
 };
 
 export const STAT_CARDS = [
