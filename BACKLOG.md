@@ -6,7 +6,7 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
-- [ ] Extract the renderer into `src/renderer.js` to make `index.html` easier to
+- [x] Extract the renderer into `src/renderer.js` to make `index.html` easier to
       navigate. The inline `<script type="module">` is ~750 lines; `draw()` alone is
       ~180 lines. Done = `src/renderer.js` exists and exports a single `draw(G, ctx,
       W, H, getCss)` function; `index.html` imports and calls it; all other code
@@ -83,4 +83,5 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] Boss HP bar: gold 50%-width bar at y=148 with 'BOSS' label; appears while boss alive, disappears on death.
 - [x] Kill counter: `G.kills` incremented per removed enemy; RETRY splash shows 'KILLS N'.
 - [x] Drone passive skill: `SKILLS.drone` (1-tap, 1.5s cooldown), cyan orbiting dot zaps nearest enemy within 140px; no button; 2 tests; nova fixture updated for 10-skill pool.
+- [x] Renderer extraction: `draw()` moved to `src/renderer.js` as `draw(G,ctx,W,H,DPR,getCss)`; index.html reduced by ~175 lines; all tests pass.
 - [x] Repulse skill: `SKILLS.repulse` (1-tap, 18s cooldown), normalised outward impulse ×220 to all enemies + white ring FX; 2 tests; nova fixture updated for 11-skill pool.
