@@ -21,6 +21,28 @@ Keep items small and verifiable. A good item names *what done looks like*.
       position also accounts for the safe area; top HUD is fully visible on iPhone with
       `viewport-fit=cover`. Rendering-only; no test needed.
 
+- [x] Top HUD still clips on iPhone 17 Dynamic Island: WAVE/LV/CORE text is half-obscured
+      even after the safe-area-inset-top fix. Harden the offset with CSS max() so that
+      clearance is guaranteed regardless of whether env() resolves correctly.
+      Done = `.topbar` padding-top is `max(78px, calc(14px + env(safe-area-inset-top)))`;
+      `.xpbar` top is `max(112px, calc(48px + env(safe-area-inset-top)))`; Playwright
+      device-emulation check (iPhone 12 viewport) confirms topbar paddingTop ≥ 78px.
+      Rendering-only; no test needed.
+
+- [ ] Level-up card overlay sometimes clips or overflows on small/notched screens — not
+      all 3 pick cards are reachable. Make the overlay scrollable and safe-area-aware.
+      Done = `#overlay` gains `overflow-y: auto` and safe-area padding on all sides;
+      `.cards` has a `max-height` that keeps it within the visible viewport; Playwright
+      iPhone 12 viewport check confirms all 3 `.pick` buttons are within `scrollHeight`.
+      Rendering-only; no test needed.
+
+- [ ] Enemies are too strong in early waves — players die before reaching LV 3. Soften
+      the initial difficulty so new players can survive to wave 2–3 and level up twice.
+      Done = `CONFIG.baseEnemyHp` lowered and/or `CONFIG.baseSpawnInterval` raised in
+      `engine.js`; `derive(defaultStats(), 1).enemyHp` and `spawnInterval` tests updated
+      to assert the new values; `derive(defaultStats(), 5)` still harder than wave 1
+      (existing invariant must hold).
+
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
 - [x] crit stat: added `crit: 0` to defaultStats, `critChance` to derive, `+Crit` STAT_CARD, auto-shot rolls double damage on crit; crit shots render larger/white.
@@ -29,3 +51,4 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] Best score: `bestWave` session variable updated on game over; `#bestscore` element shows "BEST  WAVE N" on RETRY splash (empty on first load).
 - [x] Screen shake: `G.shakeUntil` set on shielded core hit; `draw()` applies decaying random translate via `setTransform` for 0.25s.
 - [x] iPhone safe-area fix: `.topbar` padding-top and `.xpbar` top now use `calc(N + env(safe-area-inset-top))`; mirrors existing bottom safe-area pattern.
+- [x] iPhone 17 max() hardening: `.topbar` padding-top `max(78px, …)`, `.xpbar` top `max(112px, …)`; Playwright iPhone 12 check confirms paddingTop ≥ 78px.
