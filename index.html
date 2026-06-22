@@ -136,7 +136,7 @@
 <script type="module">
 import {
   CONFIG, xpForLevel, gainXp, defaultStats, derive,
-  rollOffers, applyStatCard, dist, enemyHitsCore, coreDamageTaken, waveForTime, clamp, SKILLS, isBossWave,
+  rollOffers, applyStatCard, dist, enemyHitsCore, coreDamageTaken, xpForKill, waveForTime, clamp, SKILLS, isBossWave,
 } from './src/engine.js';
 
 const cv = document.getElementById('c');
@@ -431,7 +431,7 @@ function step(dt) {
   G.enemies = G.enemies.filter(e => e.hp > 0);
   const removed = before - G.enemies.length;
   if (removed > 0) {
-    const res = gainXp({ level: G.level, xp: G.xp }, removed * CONFIG.xpPerKill);
+    const res = gainXp({ level: G.level, xp: G.xp }, removed * xpForKill(G.stats));
     const ups = res.leveledUp;
     G.level = res.level; G.xp = res.xp; G.xpNeeded = res.xpNeeded;
     if (ups > 0) { G.pendingLevels = (G.pendingLevels || 0) + ups - 1; openLevelUp(); }

@@ -47,6 +47,7 @@ export function defaultStats() {
     cooldown: 1,   // skill cooldown multiplier (lower = faster); applied as 1/cooldown
     crit: 0,       // probability per auto-shot to deal double damage (0–1)
     armor: 0,      // fraction of incoming core damage prevented (0–0.75)
+    magnet: 0,     // bonus XP per kill until physical pickups exist
   };
 }
 
@@ -84,6 +85,7 @@ export const STAT_CARDS = [
   { id: 'cooldn', name: '+Haste',  apply: s => ({ ...s, cooldown: +(Math.max(0.4, s.cooldown - 0.12)).toFixed(2) }), desc: 'Skill cooldown -12%' },
   { id: 'crit',   name: '+Crit',   apply: s => ({ ...s, crit: +(Math.min(0.9, s.crit + 0.12)).toFixed(2) }),          desc: 'Crit chance +12% (double damage)' },
   { id: 'armor',  name: '+Armor',  apply: s => ({ ...s, armor: +(Math.min(0.75, s.armor + 0.15)).toFixed(2) }),       desc: 'Core damage -15% (max 75%)' },
+  { id: 'magnet', name: '+Magnet', apply: s => ({ ...s, magnet: +(s.magnet + 0.2).toFixed(2) }),                     desc: 'XP from kills +20%' },
 ];
 
 // Deterministic offer generation given an rng function (0..1).
@@ -130,6 +132,10 @@ export function enemyHitsCore(enemy, core) {
 export function coreDamageTaken(stats, baseDamage) {
   const armor = clamp(stats.armor || 0, 0, 0.75);
   return baseDamage * (1 - armor);
+}
+
+export function xpForKill(stats) {
+  return CONFIG.xpPerKill * (1 + (stats.magnet || 0));
 }
 
 export function waveForTime(elapsedSec) {

@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   xpForLevel, gainXp, defaultStats, derive, rollOffers,
-  applyStatCard, dist, enemyHitsCore, coreDamageTaken, waveForTime, clamp, SKILLS, CONFIG, isBossWave,
+  applyStatCard, dist, enemyHitsCore, coreDamageTaken, xpForKill, waveForTime, clamp, SKILLS, CONFIG, isBossWave,
 } from '../src/engine.js';
 
 describe('xp / leveling', () => {
@@ -87,6 +87,10 @@ describe('stats', () => {
     expect(defaultStats().armor).toBe(0);
   });
 
+  it('defaultStats has magnet at 0', () => {
+    expect(defaultStats().magnet).toBe(0);
+  });
+
   it('applyStatCard crit increases crit chance', () => {
     const s = applyStatCard(defaultStats(), 'crit');
     expect(s.crit).toBeCloseTo(0.12);
@@ -122,6 +126,16 @@ describe('stats', () => {
   it('coreDamageTaken keeps at least 25% incoming damage through armor cap', () => {
     const stats = { ...defaultStats(), armor: 2 };
     expect(coreDamageTaken(stats, 20)).toBeCloseTo(5);
+  });
+
+  it('xpForKill returns baseline XP without magnet', () => {
+    expect(xpForKill(defaultStats())).toBeCloseTo(CONFIG.xpPerKill);
+  });
+
+  it('applyStatCard magnet increases XP per kill', () => {
+    const stats = applyStatCard(defaultStats(), 'magnet');
+    expect(stats.magnet).toBeCloseTo(0.2);
+    expect(xpForKill(stats)).toBeCloseTo(1.2);
   });
 });
 

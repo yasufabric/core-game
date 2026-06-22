@@ -24,7 +24,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       enemies for reduced damage. Done = entry in `SKILLS`, offerable via `rollOffers`,
       implemented in `index.html`, with a small visual arc effect.
 
-- [ ] Add a `magnet` stat card: increases XP pickup radius once pickups exist, but for
+- [x] Add a `magnet` stat card: increases XP pickup radius once pickups exist, but for
       now boosts kill XP by a small percentage as a temporary pure rule. Done = stat
       exists in `defaultStats`/`STAT_CARDS`, `xpForKill(stats)` helper exists, kill XP
       uses it, and tests pin default/boosted values.
@@ -99,6 +99,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
 - [x] Armor stat: added capped `armor` upgrades plus `coreDamageTaken`; enemy core hits now use the helper and tests cover default, upgrade, reduction, and cap behavior.
+- [x] Magnet stat: added `magnet` upgrades and `xpForKill(stats)`; kill XP now routes through the helper with tests for baseline and boosted XP.
 - [x] crit stat: added `crit: 0` to defaultStats, `critChance` to derive, `+Crit` STAT_CARD, auto-shot rolls double damage on crit; crit shots render larger/white.
 - [x] Bomb skill: `SKILLS.bomb` (1-tap, 20s cooldown), deals 15×power to all on-screen enemies, white screen-flash fx; 3 tests added.
 - [x] Boss enemy: `isBossWave(wave)` exported, one 8-sided gold boss (r=28, 8×hp, 0.35×speed) spawns once per 5th wave; 4 tests asserting cadence.
