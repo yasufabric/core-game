@@ -14,6 +14,47 @@ Keep items small and verifiable. A good item names *what done looks like*.
       trigger; the Missile skill button is hidden from the thumb zone (not rendered in
       `#skills`) so it doesn't take up a slot. Rendering/input-only; no test needed.
 
+- [ ] Show enemy HP bars: render a small bar above each enemy that shrinks as HP drops,
+      so the player can see which enemies are nearly dead. Done = `draw()` draws a 1px
+      tall bar (enemy width × hp/maxHp) above each enemy in red; bar is hidden when
+      hp === maxHp (freshly spawned); boss bar is proportionally wider matching its
+      larger radius. Rendering-only; no test needed.
+
+- [ ] Enemy death burst: when an enemy's hp drops to 0, push 5–8 tiny particle FX that
+      scatter outward and fade over 0.4s, matching the enemy's colour. Done = kill
+      detection in `step()` pushes `{ kind: 'burst', x, y, color }` entries to `G.fx`;
+      `draw()` renders each burst as several small circles spreading from origin with
+      `globalAlpha` fading to 0 over the particle lifetime. Rendering-only; no test needed.
+
+- [ ] Boss HP bar at top of screen: when a boss is alive (enemy with `boss: true` in
+      `G.enemies`), render a wide red bar near the top of the canvas labelled "BOSS"
+      showing its remaining HP fraction. Done = `draw()` detects any enemy with
+      `boss === true`, renders a centred bar `(canvas width × 0.5)` wide below the
+      wave/level HUD that scales with `hp / maxHp`; bar disappears when no boss exists.
+      Rendering-only; no test needed.
+
+- [ ] Kill counter: track total enemies killed in `G.kills` (increment on each enemy
+      death in `step()`), display it on the game-over / RETRY screen alongside wave.
+      Done = `G.kills` is initialised to 0 in `newGame()` and incremented each time an
+      enemy is removed as dead; the RETRY splash shows "KILLS  N" beneath "WAVE N".
+      Rendering/input-only; no test needed.
+
+- [ ] Add a `Drone` passive skill: once unlocked an orbiting satellite rotates around
+      the core and zaps the nearest enemy within 140px every 1.5s for 1×power damage.
+      Done = `SKILLS.drone` exists in `engine.js` (tap: 1, cooldown: 0, desc mentions
+      orbit); test asserting `SKILLS.drone` is defined and not offered when unlocked;
+      `index.html` tracks `G.drone = { angle, lastZap }` in game state, advances angle
+      in `step()`, zaps the closest in-range enemy on interval, renders as a small cyan
+      dot orbiting at `coreRadius + 20`; skill button hidden (passive, like missile).
+      Mixed — engine entry + test; rendering in `index.html`.
+
+- [ ] Add a `Repulse` 1-tap skill: instantly pushes all enemies outward from the core,
+      buying breathing room without dealing damage. Done = `SKILLS.repulse` exists in
+      `engine.js` (tap: 1, cooldown: 18); test asserting it is defined and not offered
+      when unlocked; `index.html` trigger applies an outward velocity impulse
+      `(enemy position − core) normalised × 220` to every enemy, shown with a brief
+      white ring FX. Mixed — engine entry + test; impulse logic in `index.html`.
+
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
 - [x] Armor stat: added capped `armor` upgrades plus `coreDamageTaken`; enemy core hits now use the helper and tests cover default, upgrade, reduction, and cap behavior.
