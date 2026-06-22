@@ -121,7 +121,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       `step()` snaps core back to `G.blinkHome` when `G.t >= G.blinkReturn`; ring
       flash FX appears at departure and arrival on blink.
 
-- [ ] Add a `Missile` 1-tap skill: fires a slow homing projectile that steers toward the
+- [x] Add a `Missile` 1-tap skill: fires a slow homing projectile that steers toward the
       nearest enemy each frame and deals high damage on impact. Done = `SKILLS.missile`
       exists in `engine.js` (tap: 1, cooldown ≥ 5); test asserting `SKILLS.missile`
       is defined and is not offered when already unlocked; `index.html` adds a missile
@@ -148,3 +148,4 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] Level-up overlay fix: `#overlay` gets `overflow-y: auto` + safe-area padding + `justify-content: safe center`; `.cards` gets `max-height` bounded to viewport; Playwright confirms all 3 picks within scrollHeight.
 - [x] Early difficulty balance: `baseEnemyHp` 3→2, `baseSpawnInterval` 1.1→1.4; wave-1 hp=3, interval≈1.34 pinned in new tests; difficulty-rises invariant still holds.
 - [x] Wave-2 hp spike fix: `CONFIG.enemyHpScale` 1.5→1.0; wave-2 hp 5→4; new test pins wave-2 hp=4; difficulty-rises invariant holds.
+- [x] Missile skill: `SKILLS.missile` (1-tap, 6s cooldown), homing steering with turn-rate cap, 25×power on impact, magenta dot + fading tail; 2 engine tests added; nova fixture updated for 9-skill pool.

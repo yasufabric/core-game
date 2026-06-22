@@ -188,8 +188,20 @@ describe('SKILLS', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
     expect(SKILLS.nova).toBeDefined();
     expect(SKILLS.nova.tap).toBe(2);
-    const offers = rollOffers([], seq([0.8, 0.1, 0.5])); // 0.8 → index 6 = nova in 8-skill pool
+    const offers = rollOffers([], seq([0.7, 0.1, 0.5])); // 0.7 × 9 = 6.3 → floor 6 = nova in 9-skill pool
     expect(offers).toContainEqual(expect.objectContaining({ kind: 'skill', id: 'nova', tap: 2 }));
+  });
+
+  it('missile exists as a 1-tap skill with cooldown >= 5', () => {
+    expect(SKILLS.missile).toBeDefined();
+    expect(SKILLS.missile.tap).toBe(1);
+    expect(SKILLS.missile.cooldown).toBeGreaterThanOrEqual(5);
+  });
+
+  it('missile is not offered when already unlocked', () => {
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers(['missile'], seq([0, 0.1, 0.4, 0.7]));
+    expect(offers.filter(o => o.id === 'missile')).toHaveLength(0);
   });
 });
 

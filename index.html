@@ -176,7 +176,7 @@ function newGame() {
     stats: defaultStats(),
     level: 1, xp: 0, xpNeeded: xpForLevel(1),
     wave: 1,
-    enemies: [], shots: [], fx: [],
+    enemies: [], shots: [], fx: [], missiles: [],
     lastAuto: 0,
     unlocked: [],            // skill ids
     cooldowns: {},           // id -> ready time
@@ -291,6 +291,13 @@ function triggerSkill(id, aimX, aimY) {
     }
   } else if (id === 'nova') {
     G.fx.push({ kind: 'nova', x: aimX, y: aimY, r: 0, max: 120, born: G.t, life: .85, hitAt: G.t + .45, hit: false, damage: 18 * G.stats.power });
+  } else if (id === 'missile') {
+    let target = null, targetD = Infinity;
+    for (const e of G.enemies) {
+      const dd = dist(e.x, e.y, c.x, c.y);
+      if (dd < targetD) { targetD = dd; target = e; }
+    }
+    G.missiles.push({ x: c.x, y: c.y, vx: 0, vy: -120, target, tail: [], life: 8 });
   } else if (id === 'blink') {
     G.blinkHome = { x: c.x, y: c.y };
     G.blinkReturn = G.t + 1.5;
@@ -468,6 +475,35 @@ function step(dt) {
   }
   G.shots = G.shots.filter(s => s.life > 0 && s.x > -20 && s.x < W + 20 && s.y > -20 && s.y < H + 20);
 
+  // missiles — homing
+  for (const m of G.missiles) {
+    m.life -= dt;
+    if (!m.target || m.target.hp <= 0) {
+      let best = null, bestD = Infinity;
+      for (const e of G.enemies) { if (e.hp > 0) { const dd = dist(m.x, m.y, e.x, e.y); if (dd < bestD) { bestD = dd; best = e; } } }
+      m.target = best;
+    }
+    if (m.target) {
+      const ang = Math.atan2(m.target.y - m.y, m.target.x - m.x);
+      const curr = Math.atan2(m.vy, m.vx);
+      let diff = ang - curr;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+      const newAng = curr + Math.sign(diff) * Math.min(Math.abs(diff), 3.5 * dt);
+      const spd = 140;
+      m.vx = Math.cos(newAng) * spd; m.vy = Math.sin(newAng) * spd;
+    }
+    m.tail.push({ x: m.x, y: m.y });
+    if (m.tail.length > 4) m.tail.shift();
+    m.x += m.vx * dt; m.y += m.vy * dt;
+    if (m.target && m.target.hp > 0 && dist(m.x, m.y, m.target.x, m.target.y) < m.target.r + 10) {
+      m.target.hp -= 25 * G.stats.power;
+      G.fx.push({ kind: 'ring', x: m.x, y: m.y, r: 0, max: 40, born: G.t, life: .3, color: '#ff4dff' });
+      m.life = 0;
+    }
+  }
+  G.missiles = G.missiles.filter(m => m.life > 0);
+
   // move enemies toward core
   let killed = 0;
   const spawnedFromSplitters = [];
@@ -602,6 +638,21 @@ function draw() {
   for (const s of G.shots) {
     ctx.fillStyle = s.crit ? '#fff' : getCss('--core');
     ctx.beginPath(); ctx.arc(s.x, s.y, s.crit ? 4 : 2.5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // missiles
+  for (const m of G.missiles) {
+    for (let i = 0; i < m.tail.length; i++) {
+      const k = (i + 1) / (m.tail.length + 1);
+      ctx.globalAlpha = k * 0.6;
+      ctx.fillStyle = '#ff4dff';
+      ctx.beginPath(); ctx.arc(m.tail[i].x, m.tail[i].y, 2 * k, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#ff4dff';
+    ctx.shadowColor = '#ff4dff'; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.arc(m.x, m.y, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
   }
 
   // core
