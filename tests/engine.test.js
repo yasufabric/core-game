@@ -171,6 +171,14 @@ describe('SKILLS', () => {
     const offers = rollOffers(['bomb'], seq([0, 0.1, 0.2, 0.4, 0.6, 0.8]));
     expect(offers.filter(o => o.id === 'bomb')).toHaveLength(0);
   });
+
+  it('nova exists as a 2-tap skill and is offerable', () => {
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    expect(SKILLS.nova).toBeDefined();
+    expect(SKILLS.nova.tap).toBe(2);
+    const offers = rollOffers([], seq([0.42, 0, 0.8]));
+    expect(offers).toContainEqual(expect.objectContaining({ kind: 'skill', id: 'nova', tap: 2 }));
+  });
 });
 
 describe('offers', () => {

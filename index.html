@@ -283,6 +283,8 @@ function triggerSkill(id, aimX, aimY) {
         prev = next;
       }
     }
+  } else if (id === 'nova') {
+    G.fx.push({ kind: 'nova', x: aimX, y: aimY, r: 0, max: 120, born: G.t, life: .85, hitAt: G.t + .45, hit: false, damage: 18 * G.stats.power });
   }
   updateSkillBar();
 }
@@ -404,6 +406,16 @@ function step(dt) {
 
   // spawn
   if (G.t - G.lastSpawn > d.spawnInterval) { spawnEnemy(); G.lastSpawn = G.t; }
+
+  for (const f of G.fx) {
+    if (f.kind === 'nova' && !f.hit && G.t >= f.hitAt) {
+      f.hit = true;
+      for (const e of G.enemies) {
+        if (dist(e.x, e.y, f.x, f.y) <= f.max + e.r) e.hp -= f.damage;
+      }
+      G.fx.push({ kind: 'ring', x: f.x, y: f.y, r: 24, max: f.max, born: G.t, life: .25, color: '#ffec99' });
+    }
+  }
 
   // auto-fire: target nearest enemy in range
   const slow = G.t < G.slowUntil ? 0.4 : 1;
@@ -530,6 +542,14 @@ function draw() {
     } else if (f.kind === 'arc') {
       ctx.strokeStyle = '#ffe066'; ctx.globalAlpha = (1 - k) * 0.9; ctx.lineWidth = 2.5 * (1 - k) + 0.5;
       ctx.beginPath(); ctx.moveTo(f.x1, f.y1); ctx.lineTo(f.x2, f.y2); ctx.stroke(); ctx.globalAlpha = 1;
+    } else if (f.kind === 'nova') {
+      const armed = f.hit ? 1 : Math.min(1, (G.t - f.born) / (f.hitAt - f.born));
+      ctx.strokeStyle = f.hit ? '#ffec99' : 'rgba(255,236,153,.72)';
+      ctx.globalAlpha = f.hit ? Math.max(0, 1 - k) : 0.45 + armed * 0.45;
+      ctx.lineWidth = f.hit ? 3 : 2;
+      ctx.setLineDash(f.hit ? [] : [6, 8]);
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.max * (f.hit ? 1 : armed), 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
     }
   }
 

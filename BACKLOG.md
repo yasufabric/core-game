@@ -37,7 +37,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       killed. Done = pure helper defines splitter child stats, spawn/render logic uses
       it, and tests assert child count, hp, radius, and speed.
 
-- [ ] Add a `Nova` 2-tap skill: aim point selects a blast center, then damages enemies
+- [x] Add a `Nova` 2-tap skill: aim point selects a blast center, then damages enemies
       in that radius after a short delay. Done = entry in `SKILLS`, two-tap handling
       reuses the existing aim flow, cooldown applies on cast, and the blast has a clear
       warning ring.
@@ -102,6 +102,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] Magnet stat: added `magnet` upgrades and `xpForKill(stats)`; kill XP now routes through the helper with tests for baseline and boosted XP.
 - [x] Wave announcement: renderer now flashes centered "WAVE N" text on wave changes without pausing gameplay; Playwright confirmed wave 2 flash.
 - [x] Enemy splitters: added pure `splitterChildren`, random medium splitter spawns, two fast children on kill, distinct rendering, and tests for child stats/consumed enemies.
+- [x] Nova skill: added `SKILLS.nova` as a 2-tap offer, delayed warning-ring blast, area damage after arming, and tests for offerability.
 - [x] crit stat: added `crit: 0` to defaultStats, `critChance` to derive, `+Crit` STAT_CARD, auto-shot rolls double damage on crit; crit shots render larger/white.
 - [x] Bomb skill: `SKILLS.bomb` (1-tap, 20s cooldown), deals 15×power to all on-screen enemies, white screen-flash fx; 3 tests added.
 - [x] Boss enemy: `isBossWave(wave)` exported, one 8-sided gold boss (r=28, 8×hp, 0.35×speed) spawns once per 5th wave; 4 tests asserting cadence.
