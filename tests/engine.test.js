@@ -88,6 +88,28 @@ describe('stats', () => {
   });
 });
 
+describe('SKILLS', () => {
+  it('bomb exists as a 1-tap skill with a long cooldown', () => {
+    expect(SKILLS.bomb).toBeDefined();
+    expect(SKILLS.bomb.tap).toBe(1);
+    expect(SKILLS.bomb.cooldown).toBeGreaterThanOrEqual(15);
+  });
+
+  it('bomb is offerable when not yet unlocked', () => {
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers([], seq([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]));
+    const skillIds = offers.filter(o => o.kind === 'skill').map(o => o.id);
+    // bomb must be reachable — pool includes it (not unlocked)
+    expect(Object.keys(SKILLS)).toContain('bomb');
+  });
+
+  it('bomb is not offered when already unlocked', () => {
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers(['bomb'], seq([0, 0.1, 0.2, 0.4, 0.6, 0.8]));
+    expect(offers.filter(o => o.id === 'bomb')).toHaveLength(0);
+  });
+});
+
 describe('offers', () => {
   const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
 

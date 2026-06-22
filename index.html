@@ -214,6 +214,9 @@ function triggerSkill(id, aimX, aimY) {
       if (pointSegDist(e.x, e.y, c.x, c.y, ex, ey) < e.r + 14) e.hp -= 20 * G.stats.power;
     }
     G.fx.push({ kind: 'beam', x1: c.x, y1: c.y, x2: ex, y2: ey, born: G.t, life: .25 });
+  } else if (id === 'bomb') {
+    for (const e of G.enemies) e.hp -= 15 * G.stats.power;
+    G.fx.push({ kind: 'flash', born: G.t, life: .35 });
   }
   updateSkillBar();
 }
@@ -431,6 +434,9 @@ function draw() {
     } else if (f.kind === 'spark') {
       ctx.fillStyle = '#fff'; ctx.globalAlpha = 1 - k;
       ctx.beginPath(); ctx.arc(f.x, f.y, 3 * (1 - k) + 1, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+    } else if (f.kind === 'flash') {
+      ctx.fillStyle = '#fff'; ctx.globalAlpha = (1 - k) * 0.28;
+      ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
     }
   }
 

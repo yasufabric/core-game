@@ -70,6 +70,7 @@ export const SKILLS = {
   slow:    { id: 'slow',    name: 'Slowfield', tap: 1, cooldown: 10, desc: 'Slow all enemies for 3s' },
   shield:  { id: 'shield',  name: 'Shield',   tap: 1, cooldown: 14, desc: 'Block all damage for 2.5s' },
   lance:   { id: 'lance',   name: 'Lance',    tap: 2, cooldown: 4,  desc: 'Aim, then fire a piercing beam' },
+  bomb:    { id: 'bomb',    name: 'Bomb',     tap: 1, cooldown: 20, desc: 'Damage all enemies on screen' },
 };
 
 export const STAT_CARDS = [
