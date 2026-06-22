@@ -67,6 +67,14 @@ describe('stats', () => {
     expect(derive(defaultStats(), 999).spawnInterval).toBeGreaterThanOrEqual(0.28);
   });
 
+  it('wave 1 enemyHp matches softened baseline', () => {
+    expect(derive(defaultStats(), 1).enemyHp).toBe(3); // baseEnemyHp(2) + floor(1*1.5)
+  });
+
+  it('wave 1 spawnInterval matches raised baseline', () => {
+    expect(derive(defaultStats(), 1).spawnInterval).toBeCloseTo(1.34, 2); // 1.4 - 1*0.06
+  });
+
   it('defaultStats has crit at 0', () => {
     expect(defaultStats().crit).toBe(0);
   });

@@ -36,7 +36,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
       iPhone 12 viewport check confirms all 3 `.pick` buttons are within `scrollHeight`.
       Rendering-only; no test needed.
 
-- [ ] Enemies are too strong in early waves — players die before reaching LV 3. Soften
+- [x] Enemies are too strong in early waves — players die before reaching LV 3. Soften
       the initial difficulty so new players can survive to wave 2–3 and level up twice.
       Done = `CONFIG.baseEnemyHp` lowered and/or `CONFIG.baseSpawnInterval` raised in
       `engine.js`; `derive(defaultStats(), 1).enemyHp` and `spawnInterval` tests updated
@@ -53,3 +53,4 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] iPhone safe-area fix: `.topbar` padding-top and `.xpbar` top now use `calc(N + env(safe-area-inset-top))`; mirrors existing bottom safe-area pattern.
 - [x] iPhone 17 max() hardening: `.topbar` padding-top `max(78px, …)`, `.xpbar` top `max(112px, …)`; Playwright iPhone 12 check confirms paddingTop ≥ 78px.
 - [x] Level-up overlay fix: `#overlay` gets `overflow-y: auto` + safe-area padding + `justify-content: safe center`; `.cards` gets `max-height` bounded to viewport; Playwright confirms all 3 picks within scrollHeight.
+- [x] Early difficulty balance: `baseEnemyHp` 3→2, `baseSpawnInterval` 1.1→1.4; wave-1 hp=3, interval≈1.34 pinned in new tests; difficulty-rises invariant still holds.
