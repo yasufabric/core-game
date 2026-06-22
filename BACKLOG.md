@@ -6,7 +6,35 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
-<!-- no items pending -->
+- [ ] Tap-to-reposition: tapping the arena canvas (outside skill buttons) slides the core to
+      that point over 0.8 s; a 12 s cooldown (stored in `CONFIG.reposCooldown`) prevents
+      spamming; a radial arc ring drawn around the core shows remaining cooldown.
+      Done = `CONFIG.reposCooldown = 12` exported from `engine.js` with a test asserting
+      the value; canvas pointerdown in `index.html` starts a slide when cooldown is ready;
+      repositioning radial ring visible while on cooldown; enemies re-target the new position.
+
+- [ ] Thorns passive skill: enemies that deal damage to the core are themselves hit for 4
+      points (before armor). Done = `SKILLS.thorns` (`passive: true`) in `engine.js`,
+      offerable by `rollOffers` (test: thorns appears in locked list before unlock, not after);
+      `step()` in `index.html` applies 4-damage retaliation when `G.unlocked` includes
+      `'thorns'` and an enemy hits the core.
+
+- [ ] Overload passive skill: every 8th auto-shot fires an extra burst of 8 directional shots
+      at half damage. Done = `SKILLS.overload` (`passive: true`) in `engine.js` with a test
+      asserting it is offerable; `G.autoShotCount` tracked in state; when count % 8 === 0
+      and `'overload'` is unlocked, 8 radial shots pushed in `step()`.
+
+- [ ] Siphon passive skill: killing an enemy within 60 px of the core restores 1 HP (capped
+      at `CONFIG.coreHp`). Done = `SKILLS.siphon` (`passive: true`) in `engine.js`, test
+      asserting it is offerable; `step()` checks `dist(e.x, e.y, c.x, c.y) < 60` on kill and
+      heals when `'siphon'` is unlocked.
+
+- [ ] Shielded enemy type: a new `shielded` variant spawns from wave 4 onward (8 % base
+      chance + 0.5 % per wave). Its frontal arc (facing toward core, ±70°) blocks auto-shots
+      — they deal 0 damage. Skill hits (pulse, lance, bomb, chain, nova, repulse) bypass the
+      shield entirely. Done = `isShieldBlocked(shot, enemy, core)` exported from `engine.js`
+      with tests: shot arriving from the core direction returns true, shot from behind returns
+      false; shielded enemy spawned in `index.html` with a distinct visual arc indicator.
 
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
