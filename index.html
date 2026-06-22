@@ -37,6 +37,8 @@
   }
   .stat { color: var(--muted); }
   .stat b { color: var(--ink); font-weight: 600; }
+  #hud.lowcore .topbar .stat:last-child b { color: var(--enemy); text-shadow: 0 0 12px rgba(255,93,115,.65); animation: lowcorePulse .75s ease-in-out infinite alternate; }
+  #hud.lowcore .xpbar { box-shadow: 0 0 12px rgba(255,93,115,.28); }
   .xpbar { position: absolute; top: max(112px, calc(48px + env(safe-area-inset-top))); left: 16px; right: 16px; height: 3px; background: #1a2230; border-radius: 2px; }
   .xpbar > i { display: block; height: 100%; width: 0; background: var(--xp); border-radius: 2px; transition: width .12s linear; }
   #waveflash {
@@ -109,6 +111,7 @@
   #splash .dead { color: var(--enemy); font-size: 13px; letter-spacing: .2em; min-height: 18px; }
   #splash .best { color: var(--muted); font-size: 11px; letter-spacing: .22em; min-height: 16px; }
   .hidden { display: none !important; }
+  @keyframes lowcorePulse { from { opacity: .72; } to { opacity: 1; } }
 </style>
 </head>
 <body>
@@ -148,6 +151,7 @@ import {
 
 const cv = document.getElementById('c');
 const ctx = cv.getContext('2d');
+const hudEl = document.getElementById('hud');
 const waveFlashEl = document.getElementById('waveflash');
 let W = 0, H = 0, DPR = 1;
 function resize() {
@@ -478,6 +482,7 @@ function step(dt) {
   G.fx = G.fx.filter(f => G.t - f.born < f.life);
 
   // hud
+  hudEl.classList.toggle('lowcore', c.hp / CONFIG.coreHp < 0.3);
   document.getElementById('wave').textContent = G.wave;
   document.getElementById('lv').textContent = G.level;
   document.getElementById('hp').textContent = Math.ceil(c.hp);
@@ -599,6 +604,12 @@ function draw() {
   // hp ring
   ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 3;
   ctx.beginPath(); ctx.arc(0, 0, CONFIG.coreRadius + 8, -Math.PI/2, -Math.PI/2 + Math.PI*2*(c.hp/CONFIG.coreHp)); ctx.stroke();
+  if (c.hp / CONFIG.coreHp < 0.3) {
+    const pulse = 0.5 + 0.5 * Math.sin(G.t * 10);
+    ctx.strokeStyle = `rgba(255,93,115,${0.25 + pulse * 0.35})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, CONFIG.coreRadius + 14 + pulse * 4, 0, Math.PI * 2); ctx.stroke();
+  }
   ctx.restore();
 }
 
