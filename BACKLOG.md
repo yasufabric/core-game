@@ -16,6 +16,11 @@ Keep items small and verifiable. A good item names *what done looks like*.
       splash. Done = best updates on game over, shown on RETRY screen. (No localStorage.)
 - [x] Add a brief screen-shake on core hit. Rendering-only; no test needed.
 
+- [x] Fix iPhone top-of-screen clipping: HUD is cut off by the notch / Dynamic Island.
+      Done = `.topbar` top padding includes `env(safe-area-inset-top)`, `.xpbar` top
+      position also accounts for the safe area; top HUD is fully visible on iPhone with
+      `viewport-fit=cover`. Rendering-only; no test needed.
+
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
 - [x] crit stat: added `crit: 0` to defaultStats, `critChance` to derive, `+Crit` STAT_CARD, auto-shot rolls double damage on crit; crit shots render larger/white.
@@ -23,3 +28,4 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] Boss enemy: `isBossWave(wave)` exported, one 8-sided gold boss (r=28, 8×hp, 0.35×speed) spawns once per 5th wave; 4 tests asserting cadence.
 - [x] Best score: `bestWave` session variable updated on game over; `#bestscore` element shows "BEST  WAVE N" on RETRY splash (empty on first load).
 - [x] Screen shake: `G.shakeUntil` set on shielded core hit; `draw()` applies decaying random translate via `setTransform` for 0.25s.
+- [x] iPhone safe-area fix: `.topbar` padding-top and `.xpbar` top now use `calc(N + env(safe-area-inset-top))`; mirrors existing bottom safe-area pattern.
