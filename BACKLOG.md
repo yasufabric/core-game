@@ -14,6 +14,16 @@ Keep items small and verifiable. A good item names *what done looks like*.
       tests assert each multiplier value (normal=1, tanky=2, splitter=1.5, boss=5) at
       default stats; backward-compat: calling with no enemy still returns base XP.
 
+- [ ] Rare double-pick on level-up: each level-up has a 15% chance to let the player
+      choose two cards instead of one. Done = `CONFIG.doublePickChance` exists in
+      `engine.js` with value 0.15; test asserting it is a number between 0 and 1
+      (exclusive); in `index.html` `openLevelUp()` rolls `Math.random() <
+      CONFIG.doublePickChance` to set `G.picksRemaining = 2` (else 1); after the player
+      picks a card the overlay re-opens with a fresh set of 3 offers if
+      `G.picksRemaining > 0`, then closes; when double-pick fires the overlay shows a
+      "DOUBLE PICK!" header line so the player knows they get two. Mixed — config in
+      `engine.js` with test; pick-count logic and header in `index.html`.
+
 - [ ] Grant XP when a skill is used: each skill activation awards a fixed amount of XP
       so that active play is rewarded even between kills. Done = `CONFIG.xpPerSkillUse`
       exists in `engine.js` (value ≥ 1); `index.html` calls `gainXp` with
