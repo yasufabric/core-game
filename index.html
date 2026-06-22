@@ -128,7 +128,7 @@
 <script type="module">
 import {
   CONFIG, xpForLevel, gainXp, defaultStats, derive,
-  rollOffers, applyStatCard, dist, enemyHitsCore, waveForTime, clamp, SKILLS,
+  rollOffers, applyStatCard, dist, enemyHitsCore, waveForTime, clamp, SKILLS, isBossWave,
 } from './src/engine.js';
 
 const cv = document.getElementById('c');
@@ -161,6 +161,7 @@ function newGame() {
     slowUntil: 0, shieldUntil: 0,
     aiming: null,            // skill id awaiting 2nd tap
     paused: false,
+    lastBossWave: 0,         // last wave number a boss was spawned on
   };
   renderSkillBar();
   document.getElementById('splash').classList.add('hidden');
@@ -185,6 +186,19 @@ function spawnEnemy() {
     spd: d.enemySpeed * (tanky ? 0.7 : 1),
     tanky,
   });
+}
+
+function spawnBoss() {
+  const d = derive(G.stats, G.wave);
+  const edge = Math.floor(Math.random() * 4);
+  const m = 40;
+  let x, y;
+  if (edge === 0) { x = Math.random() * W; y = -m; }
+  else if (edge === 1) { x = W + m; y = Math.random() * H; }
+  else if (edge === 2) { x = Math.random() * W; y = H + m; }
+  else { x = -m; y = Math.random() * H; }
+  const hp = d.enemyHp * 8;
+  G.enemies.push({ x, y, r: 28, hp, maxHp: hp, spd: d.enemySpeed * 0.35, tanky: false, boss: true });
 }
 
 // --- skills --------------------------------------------------------------
@@ -326,6 +340,12 @@ function step(dt) {
   // regen
   if (G.stats.regen) c.hp = clamp(c.hp + G.stats.regen * dt, 0, CONFIG.coreHp);
 
+  // boss spawn — one per 5th wave
+  if (isBossWave(G.wave) && G.wave > G.lastBossWave) {
+    spawnBoss();
+    G.lastBossWave = G.wave;
+  }
+
   // spawn
   if (G.t - G.lastSpawn > d.spawnInterval) { spawnEnemy(); G.lastSpawn = G.t; }
 
@@ -443,19 +463,21 @@ function draw() {
   // enemies
   for (const e of G.enemies) {
     ctx.save(); ctx.translate(e.x, e.y);
-    ctx.fillStyle = e.tanky ? '#ff8a4d' : getCss('--enemy');
+    ctx.fillStyle = e.boss ? '#ffd700' : (e.tanky ? '#ff8a4d' : getCss('--enemy'));
+    if (e.boss) { ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 16; }
     ctx.beginPath();
-    const sides = e.tanky ? 6 : 3;
+    const sides = e.boss ? 8 : (e.tanky ? 6 : 3);
     for (let i = 0; i < sides; i++) {
-      const a = (i / sides) * Math.PI * 2 - Math.PI / 2 + G.t * (e.tanky ? .5 : 1.5);
+      const a = (i / sides) * Math.PI * 2 - Math.PI / 2 + G.t * (e.boss ? .3 : e.tanky ? .5 : 1.5);
       const px = Math.cos(a) * e.r, py = Math.sin(a) * e.r;
       i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
     }
     ctx.closePath(); ctx.fill();
+    ctx.shadowBlur = 0;
     if (e.hp < e.maxHp) {
       ctx.fillStyle = 'rgba(255,255,255,.25)';
       ctx.fillRect(-e.r, e.r + 4, e.r * 2, 2);
-      ctx.fillStyle = '#fff';
+      ctx.fillStyle = e.boss ? '#ffd700' : '#fff';
       ctx.fillRect(-e.r, e.r + 4, e.r * 2 * (e.hp / e.maxHp), 2);
     }
     ctx.restore();

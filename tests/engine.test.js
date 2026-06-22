@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   xpForLevel, gainXp, defaultStats, derive, rollOffers,
-  applyStatCard, dist, enemyHitsCore, waveForTime, clamp, SKILLS, CONFIG,
+  applyStatCard, dist, enemyHitsCore, waveForTime, clamp, SKILLS, CONFIG, isBossWave,
 } from '../src/engine.js';
 
 describe('xp / leveling', () => {
@@ -161,5 +161,31 @@ describe('geometry / collision', () => {
     expect(clamp(-5, 0, 10)).toBe(0);
     expect(clamp(15, 0, 10)).toBe(10);
     expect(clamp(5, 0, 10)).toBe(5);
+  });
+});
+
+describe('boss wave cadence', () => {
+  it('isBossWave is true for every 5th wave', () => {
+    expect(isBossWave(5)).toBe(true);
+    expect(isBossWave(10)).toBe(true);
+    expect(isBossWave(15)).toBe(true);
+  });
+
+  it('isBossWave is false for non-5th waves', () => {
+    expect(isBossWave(1)).toBe(false);
+    expect(isBossWave(4)).toBe(false);
+    expect(isBossWave(6)).toBe(false);
+    expect(isBossWave(9)).toBe(false);
+  });
+
+  it('isBossWave is false for wave 0', () => {
+    expect(isBossWave(0)).toBe(false);
+  });
+
+  it('5th wave arrives at the right time via waveForTime', () => {
+    const wave5Start = CONFIG.waveSeconds * 4; // wave 5 begins at t=80s
+    expect(waveForTime(wave5Start)).toBe(5);
+    expect(isBossWave(waveForTime(wave5Start))).toBe(true);
+    expect(isBossWave(waveForTime(wave5Start - 1))).toBe(false);
   });
 });

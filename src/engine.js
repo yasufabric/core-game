@@ -127,6 +127,11 @@ export function waveForTime(elapsedSec) {
   return 1 + Math.floor(elapsedSec / CONFIG.waveSeconds);
 }
 
+// Returns true for waves where a boss should spawn (every 5th wave, starting wave 5).
+export function isBossWave(wave) {
+  return wave > 0 && wave % 5 === 0;
+}
+
 // Clamp helper used by regen and shield logic.
 export function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
