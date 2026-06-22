@@ -190,7 +190,7 @@ function newGame() {
     blinkHome: null, blinkReturn: 0,
     kills: 0,
     drone: { angle: 0, lastZap: 0 },
-    bossAnnounced: false, bossFlashUntil: 0,
+    bossFlashUntil: 0, pendingLevels: 0,
   };
   renderSkillBar();
   overlay.classList.remove('show');
@@ -238,6 +238,15 @@ function spawnBoss() {
   else { x = -m; y = Math.random() * H; }
   const hp = d.enemyHp * 8;
   G.enemies.push({ x, y, r: 28, hp, maxHp: hp, spd: d.enemySpeed * 0.35, tanky: false, boss: true });
+}
+
+function applyXp(amount) {
+  const res = gainXp({ level: G.level, xp: G.xp }, amount);
+  G.level = res.level; G.xp = res.xp; G.xpNeeded = res.xpNeeded;
+  if (res.leveledUp > 0) {
+    G.pendingLevels += res.leveledUp - 1;
+    openLevelUp();
+  }
 }
 
 // --- skills --------------------------------------------------------------
@@ -320,10 +329,7 @@ function triggerSkill(id, aimX, aimY) {
     G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
   }
   // reward skill use with XP
-  const xpRes = gainXp({ level: G.level, xp: G.xp }, CONFIG.xpPerSkillUse);
-  const ups = xpRes.leveledUp;
-  G.level = xpRes.level; G.xp = xpRes.xp; G.xpNeeded = xpRes.xpNeeded;
-  if (ups > 0) { G.pendingLevels = (G.pendingLevels || 0) + ups - 1; openLevelUp(); }
+  applyXp(CONFIG.xpPerSkillUse);
   updateSkillBar();
 }
 function pointSegDist(px, py, ax, ay, bx, by) {
@@ -394,10 +400,8 @@ function openLevelUp(picksRemaining) {
   G.paused = true;
   setAiming(null);
   const offers = rollOffers(G.unlocked, Math.random);
-  const isDouble = picksRemaining === 2;
   cardsEl.innerHTML = '';
-  const header = document.querySelector('#overlay h2');
-  if (header) header.textContent = isDouble ? 'DOUBLE PICK!' : 'LEVEL UP';
+  overlay.querySelector('h2').textContent = picksRemaining === 2 ? 'DOUBLE PICK!' : 'LEVEL UP';
   for (const o of offers) {
     const el = document.createElement('button');
     el.className = 'pick ' + o.kind;
@@ -544,13 +548,12 @@ function step(dt) {
   G.missiles = G.missiles.filter(m => m.life > 0);
 
   // move enemies toward core
-  let killed = 0;
+  let totalXp = 0;
+  const survivors = [];
   const spawnedFromSplitters = [];
-  const killedEnemies = [];
   for (const e of G.enemies) {
     if (e.hp <= 0) {
-      killed++;
-      killedEnemies.push(e);
+      totalXp += xpForKill(G.stats, e);
       const col = e.boss ? '#ffd700' : e.tanky ? '#ff8a4d' : e.splitter ? '#f277ff' : getCss('--enemy');
       G.fx.push({ kind: 'burst', x: e.x, y: e.y, color: col, born: G.t, life: 0.4, n: 7 });
       spawnedFromSplitters.push(...splitterChildren(e));
@@ -561,23 +564,18 @@ function step(dt) {
     e.y += Math.sin(ang) * e.spd * slow * dt;
     if (enemyHitsCore(e, c)) {
       if (G.t >= G.shieldUntil) { c.hp -= coreDamageTaken(G.stats, e.tanky ? 14 : 7); G.shakeUntil = G.t + 0.25; }
-      e.hp = 0; e.consumed = true; killed++;
+      e.hp = 0; e.consumed = true;
       G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 18, born: G.t, life: .3, color: '#ff5d73' });
+      continue;
     }
+    survivors.push(e);
   }
-  // award xp for kills (only those killed by damage, not core hits — approx: all removed grant xp)
-  const before = G.enemies.length;
-  const survivors = G.enemies.filter(e => e.hp > 0);
-  const removed = before - survivors.length;
+  const removed = G.enemies.length - survivors.length;
   G.enemies = survivors;
   G.enemies.push(...spawnedFromSplitters);
   if (removed > 0) {
     G.kills += removed;
-    const totalXp = killedEnemies.reduce((sum, e) => sum + xpForKill(G.stats, e), 0);
-    const res = gainXp({ level: G.level, xp: G.xp }, totalXp);
-    const ups = res.leveledUp;
-    G.level = res.level; G.xp = res.xp; G.xpNeeded = res.xpNeeded;
-    if (ups > 0) { G.pendingLevels = (G.pendingLevels || 0) + ups - 1; openLevelUp(); }
+    applyXp(totalXp);
   }
 
   // drone auto-zap
@@ -603,8 +601,7 @@ function step(dt) {
   }
 
   // boss arrival announcement
-  if (!G.bossAnnounced && G.enemies.some(e => e.boss)) {
-    G.bossAnnounced = true;
+  if (!G.bossFlashUntil && G.enemies.some(e => e.boss)) {
     G.bossFlashUntil = G.t + 2;
   }
 
