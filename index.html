@@ -95,6 +95,7 @@
   }
   #splash .go:active { background: var(--core); color: var(--bg); }
   #splash .dead { color: var(--enemy); font-size: 13px; letter-spacing: .2em; min-height: 18px; }
+  #splash .best { color: var(--muted); font-size: 11px; letter-spacing: .22em; min-height: 16px; }
   .hidden { display: none !important; }
 </style>
 </head>
@@ -121,6 +122,7 @@
     <div class="logo">CORE</div>
     <div class="tag">PROTECT THE CENTER · ONE THUMB</div>
     <div class="dead" id="deadmsg"></div>
+    <div class="best" id="bestscore"></div>
     <button class="go" id="start">START</button>
   </div>
 </div>
@@ -145,6 +147,7 @@ window.addEventListener('resize', resize);
 
 // --- game state ----------------------------------------------------------
 let G = null;
+let bestWave = 0; // session best, not persisted across page reloads
 function newGame() {
   resize();
   G = {
@@ -418,7 +421,9 @@ function step(dt) {
 
 function gameOver() {
   G.running = false;
+  if (G.wave > bestWave) bestWave = G.wave;
   document.getElementById('deadmsg').textContent = `CORE BREACHED · WAVE ${G.wave} · LV ${G.level}`;
+  document.getElementById('bestscore').textContent = bestWave > 0 ? `BEST  WAVE ${bestWave}` : '';
   document.getElementById('start').textContent = 'RETRY';
   document.getElementById('splash').classList.remove('hidden');
 }
