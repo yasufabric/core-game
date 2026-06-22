@@ -20,6 +20,14 @@ Keep items small and verifiable. A good item names *what done looks like*.
       `getBoundingClientRect().width` is ≥ 260px (not the current 72px).
       Rendering-only; no test needed.
 
+- [x] Add a core idle animation: a second hexagon ring slowly counter-rotates around
+      the core, and a soft outer glow pulses in/out using `Math.sin(G.t * 1.8)`.
+      Done = `draw()` renders an outer hex ring at `CONFIG.coreRadius + 12` that
+      rotates opposite to the inner ring (`-G.t * 0.2`), and a `shadowBlur` that
+      oscillates between 10 and 28 based on `sin(G.t * 1.8)`; Playwright confirms the
+      game still boots and `window.__CORE().running === true` after START.
+      Rendering-only; no test needed.
+
 - [x] Add a `Chain` 1-tap skill: zaps the nearest enemy, then jumps to a few nearby
       enemies for reduced damage. Done = entry in `SKILLS`, offerable via `rollOffers`,
       implemented in `index.html`, with a small visual arc effect.
