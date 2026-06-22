@@ -267,6 +267,13 @@ function triggerSkill(id, aimX, aimY) {
   } else if (id === 'bomb') {
     for (const e of G.enemies) e.hp -= 15 * G.stats.power;
     G.fx.push({ kind: 'flash', born: G.t, life: .35 });
+  } else if (id === 'repulse') {
+    for (const e of G.enemies) {
+      const dx = e.x - c.x, dy = e.y - c.y;
+      const d = Math.sqrt(dx * dx + dy * dy) || 1;
+      e.x += (dx / d) * 220; e.y += (dy / d) * 220;
+    }
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: Math.max(W, H) * 0.6, born: G.t, life: .45, color: '#fff' });
   } else if (id === 'chain') {
     let first = null, firstD = Infinity;
     for (const e of G.enemies) {

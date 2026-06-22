@@ -192,7 +192,7 @@ describe('SKILLS', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
     expect(SKILLS.nova).toBeDefined();
     expect(SKILLS.nova.tap).toBe(2);
-    const offers = rollOffers([], seq([0.65, 0.1, 0.5])); // 0.65 × 10 = 6.5 → floor 6 = nova in 10-skill pool
+    const offers = rollOffers([], seq([0.58, 0.1, 0.5])); // 0.58 × 11 = 6.38 → floor 6 = nova in 11-skill pool
     expect(offers).toContainEqual(expect.objectContaining({ kind: 'skill', id: 'nova', tap: 2 }));
   });
 
@@ -218,6 +218,18 @@ describe('SKILLS', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
     const offers = rollOffers(['drone'], seq([0, 0.1, 0.4, 0.7]));
     expect(offers.filter(o => o.id === 'drone')).toHaveLength(0);
+  });
+
+  it('repulse exists as a 1-tap skill with cooldown >= 15', () => {
+    expect(SKILLS.repulse).toBeDefined();
+    expect(SKILLS.repulse.tap).toBe(1);
+    expect(SKILLS.repulse.cooldown).toBeGreaterThanOrEqual(15);
+  });
+
+  it('repulse is not offered when already unlocked', () => {
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers(['repulse'], seq([0, 0.1, 0.4, 0.7]));
+    expect(offers.filter(o => o.id === 'repulse')).toHaveLength(0);
   });
 });
 

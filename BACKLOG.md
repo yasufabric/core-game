@@ -6,54 +6,7 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
-- [x] Make the Missile skill auto-fire: once unlocked, it launches a homing missile at
-      the nearest enemy automatically whenever its cooldown is ready, with no tap
-      required. Done = in `index.html` `step()`, if `missile` is in `G.unlocked` and
-      its cooldown has expired and at least one enemy exists, a missile is pushed to
-      `G.missiles` and the cooldown reset — identical projectile behaviour to the manual
-      trigger; the Missile skill button is hidden from the thumb zone (not rendered in
-      `#skills`) so it doesn't take up a slot. Rendering/input-only; no test needed.
-
-- [x] Show enemy HP bars: render a small bar above each enemy that shrinks as HP drops,
-      so the player can see which enemies are nearly dead. Done = `draw()` draws a 1px
-      tall bar (enemy width × hp/maxHp) above each enemy in red; bar is hidden when
-      hp === maxHp (freshly spawned); boss bar is proportionally wider matching its
-      larger radius. Rendering-only; no test needed.
-
-- [x] Enemy death burst: when an enemy's hp drops to 0, push 5–8 tiny particle FX that
-      scatter outward and fade over 0.4s, matching the enemy's colour. Done = kill
-      detection in `step()` pushes `{ kind: 'burst', x, y, color }` entries to `G.fx`;
-      `draw()` renders each burst as several small circles spreading from origin with
-      `globalAlpha` fading to 0 over the particle lifetime. Rendering-only; no test needed.
-
-- [x] Boss HP bar at top of screen: when a boss is alive (enemy with `boss: true` in
-      `G.enemies`), render a wide red bar near the top of the canvas labelled "BOSS"
-      showing its remaining HP fraction. Done = `draw()` detects any enemy with
-      `boss === true`, renders a centred bar `(canvas width × 0.5)` wide below the
-      wave/level HUD that scales with `hp / maxHp`; bar disappears when no boss exists.
-      Rendering-only; no test needed.
-
-- [x] Kill counter: track total enemies killed in `G.kills` (increment on each enemy
-      death in `step()`), display it on the game-over / RETRY screen alongside wave.
-      Done = `G.kills` is initialised to 0 in `newGame()` and incremented each time an
-      enemy is removed as dead; the RETRY splash shows "KILLS  N" beneath "WAVE N".
-      Rendering/input-only; no test needed.
-
-- [x] Add a `Drone` passive skill: once unlocked an orbiting satellite rotates around
-      the core and zaps the nearest enemy within 140px every 1.5s for 1×power damage.
-      Done = `SKILLS.drone` exists in `engine.js` (tap: 1, cooldown: 0, desc mentions
-      orbit); test asserting `SKILLS.drone` is defined and not offered when unlocked;
-      `index.html` tracks `G.drone = { angle, lastZap }` in game state, advances angle
-      in `step()`, zaps the closest in-range enemy on interval, renders as a small cyan
-      dot orbiting at `coreRadius + 20`; skill button hidden (passive, like missile).
-      Mixed — engine entry + test; rendering in `index.html`.
-
-- [ ] Add a `Repulse` 1-tap skill: instantly pushes all enemies outward from the core,
-      buying breathing room without dealing damage. Done = `SKILLS.repulse` exists in
-      `engine.js` (tap: 1, cooldown: 18); test asserting it is defined and not offered
-      when unlocked; `index.html` trigger applies an outward velocity impulse
-      `(enemy position − core) normalised × 220` to every enemy, shown with a brief
-      white ring FX. Mixed — engine entry + test; impulse logic in `index.html`.
+<!-- no items pending -->
 
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
@@ -82,3 +35,9 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] Missile skill: `SKILLS.missile` (1-tap, 6s cooldown), homing steering with turn-rate cap, 25×power on impact, magenta dot + fading tail; 2 engine tests added; nova fixture updated for 9-skill pool.
 - [x] Wave 2–3 difficulty pass: `enemyHpScale` 1.0→0.6, `baseEnemySpeed` 28→22; wave-1 hp=2, wave-2 hp=3; hp/speed tests updated; difficulty-rises invariant holds.
 - [x] Missile auto-fire: skips skill button, fires automatically in `step()` whenever cooldown ready and enemies exist; identical homing/damage logic retained.
+- [x] Enemy HP bars: already present — 2px bar below each enemy visible when hp < maxHp; gold for boss, white for others.
+- [x] Death burst particles: 7-dot colour-matched burst FX pushed on enemy death, scatter+fade over 0.4s; new 'burst' fx kind in draw().
+- [x] Boss HP bar: gold 50%-width bar at y=148 with 'BOSS' label; appears while boss alive, disappears on death.
+- [x] Kill counter: `G.kills` incremented per removed enemy; RETRY splash shows 'KILLS N'.
+- [x] Drone passive skill: `SKILLS.drone` (1-tap, 1.5s cooldown), cyan orbiting dot zaps nearest enemy within 140px; no button; 2 tests; nova fixture updated for 10-skill pool.
+- [x] Repulse skill: `SKILLS.repulse` (1-tap, 18s cooldown), normalised outward impulse ×220 to all enemies + white ring FX; 2 tests; nova fixture updated for 11-skill pool.
