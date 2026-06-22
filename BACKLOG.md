@@ -6,128 +6,7 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
-- [x] Add an `armor` stat card: reduces core damage taken from enemies, capped so the
-      core can never become invulnerable from stats alone. Done = `armor` exists in
-      `defaultStats`/`STAT_CARDS`, a pure helper computes incoming core damage, renderer
-      uses it on enemy contact, and tests cover the cap.
-
-- [x] Fix level-up card width bug: `.pick skill` cards are 72px wide instead of full
-      width because the `.skill { width: 72px }` rule (for the skill bar) also matches
-      pick cards with class `pick skill`. Scope the `.skill` CSS rule to `#skills .skill`
-      so it no longer applies to pick cards.
-      Done = `.pick` buttons have `offsetWidth >= 260px` in the overlay; Playwright
-      1280×800 check injects 3 pick cards, shows overlay, and confirms each `.pick`
-      `getBoundingClientRect().width` is ≥ 260px (not the current 72px).
-      Rendering-only; no test needed.
-
-- [x] Add a core idle animation: a second hexagon ring slowly counter-rotates around
-      the core, and a soft outer glow pulses in/out using `Math.sin(G.t * 1.8)`.
-      Done = `draw()` renders an outer hex ring at `CONFIG.coreRadius + 12` that
-      rotates opposite to the inner ring (`-G.t * 0.2`), and a `shadowBlur` that
-      oscillates between 10 and 28 based on `sin(G.t * 1.8)`; Playwright confirms the
-      game still boots and `window.__CORE().running === true` after START.
-      Rendering-only; no test needed.
-
-- [x] Add a `Chain` 1-tap skill: zaps the nearest enemy, then jumps to a few nearby
-      enemies for reduced damage. Done = entry in `SKILLS`, offerable via `rollOffers`,
-      implemented in `index.html`, with a small visual arc effect.
-
-- [x] Add a `magnet` stat card: increases XP pickup radius once pickups exist, but for
-      now boosts kill XP by a small percentage as a temporary pure rule. Done = stat
-      exists in `defaultStats`/`STAT_CARDS`, `xpForKill(stats)` helper exists, kill XP
-      uses it, and tests pin default/boosted values.
-
-- [x] Add wave announcement feedback when a new wave starts. Done = renderer detects
-      wave changes, shows a short centered "WAVE N" flash, and does not pause gameplay.
-      Rendering-only; no test needed.
-
-- [x] Add enemy splitters: a medium enemy can split into two small fast enemies when
-      killed. Done = pure helper defines splitter child stats, spawn/render logic uses
-      it, and tests assert child count, hp, radius, and speed.
-
-- [x] Add a `Nova` 2-tap skill: aim point selects a blast center, then damages enemies
-      in that radius after a short delay. Done = entry in `SKILLS`, two-tap handling
-      reuses the existing aim flow, cooldown applies on cast, and the blast has a clear
-      warning ring.
-
-- [x] Add a low-core warning pulse. Done = when core hp is below 30%, the core/HUD gets
-      a subtle red pulse; pulse stops after healing above the threshold. Rendering-only;
-      no test needed.
-
-- [x] Add pause/resume on page visibility change. Done = hidden tab pauses simulation
-      without accumulating a giant `dt`, visible tab resumes cleanly, and manual gameplay
-      state is unchanged. Rendering/input-only; no test needed.
-
-- [x] Add a `crit` stat card: chance for auto-shots to deal double damage. Done = `crit`
-      stat exists in `defaultStats`/`STAT_CARDS`, affects `derive`, has a test.
-- [x] Add a `Bomb` 1-tap skill: damages all enemies on screen, long cooldown. Done =
-      entry in `SKILLS`, offerable via `rollOffers`, triggers in `index.html`.
-- [x] Add a boss enemy every 5th wave (bigger, much more hp, slow). Done = spawn logic +
-      a `waveForTime`/spawn test asserting boss cadence.
-- [x] Persist best score (wave reached) in memory for the session and show it on the
-      splash. Done = best updates on game over, shown on RETRY screen. (No localStorage.)
-- [x] Add a brief screen-shake on core hit. Rendering-only; no test needed.
-
-- [x] Fix iPhone top-of-screen clipping: HUD is cut off by the notch / Dynamic Island.
-      Done = `.topbar` top padding includes `env(safe-area-inset-top)`, `.xpbar` top
-      position also accounts for the safe area; top HUD is fully visible on iPhone with
-      `viewport-fit=cover`. Rendering-only; no test needed.
-
-- [x] Top HUD still clips on iPhone 17 Dynamic Island: WAVE/LV/CORE text is half-obscured
-      even after the safe-area-inset-top fix. Harden the offset with CSS max() so that
-      clearance is guaranteed regardless of whether env() resolves correctly.
-      Done = `.topbar` padding-top is `max(78px, calc(14px + env(safe-area-inset-top)))`;
-      `.xpbar` top is `max(112px, calc(48px + env(safe-area-inset-top)))`; Playwright
-      device-emulation check (iPhone 12 viewport) confirms topbar paddingTop ≥ 78px.
-      Rendering-only; no test needed.
-
-- [x] Level-up card overlay sometimes clips or overflows on small/notched screens — not
-      all 3 pick cards are reachable. Make the overlay scrollable and safe-area-aware.
-      Done = `#overlay` gains `overflow-y: auto` and safe-area padding on all sides;
-      `.cards` has a `max-height` that keeps it within the visible viewport; Playwright
-      iPhone 12 viewport check confirms all 3 `.pick` buttons are within `scrollHeight`.
-      Rendering-only; no test needed.
-
-- [x] Enemies are too strong in early waves — players die before reaching LV 3. Soften
-      the initial difficulty so new players can survive to wave 2–3 and level up twice.
-      Done = `CONFIG.baseEnemyHp` lowered and/or `CONFIG.baseSpawnInterval` raised in
-      `engine.js`; `derive(defaultStats(), 1).enemyHp` and `spawnInterval` tests updated
-      to assert the new values; `derive(defaultStats(), 5)` still harder than wave 1
-      (existing invariant must hold).
-
-- [x] Wave-2 enemy HP spike is still too steep: hp jumps from 3 to 5 between wave 1 and
-      wave 2 because the hardcoded `1.5` scaling factor uses `floor(wave * 1.5)`.
-      Introduce `CONFIG.enemyHpScale` (replaces the hardcoded `1.5` in `derive`) and
-      set it to `1.0`, so wave-2 hp drops to 4 and the ramp is smoother.
-      Done = `CONFIG.enemyHpScale` exists in `engine.js`; `derive` uses
-      `CONFIG.baseEnemyHp + Math.floor(wave * CONFIG.enemyHpScale)`; test asserting
-      `derive(defaultStats(), 2).enemyHp` equals 4; difficulty-rises invariant still
-      holds (`derive(defaultStats(), 5).enemyHp > derive(defaultStats(), 1).enemyHp`).
-
-- [x] Fix `rollOffers` to guarantee at least one skill card per level-up when locked
-      skills are still available. Currently ~10% of offers show zero skills because
-      the pool is purely random across 7 skills + 8 stat cards.
-      Done = `rollOffers` in `engine.js` always includes exactly 1 locked skill (and
-      2 stat cards) when `unlockedSkillIds.length < Object.keys(SKILLS).length`;
-      when all skills are unlocked it returns 3 stat cards without error; tests assert
-      both cases. Mixed — engine rule change with tests; no renderer change needed.
-
-- [x] Add a `Blink` 2-tap skill: aim tap selects a destination, second tap teleports
-      the core there for 1.5s then snaps it back to the original position.
-      Done = `SKILLS.blink` exists in `engine.js` (tap: 2, cooldown ≥ 10); test
-      asserting `SKILLS.blink.tap === 2` and blink is not offered when unlocked;
-      `index.html` stores the home position in `G.blinkHome` on trigger, moves
-      `G.core.x/y` to the aim point, sets `G.blinkReturn = G.t + 1.5`, and in
-      `step()` snaps core back to `G.blinkHome` when `G.t >= G.blinkReturn`; ring
-      flash FX appears at departure and arrival on blink.
-
-- [x] Add a `Missile` 1-tap skill: fires a slow homing projectile that steers toward the
-      nearest enemy each frame and deals high damage on impact. Done = `SKILLS.missile`
-      exists in `engine.js` (tap: 1, cooldown ≥ 5); test asserting `SKILLS.missile`
-      is defined and is not offered when already unlocked; `index.html` adds a missile
-      object `{ x, y, vx, vy, target }` to `G.missiles` on trigger, steers toward its
-      target enemy each frame, deals 25×power damage on contact with radius ≤ 10, and
-      renders as a bright magenta dot with a 3-segment fading tail.
+<!-- no items pending -->
 
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
@@ -148,4 +27,9 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] Level-up overlay fix: `#overlay` gets `overflow-y: auto` + safe-area padding + `justify-content: safe center`; `.cards` gets `max-height` bounded to viewport; Playwright confirms all 3 picks within scrollHeight.
 - [x] Early difficulty balance: `baseEnemyHp` 3→2, `baseSpawnInterval` 1.1→1.4; wave-1 hp=3, interval≈1.34 pinned in new tests; difficulty-rises invariant still holds.
 - [x] Wave-2 hp spike fix: `CONFIG.enemyHpScale` 1.5→1.0; wave-2 hp 5→4; new test pins wave-2 hp=4; difficulty-rises invariant holds.
+- [x] Level-up card width fix: scoped `.skill` CSS rule to `#skills .skill` so pick cards in the overlay are no longer forced to 72px; rendering-only.
+- [x] Core idle animation: outer hex ring counter-rotates at `-G.t * 0.2`; glow pulses via `shadowBlur = 19 + 9*sin(G.t*1.8)`; rendering-only.
+- [x] Chain skill: `SKILLS.chain` (1-tap, 8s cooldown), zaps nearest enemy then arcs to 3 nearby foes at 60% damage, yellow arc FX; engine test added.
+- [x] rollOffers guarantee: `rollOffers` now always picks 1 locked skill first then fills 2 stat cards; falls back to 3 stats when all skills unlocked; tests cover both cases.
+- [x] Blink skill: `SKILLS.blink` (2-tap, 12s cooldown), teleports core to aim point for 1.5s then snaps back; `G.blinkHome`/`G.blinkReturn` in step(); ring FX on departure and return; 2 engine tests added.
 - [x] Missile skill: `SKILLS.missile` (1-tap, 6s cooldown), homing steering with turn-rate cap, 25×power on impact, magenta dot + fading tail; 2 engine tests added; nova fixture updated for 9-skill pool.
