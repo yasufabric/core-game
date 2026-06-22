@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>CORE</title>
+<style>
+  :root {
+    --bg: #0a0e14;
+    --grid: #11161f;
+    --core: #7df9ff;     /* signature cyan */
+    --core-dim: #2a6e74;
+    --enemy: #ff5d73;
+    --xp: #9d7bff;
+    --ink: #e7ecf3;
+    --muted: #5d6b7e;
+    --card: #131a25;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
+  body {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    touch-action: none; user-select: none;
+  }
+  #stage { position: relative; width: 100vw; height: 100vh; max-width: 540px; }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  /* HUD */
+  #hud { position: absolute; inset: 0; pointer-events: none; }
+  .topbar {
+    position: absolute; top: 0; left: 0; right: 0; padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    font-size: 13px; letter-spacing: .08em;
+  }
+  .stat { color: var(--muted); }
+  .stat b { color: var(--ink); font-weight: 600; }
+  .xpbar { position: absolute; top: 44px; left: 16px; right: 16px; height: 3px; background: #1a2230; border-radius: 2px; }
+  .xpbar > i { display: block; height: 100%; width: 0; background: var(--xp); border-radius: 2px; transition: width .12s linear; }
+
+  /* skill buttons (thumb zone, bottom) */
+  #skills {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 18px 16px calc(18px + env(safe-area-inset-bottom));
+    display: flex; gap: 12px; justify-content: center; pointer-events: none;
+  }
+  .skill {
+    pointer-events: auto;
+    width: 72px; height: 72px; border-radius: 18px;
+    background: var(--card); border: 1px solid #1e2836;
+    color: var(--ink); font-size: 12px; letter-spacing: .04em;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    position: relative; overflow: hidden; transition: transform .08s;
+  }
+  .skill:active { transform: scale(.94); }
+  .skill .nm { font-weight: 600; }
+  .skill .tap { font-size: 9px; color: var(--muted); }
+  .skill .cd { position: absolute; inset: 0; background: rgba(10,14,20,.78); transform-origin: bottom; }
+  .skill.aiming { border-color: var(--core); box-shadow: 0 0 0 1px var(--core); }
+
+  /* level-up overlay */
+  #overlay {
+    position: absolute; inset: 0; background: rgba(6,9,13,.82); backdrop-filter: blur(3px);
+    display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    pointer-events: auto; padding: 24px;
+  }
+  #overlay.show { display: flex; }
+  #overlay h2 { margin: 0; font-size: 14px; letter-spacing: .3em; color: var(--core); font-weight: 600; }
+  #overlay .sub { font-size: 11px; color: var(--muted); letter-spacing: .15em; margin-top: -8px; }
+  .cards { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 320px; }
+  .pick {
+    background: var(--card); border: 1px solid #1e2836; border-radius: 16px; padding: 16px 18px;
+    text-align: left; color: var(--ink); cursor: pointer; transition: border-color .12s, transform .08s;
+  }
+  .pick:active { transform: scale(.98); }
+  .pick .h { display: flex; justify-content: space-between; align-items: center; }
+  .pick .name { font-weight: 600; font-size: 15px; }
+  .pick.skill .name { color: var(--core); }
+  .pick.stat .name { color: var(--xp); }
+  .pick .badge { font-size: 9px; color: var(--muted); border: 1px solid #2a3445; border-radius: 6px; padding: 2px 6px; letter-spacing: .1em; }
+  .pick .d { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  /* start / gameover */
+  #splash {
+    position: absolute; inset: 0; background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    pointer-events: auto;
+  }
+  #splash .logo { font-size: 56px; letter-spacing: .42em; font-weight: 700; color: var(--core); text-shadow: 0 0 24px var(--core-dim); margin-right: -.42em; }
+  #splash .tag { font-size: 12px; color: var(--muted); letter-spacing: .22em; }
+  #splash .go {
+    margin-top: 26px; pointer-events: auto; background: transparent; color: var(--ink);
+    border: 1px solid var(--core); border-radius: 999px; padding: 14px 40px; font: inherit;
+    letter-spacing: .18em; font-size: 13px;
+  }
+  #splash .go:active { background: var(--core); color: var(--bg); }
+  #splash .dead { color: var(--enemy); font-size: 13px; letter-spacing: .2em; min-height: 18px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="c"></canvas>
+  <div id="hud">
+    <div class="topbar">
+      <div class="stat">WAVE <b id="wave">1</b></div>
+      <div class="stat">LV <b id="lv">1</b></div>
+      <div class="stat">CORE <b id="hp">100</b></div>
+    </div>
+    <div class="xpbar"><i id="xpfill"></i></div>
+    <div id="skills"></div>
+  </div>
+
+  <div id="overlay">
+    <h2>LEVEL UP</h2>
+    <div class="sub">choose one</div>
+    <div class="cards" id="cards"></div>
+  </div>
+
+  <div id="splash">
+    <div class="logo">CORE</div>
+    <div class="tag">PROTECT THE CENTER · ONE THUMB</div>
+    <div class="dead" id="deadmsg"></div>
+    <button class="go" id="start">START</button>
+  </div>
+</div>
+
+<script type="module">
+import {
+  CONFIG, xpForLevel, gainXp, defaultStats, derive,
+  rollOffers, applyStatCard, dist, enemyHitsCore, waveForTime, clamp, SKILLS,
+} from './src/engine.js';
+
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+let W = 0, H = 0, DPR = 1;
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  const r = cv.getBoundingClientRect();
+  W = r.width; H = r.height;
+  cv.width = W * DPR; cv.height = H * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+window.addEventListener('resize', resize);
+
+// --- game state ----------------------------------------------------------
+let G = null;
+function newGame() {
+  resize();
+  G = {
+    running: true,
+    t: 0, lastSpawn: 0,
+    core: { x: W / 2, y: H * 0.46, hp: CONFIG.coreHp },
+    stats: defaultStats(),
+    level: 1, xp: 0, xpNeeded: xpForLevel(1),
+    wave: 1,
+    enemies: [], shots: [], fx: [],
+    lastAuto: 0,
+    unlocked: [],            // skill ids
+    cooldowns: {},           // id -> ready time
+    slowUntil: 0, shieldUntil: 0,
+    aiming: null,            // skill id awaiting 2nd tap
+    paused: false,
+  };
+  renderSkillBar();
+  document.getElementById('splash').classList.add('hidden');
+}
+
+// --- spawning ------------------------------------------------------------
+function spawnEnemy() {
+  const d = derive(G.stats, G.wave);
+  const edge = Math.floor(Math.random() * 4);
+  const m = 20;
+  let x, y;
+  if (edge === 0) { x = Math.random() * W; y = -m; }
+  else if (edge === 1) { x = W + m; y = Math.random() * H; }
+  else if (edge === 2) { x = Math.random() * W; y = H + m; }
+  else { x = -m; y = Math.random() * H; }
+  // occasional tanky variant
+  const tanky = Math.random() < 0.12 + G.wave * 0.01;
+  G.enemies.push({
+    x, y, r: tanky ? 13 : 8,
+    hp: d.enemyHp * (tanky ? 2.4 : 1),
+    maxHp: d.enemyHp * (tanky ? 2.4 : 1),
+    spd: d.enemySpeed * (tanky ? 0.7 : 1),
+    tanky,
+  });
+}
+
+// --- skills --------------------------------------------------------------
+function skillReady(id) {
+  return (G.cooldowns[id] || 0) <= G.t;
+}
+function triggerSkill(id, aimX, aimY) {
+  const sk = SKILLS[id];
+  if (!skillReady(id)) return;
+  G.cooldowns[id] = G.t + sk.cooldown * G.stats.cooldown;
+  const c = G.core;
+  if (id === 'pulse') {
+    for (const e of G.enemies) {
+      if (dist(e.x, e.y, c.x, c.y) < 150) e.hp -= 6 * G.stats.power;
+    }
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 150, born: G.t, life: .45, color: '#7df9ff' });
+  } else if (id === 'slow') {
+    G.slowUntil = G.t + 3;
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: Math.max(W, H), born: G.t, life: .6, color: '#9d7bff' });
+  } else if (id === 'shield') {
+    G.shieldUntil = G.t + 2.5;
+  } else if (id === 'lance') {
+    const ang = Math.atan2(aimY - c.y, aimX - c.x);
+    const len = Math.max(W, H);
+    const ex = c.x + Math.cos(ang) * len, ey = c.y + Math.sin(ang) * len;
+    for (const e of G.enemies) {
+      if (pointSegDist(e.x, e.y, c.x, c.y, ex, ey) < e.r + 14) e.hp -= 20 * G.stats.power;
+    }
+    G.fx.push({ kind: 'beam', x1: c.x, y1: c.y, x2: ex, y2: ey, born: G.t, life: .25 });
+  }
+  updateSkillBar();
+}
+function pointSegDist(px, py, ax, ay, bx, by) {
+  const dx = bx - ax, dy = by - ay;
+  const l2 = dx * dx + dy * dy || 1;
+  let t = ((px - ax) * dx + (py - ay) * dy) / l2;
+  t = clamp(t, 0, 1);
+  return dist(px, py, ax + t * dx, ay + t * dy);
+}
+
+// --- input ---------------------------------------------------------------
+cv.addEventListener('pointerdown', (e) => {
+  if (!G || !G.running || G.paused) return;
+  const r = cv.getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top;
+  if (G.aiming) {
+    triggerSkill(G.aiming, x, y);
+    setAiming(null);
+  }
+});
+
+// --- HUD: skill bar ------------------------------------------------------
+const skillsEl = document.getElementById('skills');
+function renderSkillBar() {
+  skillsEl.innerHTML = '';
+  for (const id of G.unlocked) {
+    const sk = SKILLS[id];
+    const b = document.createElement('button');
+    b.className = 'skill';
+    b.dataset.id = id;
+    b.innerHTML = `<span class="nm">${sk.name}</span><span class="tap">${sk.tap === 2 ? 'AIM·TAP' : 'TAP'}</span><i class="cd"></i>`;
+    b.addEventListener('pointerdown', (ev) => {
+      ev.stopPropagation();
+      if (G.paused) return;
+      if (sk.tap === 2) {
+        setAiming(G.aiming === id ? null : id);
+      } else {
+        triggerSkill(id);
+      }
+    });
+    skillsEl.appendChild(b);
+  }
+  updateSkillBar();
+}
+function setAiming(id) {
+  G.aiming = id;
+  [...skillsEl.children].forEach(b => b.classList.toggle('aiming', b.dataset.id === id));
+}
+function updateSkillBar() {
+  [...skillsEl.children].forEach(b => {
+    const id = b.dataset.id, sk = SKILLS[id];
+    const cd = b.querySelector('.cd');
+    const total = sk.cooldown * G.stats.cooldown;
+    const remain = Math.max(0, (G.cooldowns[id] || 0) - G.t);
+    cd.style.transform = `scaleY(${remain / total})`;
+  });
+}
+
+// --- level up ------------------------------------------------------------
+const overlay = document.getElementById('overlay');
+const cardsEl = document.getElementById('cards');
+function openLevelUp() {
+  G.paused = true;
+  setAiming(null);
+  const offers = rollOffers(G.unlocked, Math.random);
+  cardsEl.innerHTML = '';
+  for (const o of offers) {
+    const el = document.createElement('button');
+    el.className = 'pick ' + o.kind;
+    const badge = o.kind === 'skill' ? (o.tap === 2 ? 'SKILL·AIM' : 'SKILL') : 'STAT';
+    el.innerHTML = `<div class="h"><span class="name">${o.name}</span><span class="badge">${badge}</span></div><div class="d">${o.desc}</div>`;
+    el.addEventListener('click', () => choose(o));
+    cardsEl.appendChild(el);
+  }
+  overlay.classList.add('show');
+}
+function choose(o) {
+  if (o.kind === 'stat') {
+    G.stats = applyStatCard(G.stats, o.id);
+  } else {
+    if (!G.unlocked.includes(o.id)) G.unlocked.push(o.id);
+    renderSkillBar();
+  }
+  overlay.classList.remove('show');
+  G.paused = false;
+  // queue may hold more level-ups
+  if (G.pendingLevels > 0) { G.pendingLevels--; openLevelUp(); }
+}
+
+// --- main loop -----------------------------------------------------------
+let prev = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  if (!G || !G.running) return;
+  const dt = Math.min(0.05, (now - prev) / 1000 || 0);
+  prev = now;
+  if (!G.paused) step(dt);
+  draw();
+}
+function step(dt) {
+  G.t += dt;
+  G.wave = waveForTime(G.t);
+  const d = derive(G.stats, G.wave);
+  const c = G.core;
+
+  // regen
+  if (G.stats.regen) c.hp = clamp(c.hp + G.stats.regen * dt, 0, CONFIG.coreHp);
+
+  // spawn
+  if (G.t - G.lastSpawn > d.spawnInterval) { spawnEnemy(); G.lastSpawn = G.t; }
+
+  // auto-fire: target nearest enemy in range
+  const slow = G.t < G.slowUntil ? 0.4 : 1;
+  if (G.t - G.lastAuto > 1 / d.autoRate) {
+    let best = null, bestD = d.autoRange;
+    for (const e of G.enemies) {
+      const dd = dist(e.x, e.y, c.x, c.y);
+      if (dd < bestD) { bestD = dd; best = e; }
+    }
+    if (best) {
+      const ang = Math.atan2(best.y - c.y, best.x - c.x);
+      G.shots.push({ x: c.x, y: c.y, vx: Math.cos(ang) * 420, vy: Math.sin(ang) * 420, dmg: d.autoDamage, life: 1.2 });
+      G.lastAuto = G.t;
+    }
+  }
+
+  // move shots
+  for (const s of G.shots) { s.x += s.vx * dt; s.y += s.vy * dt; s.life -= dt; }
+  // shot vs enemy
+  for (const s of G.shots) {
+    for (const e of G.enemies) {
+      if (e.hp > 0 && dist(s.x, s.y, e.x, e.y) < e.r + 3) {
+        e.hp -= s.dmg; s.life = 0;
+        G.fx.push({ kind: 'spark', x: s.x, y: s.y, born: G.t, life: .2 });
+        break;
+      }
+    }
+  }
+  G.shots = G.shots.filter(s => s.life > 0 && s.x > -20 && s.x < W + 20 && s.y > -20 && s.y < H + 20);
+
+  // move enemies toward core
+  let killed = 0;
+  for (const e of G.enemies) {
+    if (e.hp <= 0) { killed++; continue; }
+    const ang = Math.atan2(c.y - e.y, c.x - e.x);
+    e.x += Math.cos(ang) * e.spd * slow * dt;
+    e.y += Math.sin(ang) * e.spd * slow * dt;
+    if (enemyHitsCore(e, c)) {
+      if (G.t >= G.shieldUntil) c.hp -= e.tanky ? 14 : 7;
+      e.hp = 0; killed++;
+      G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 18, born: G.t, life: .3, color: '#ff5d73' });
+    }
+  }
+  // award xp for kills (only those killed by damage, not core hits — approx: all removed grant xp)
+  const before = G.enemies.length;
+  G.enemies = G.enemies.filter(e => e.hp > 0);
+  const removed = before - G.enemies.length;
+  if (removed > 0) {
+    const res = gainXp({ level: G.level, xp: G.xp }, removed * CONFIG.xpPerKill);
+    const ups = res.leveledUp;
+    G.level = res.level; G.xp = res.xp; G.xpNeeded = res.xpNeeded;
+    if (ups > 0) { G.pendingLevels = (G.pendingLevels || 0) + ups - 1; openLevelUp(); }
+  }
+
+  // fx ttl
+  G.fx = G.fx.filter(f => G.t - f.born < f.life);
+
+  // hud
+  document.getElementById('wave').textContent = G.wave;
+  document.getElementById('lv').textContent = G.level;
+  document.getElementById('hp').textContent = Math.ceil(c.hp);
+  document.getElementById('xpfill').style.width = (100 * G.xp / G.xpNeeded) + '%';
+  updateSkillBar();
+
+  if (c.hp <= 0) gameOver();
+}
+
+function gameOver() {
+  G.running = false;
+  document.getElementById('deadmsg').textContent = `CORE BREACHED · WAVE ${G.wave} · LV ${G.level}`;
+  document.getElementById('start').textContent = 'RETRY';
+  document.getElementById('splash').classList.remove('hidden');
+}
+
+// --- draw ----------------------------------------------------------------
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  // grid
+  ctx.strokeStyle = getCss('--grid'); ctx.lineWidth = 1;
+  const gs = 36;
+  ctx.beginPath();
+  for (let x = (W/2 % gs); x < W; x += gs) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+  for (let y = (G.core.y % gs); y < H; y += gs) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
+  ctx.stroke();
+
+  const c = G.core;
+  // aiming guide
+  if (G.aiming) {
+    ctx.strokeStyle = 'rgba(125,249,255,.25)'; ctx.lineWidth = 1; ctx.setLineDash([4, 6]);
+    ctx.beginPath(); ctx.arc(c.x, c.y, 60, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  // fx
+  for (const f of G.fx) {
+    const k = (G.t - f.born) / f.life;
+    if (f.kind === 'ring') {
+      ctx.strokeStyle = f.color; ctx.globalAlpha = 1 - k; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.r + (f.max - f.r) * k, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = 1;
+    } else if (f.kind === 'beam') {
+      ctx.strokeStyle = '#7df9ff'; ctx.globalAlpha = 1 - k; ctx.lineWidth = 6 * (1 - k) + 1;
+      ctx.beginPath(); ctx.moveTo(f.x1, f.y1); ctx.lineTo(f.x2, f.y2); ctx.stroke(); ctx.globalAlpha = 1;
+    } else if (f.kind === 'spark') {
+      ctx.fillStyle = '#fff'; ctx.globalAlpha = 1 - k;
+      ctx.beginPath(); ctx.arc(f.x, f.y, 3 * (1 - k) + 1, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+    }
+  }
+
+  // enemies
+  for (const e of G.enemies) {
+    ctx.save(); ctx.translate(e.x, e.y);
+    ctx.fillStyle = e.tanky ? '#ff8a4d' : getCss('--enemy');
+    ctx.beginPath();
+    const sides = e.tanky ? 6 : 3;
+    for (let i = 0; i < sides; i++) {
+      const a = (i / sides) * Math.PI * 2 - Math.PI / 2 + G.t * (e.tanky ? .5 : 1.5);
+      const px = Math.cos(a) * e.r, py = Math.sin(a) * e.r;
+      i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+    }
+    ctx.closePath(); ctx.fill();
+    if (e.hp < e.maxHp) {
+      ctx.fillStyle = 'rgba(255,255,255,.25)';
+      ctx.fillRect(-e.r, e.r + 4, e.r * 2, 2);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(-e.r, e.r + 4, e.r * 2 * (e.hp / e.maxHp), 2);
+    }
+    ctx.restore();
+  }
+
+  // shots
+  ctx.fillStyle = getCss('--core');
+  for (const s of G.shots) { ctx.beginPath(); ctx.arc(s.x, s.y, 2.5, 0, Math.PI * 2); ctx.fill(); }
+
+  // core
+  const shielded = G.t < G.shieldUntil;
+  ctx.save(); ctx.translate(c.x, c.y);
+  ctx.shadowColor = getCss('--core'); ctx.shadowBlur = 18;
+  ctx.strokeStyle = shielded ? '#fff' : getCss('--core'); ctx.lineWidth = shielded ? 3 : 2;
+  ctx.fillStyle = 'rgba(125,249,255,.08)';
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    const a = (i / 6) * Math.PI * 2 + G.t * .3;
+    const px = Math.cos(a) * CONFIG.coreRadius, py = Math.sin(a) * CONFIG.coreRadius;
+    i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+  }
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.shadowBlur = 0;
+  // hp ring
+  ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(0, 0, CONFIG.coreRadius + 8, -Math.PI/2, -Math.PI/2 + Math.PI*2*(c.hp/CONFIG.coreHp)); ctx.stroke();
+  ctx.restore();
+}
+
+const cssCache = {};
+function getCss(v) {
+  if (!cssCache[v]) cssCache[v] = getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  return cssCache[v];
+}
+
+document.getElementById('start').addEventListener('click', () => { newGame(); });
+requestAnimationFrame(frame);
+
+// expose for headless/e2e probing (loop verification can read window.__CORE)
+window.__CORE = () => G;

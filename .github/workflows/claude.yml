@@ -1,0 +1,47 @@
+name: Claude
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
+
+jobs:
+  claude:
+    # only react to humans mentioning @claude, never to bots (incl. itself)
+    if: |
+      github.actor != 'claude[bot]' &&
+      github.actor != 'github-actions[bot]' &&
+      (
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'issues' && contains(github.event.issue.body, '@claude'))
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            You are running in CI on the CORE game repo. Follow CLAUDE.md.
+            Implement what the @claude comment asks. Put game rules in src/engine.js
+            with a matching test in tests/engine.test.js. Run `npm test` and the
+            game-verify skill before opening a PR. Never push to the default branch
+            directly — open a pull request. Do not install new runtime dependencies.
+            Time-box to the files the task touches.

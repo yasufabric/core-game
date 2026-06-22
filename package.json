@@ -1,0 +1,16 @@
+{
+  "name": "core-game",
+  "version": "0.1.0",
+  "description": "CORE — a one-thumb survival-defense browser game. Logic is pure and unit-tested so an agent loop can verify its own changes.",
+  "type": "module",
+  "scripts": {
+    "dev": "http-server -p 8080 -c-1 .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verify": "vitest run"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "vitest": "^2.1.0"
+  }
+}
