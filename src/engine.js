@@ -15,6 +15,7 @@ export const CONFIG = {
   waveSeconds: 20,           // each wave lasts this long, then difficulty ramps
   doublePickChance: 0.15,    // probability per level-up of choosing two cards
   xpPerSkillUse: 2,          // XP awarded each time any skill is activated
+  droneDamageMult: 3,        // drone zap = droneDamageMult × power
 };
 
 // --- leveling -------------------------------------------------------------

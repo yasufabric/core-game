@@ -593,7 +593,7 @@ function step(dt) {
         if (d < 140 && d < bestD) { bestD = d; best = e; }
       }
       if (best) {
-        best.hp -= 1 * G.stats.power;
+        best.hp -= CONFIG.droneDamageMult * G.stats.power;
         G.fx.push({ kind: 'arc', x1: dx, y1: dy, x2: best.x, y2: best.y, born: G.t, life: .25 });
         G.drone.lastZap = G.t;
       }
