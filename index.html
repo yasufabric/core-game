@@ -167,7 +167,7 @@ window.addEventListener('resize', resize);
 
 // --- game state ----------------------------------------------------------
 let G = null;
-let bestWave = 0; // session best, not persisted across page reloads
+let bestWave = parseInt(localStorage.getItem('bestWave') || '0', 10);
 let waveFlashTimer = 0;
 function newGame() {
   resize();
@@ -622,7 +622,7 @@ function step(dt) {
 function gameOver() {
   G.running = false;
   overlay.classList.remove('show');
-  if (G.wave > bestWave) bestWave = G.wave;
+  if (G.wave > bestWave) { bestWave = G.wave; localStorage.setItem('bestWave', bestWave); }
   document.getElementById('deadmsg').textContent = `CORE BREACHED · WAVE ${G.wave} · LV ${G.level}`;
   document.getElementById('killcount').textContent = G.kills > 0 ? `KILLS  ${G.kills}` : '';
   document.getElementById('bestscore').textContent = bestWave > 0 ? `BEST  WAVE ${bestWave}` : '';
