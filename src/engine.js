@@ -7,7 +7,8 @@ export const CONFIG = {
   baseEnemyHp: 2,
   enemyHpScale: 0.6,         // hp added per wave number
   baseEnemySpeed: 22,        // px/sec at wave 1
-  baseSpawnInterval: 1.4,    // sec between spawns at wave 1
+  enemySpeedScale: 4,        // px/sec added per wave number
+  baseSpawnInterval: 1.6,    // sec between spawns at wave 1
   xpPerKill: 1,
   // XP needed for level N = round(base * growth^(N-1))
   xpBase: 5,
@@ -62,7 +63,7 @@ export function derive(stats, wave) {
     autoRange: 140 * stats.range,      // px
     regenPerSec: stats.regen,
     enemyHp: CONFIG.baseEnemyHp + Math.floor(wave * CONFIG.enemyHpScale),
-    enemySpeed: CONFIG.baseEnemySpeed + wave * 6,
+    enemySpeed: CONFIG.baseEnemySpeed + wave * CONFIG.enemySpeedScale,
     spawnInterval: Math.max(0.28, CONFIG.baseSpawnInterval - wave * 0.06),
     critChance: stats.crit,
   };
