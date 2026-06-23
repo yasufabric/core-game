@@ -6,6 +6,30 @@ The `/loop` command pulls the first unchecked item, implements it, verifies it w
 Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
+
+<!-- ── FIXES ──────────────────────────────────────────────────── -->
+- [x] Persist best score: `bestWave` loaded from `localStorage` on init; saved back on game over; RETRY splash unchanged; no engine change.
+
+- [x] Drone damage boost: drone zap damage 1×power → 3×power so the drone stays relevant past wave 3; update the 1 test that checks drone power if one exists, or add one. Added CONFIG.droneDamageMult=3 in engine.js; index.html uses it; test pins value at 3.
+
+- [ ] Warmup grace period: first enemy spawns no earlier than 3s after `newGame()`; add a `CONFIG.warmupSec = 3` constant and gate `spawnEnemy` behind `G.t >= CONFIG.warmupSec`; 1 engine test pins the boundary.
+
+<!-- ── POLISH ──────────────────────────────────────────────────── -->
+- [ ] Slow-active HUD indicator: while slowfield is active, show a small "SLOW" badge in the HUD topbar (purple, fades out when `G.t >= G.slowUntil`); renderer-only, no engine change.
+
+- [ ] Shield expiry flash: when the shield drops (`G.t` crosses `G.shieldUntil`), push a `ring` FX (white, r=coreRadius, max=coreRadius+30, life=0.3s) so the player sees the shield fall; renderer/step change only.
+
+- [ ] Cooldown countdown text: inside each skill button, show the integer seconds remaining (e.g. "3s") centred over the cooldown fill when cd > 0.5s; hide when ready; HUD-only change.
+
+- [ ] Kill counter in HUD: add `KILLS <b id="kills">0</b>` to the topbar and update it in `step()` alongside the existing wave/lv/hp updates; no engine change needed.
+
+<!-- ── CONTENT ─────────────────────────────────────────────────── -->
+- [ ] Heal skill: `SKILLS.heal` (1-tap, 22s cooldown), restores `min(20, CONFIG.coreHp - c.hp)` HP to the core, green ring FX; 2 engine tests (skill defined, not offered when unlocked).
+
+- [ ] Fast enemy type ("dart"): starting wave 8, 8% chance per spawn of a dart (triangle, 1.8× speed, 0.4× HP, sides=3, magenta); add `dart` flag to enemy; `xpForKill` returns 0.8× for darts; 2 tests.
+
+- [ ] Wave-clear bonus XP: when `G.enemies.length` drops to 0 and the wave is still active, award `CONFIG.waveClearXp = 3` bonus XP and push a brief gold ring FX at core; 1 engine test.
+
 - [ ] Tap-to-reposition: tapping the arena canvas (outside skill buttons) slides the core to
       that point over 0.8 s; a 12 s cooldown (stored in `CONFIG.reposCooldown`) prevents
       spamming; a radial arc ring drawn around the core shows remaining cooldown.
