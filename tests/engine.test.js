@@ -247,6 +247,10 @@ describe('SKILLS', () => {
     expect(offers.filter(o => o.id === 'drone')).toHaveLength(0);
   });
 
+  it('drone damage multiplier is 3', () => {
+    expect(CONFIG.droneDamageMult).toBe(3);
+  });
+
   it('repulse exists as a 1-tap skill with cooldown >= 15', () => {
     expect(SKILLS.repulse).toBeDefined();
     expect(SKILLS.repulse.tap).toBe(1);
