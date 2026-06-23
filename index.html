@@ -151,6 +151,36 @@ import {
 } from './src/engine.js';
 import { draw as drawFrame } from './src/renderer.js';
 
+// --- sfx ------------------------------------------------------------------
+const sfx = (() => {
+  let ac;
+  function ctx() {
+    if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
+    return ac;
+  }
+  function tone(freq, type, vol, decay, freqEnd) {
+    const c = ctx();
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, c.currentTime);
+    if (freqEnd !== undefined) o.frequency.exponentialRampToValueAtTime(freqEnd, c.currentTime + decay);
+    g.gain.setValueAtTime(vol, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + decay);
+    o.connect(g); g.connect(c.destination);
+    o.start(); o.stop(c.currentTime + decay);
+  }
+  return {
+    unlock() { ctx(); },
+    kill()   { tone(520, 'square',   0.10, 0.07); },
+    hit()    { tone(90,  'sawtooth', 0.28, 0.22, 55); },
+    levelUp(){ tone(523, 'sine', 0.18, 0.14); setTimeout(() => tone(784, 'sine', 0.18, 0.2), 110); },
+    skill()  { tone(680, 'sine',   0.11, 0.09); },
+    over()   { tone(220, 'sawtooth', 0.22, 0.35, 110); setTimeout(() => tone(110, 'sawtooth', 0.18, 0.55), 220); },
+  };
+})();
+
 const cv = document.getElementById('c');
 const ctx = cv.getContext('2d');
 const hudEl = document.getElementById('hud');
@@ -257,6 +287,7 @@ function triggerSkill(id, aimX, aimY) {
   const sk = SKILLS[id];
   if (!skillReady(id)) return;
   G.cooldowns[id] = G.t + sk.cooldown * G.stats.cooldown;
+  sfx.skill();
   const c = G.core;
   if (id === 'pulse') {
     for (const e of G.enemies) {
@@ -399,6 +430,7 @@ function openLevelUp(picksRemaining) {
   }
   G.paused = true;
   setAiming(null);
+  sfx.levelUp();
   const offers = rollOffers(G.unlocked, Math.random);
   cardsEl.innerHTML = '';
   overlay.querySelector('h2').textContent = picksRemaining === 2 ? 'DOUBLE PICK!' : 'LEVEL UP';
@@ -563,7 +595,7 @@ function step(dt) {
     e.x += Math.cos(ang) * e.spd * slow * dt;
     e.y += Math.sin(ang) * e.spd * slow * dt;
     if (enemyHitsCore(e, c)) {
-      if (G.t >= G.shieldUntil) { c.hp -= coreDamageTaken(G.stats, e.tanky ? 14 : 7); G.shakeUntil = G.t + 0.25; }
+      if (G.t >= G.shieldUntil) { c.hp -= coreDamageTaken(G.stats, e.tanky ? 14 : 7); G.shakeUntil = G.t + 0.25; sfx.hit(); }
       e.hp = 0; e.consumed = true;
       G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 18, born: G.t, life: .3, color: '#ff5d73' });
       continue;
@@ -576,6 +608,7 @@ function step(dt) {
   if (removed > 0) {
     G.kills += removed;
     applyXp(totalXp);
+    sfx.kill();
   }
 
   // drone auto-zap
@@ -621,6 +654,7 @@ function step(dt) {
 
 function gameOver() {
   G.running = false;
+  sfx.over();
   overlay.classList.remove('show');
   if (G.wave > bestWave) { bestWave = G.wave; localStorage.setItem('bestWave', bestWave); }
   document.getElementById('deadmsg').textContent = `CORE BREACHED · WAVE ${G.wave} · LV ${G.level}`;
@@ -641,7 +675,7 @@ function getCss(v) {
   return cssCache[v];
 }
 
-document.getElementById('start').addEventListener('click', () => { newGame(); });
+document.getElementById('start').addEventListener('click', () => { sfx.unlock(); newGame(); });
 document.addEventListener('visibilitychange', () => {
   if (!G) return;
   G.pageHidden = document.hidden;
