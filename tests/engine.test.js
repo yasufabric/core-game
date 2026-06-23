@@ -75,12 +75,12 @@ describe('stats', () => {
     expect(derive(defaultStats(), 2).enemyHp).toBe(3); // 2 + floor(2*0.6) = 3
   });
 
-  it('wave 1 enemySpeed reflects lowered baseEnemySpeed', () => {
-    expect(derive(defaultStats(), 1).enemySpeed).toBe(28); // 22 + 1*6
+  it('wave 1 enemySpeed reflects baseEnemySpeed + 1×scale', () => {
+    expect(derive(defaultStats(), 1).enemySpeed).toBe(26); // 22 + 1*4
   });
 
   it('wave 1 spawnInterval matches raised baseline', () => {
-    expect(derive(defaultStats(), 1).spawnInterval).toBeCloseTo(1.34, 2); // 1.4 - 1*0.06
+    expect(derive(defaultStats(), 1).spawnInterval).toBeCloseTo(1.54, 2); // 1.6 - 1*0.06
   });
 
   it('defaultStats has crit at 0', () => {
