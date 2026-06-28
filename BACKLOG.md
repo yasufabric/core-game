@@ -15,7 +15,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 - [x] Warmup grace period: first enemy spawns no earlier than 3s after `newGame()`; add a `CONFIG.warmupSec = 3` constant and gate `spawnEnemy` behind `G.t >= CONFIG.warmupSec`; 1 engine test pins the boundary. Added CONFIG.warmupSec=3 in engine.js; spawn gated in index.html; test pins value at 3.
 
 <!-- ── POLISH ──────────────────────────────────────────────────── -->
-- [ ] Slow-active HUD indicator: while slowfield is active, show a small "SLOW" badge in the HUD topbar (purple, fades out when `G.t >= G.slowUntil`); renderer-only, no engine change.
+- [x] Slow-active HUD indicator: while slowfield is active, show a small "SLOW" badge in the HUD topbar (purple, fades out when `G.t >= G.slowUntil`); renderer-only, no engine change. Added #slow-badge element in topbar; opacity toggled in step() HUD block; CSS transition fades it out.
 
 - [ ] Shield expiry flash: when the shield drops (`G.t` crosses `G.shieldUntil`), push a `ring` FX (white, r=coreRadius, max=coreRadius+30, life=0.3s) so the player sees the shield fall; renderer/step change only.
 
