@@ -85,10 +85,10 @@ Keep items small and verifiable. A good item names *what done looks like*.
       visible as drone firing immediately after a crit. Rendering/input-only; no engine test
       needed. Added isCrit && drone unlock check in stepAutoFire; G.drone.lastZap = 0 on crit.
 
-- [ ] Push a white ring-burst FX (radius 0→20, life=0.15s) at the spawn point each time an
+- [x] Push a white ring-burst FX (radius 0→20, life=0.15s) at the spawn point each time an
       enemy enters the arena. Done = renderer in `index.html` pushes a `ring` FX entry at
       enemy spawn coordinates; ring visibly expands and fades within 0.15s at wave 3+.
-      Rendering-only; no test needed.
+      Rendering-only; no test needed. stepBossSpawn/stepSpawn/stepSpikeSpawn return values used in main.js to push ring FX at spawn coords on each successful spawn.
 
 <!-- ── BALANCE (2026-06-28 review) ───────────────────────────── -->
 - [x] Ease early waves: lower `CONFIG.baseSpawnInterval` 1.6 → 2.2 and `CONFIG.baseEnemyHp` 2 → 1. Done = updated constants in `engine.js` with tests pinning both values; existing difficulty-rises tests still pass. Changed baseEnemyHp 2→1, baseSpawnInterval 1.6→2.2; 3 tests updated to reflect new wave-1 values.

@@ -251,9 +251,18 @@ function step(dt) {
   const d = derive(G.stats, G.wave);
 
   stepCore(G, dt);
-  stepBossSpawn(G, d, W, H, Math.random);
-  stepSpawn(G, d, W, H, Math.random);
-  stepSpikeSpawn(G, d, W, H, Math.random);
+  if (stepBossSpawn(G, d, W, H, Math.random)) {
+    const e = G.enemies[G.enemies.length - 1];
+    G.fx.push({ kind: 'ring', x: e.x, y: e.y, r: 0, max: 20, born: G.t, life: 0.15, color: '#ffffff' });
+  }
+  if (stepSpawn(G, d, W, H, Math.random)) {
+    const e = G.enemies[G.enemies.length - 1];
+    G.fx.push({ kind: 'ring', x: e.x, y: e.y, r: 0, max: 20, born: G.t, life: 0.15, color: '#ffffff' });
+  }
+  if (stepSpikeSpawn(G, d, W, H, Math.random)) {
+    const e = G.enemies[G.enemies.length - 1];
+    G.fx.push({ kind: 'ring', x: e.x, y: e.y, r: 0, max: 20, born: G.t, life: 0.15, color: '#ffffff' });
+  }
   stepNovaDet(G);
   stepAutoFire(G, d, Math.random);
   stepShots(G, dt, W, H);
