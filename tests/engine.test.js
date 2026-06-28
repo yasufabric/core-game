@@ -266,6 +266,18 @@ describe('SKILLS', () => {
     const offers = rollOffers(['repulse'], seq([0, 0.1, 0.4, 0.7]));
     expect(offers.filter(o => o.id === 'repulse')).toHaveLength(0);
   });
+
+  it('heal exists as a 1-tap skill with cooldown 22', () => {
+    expect(SKILLS.heal).toBeDefined();
+    expect(SKILLS.heal.tap).toBe(1);
+    expect(SKILLS.heal.cooldown).toBe(22);
+  });
+
+  it('heal is not offered when already unlocked', () => {
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers(['heal'], seq([0, 0.1, 0.4, 0.7]));
+    expect(offers.filter(o => o.id === 'heal')).toHaveLength(0);
+  });
 });
 
 describe('offers', () => {

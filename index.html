@@ -325,6 +325,9 @@ function triggerSkill(id, aimX, aimY) {
       e.x += (dx / d) * 220; e.y += (dy / d) * 220;
     }
     G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: Math.max(W, H) * 0.6, born: G.t, life: .45, color: '#fff' });
+  } else if (id === 'heal') {
+    c.hp = Math.min(CONFIG.coreHp, c.hp + Math.min(20, CONFIG.coreHp - c.hp));
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: CONFIG.coreRadius + 40, born: G.t, life: .5, color: '#4cff91' });
   } else if (id === 'chain') {
     let first = null, firstD = Infinity;
     for (const e of G.enemies) {

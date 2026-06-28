@@ -85,6 +85,7 @@ export const SKILLS = {
   missile: { id: 'missile', name: 'Missile', tap: 1, cooldown: 6,  desc: 'Fire a homing missile that tracks the nearest enemy' },
   drone:    { id: 'drone',    name: 'Drone',    tap: 1, cooldown: 1.5, desc: 'Orbiting satellite that auto-zaps the nearest enemy in range' },
   repulse:  { id: 'repulse',  name: 'Repulse',  tap: 1, cooldown: 18, desc: 'Blast all enemies outward from the core' },
+  heal:     { id: 'heal',     name: 'Heal',     tap: 1, cooldown: 22, desc: 'Restore up to 20 HP to the core' },
 };
 
 export const STAT_CARDS = [
