@@ -92,6 +92,7 @@ export const SKILLS = {
   drone:    { id: 'drone',    name: 'Drone',    tap: 1, cooldown: 1.5, desc: 'Orbiting satellite that auto-zaps the nearest enemy in range' },
   repulse:  { id: 'repulse',  name: 'Repulse',  tap: 1, cooldown: 18, desc: 'Blast all enemies outward from the core' },
   heal:     { id: 'heal',     name: 'Heal',     tap: 1, cooldown: 22, desc: 'Restore up to 20 HP to the core' },
+  thorns:   { id: 'thorns',   name: 'Thorns',   passive: true,       desc: 'Enemies that hit the core take 4 damage' },
 };
 
 export const STAT_CARDS = [

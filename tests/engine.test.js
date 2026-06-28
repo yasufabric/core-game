@@ -243,7 +243,7 @@ describe('SKILLS', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
     expect(SKILLS.nova).toBeDefined();
     expect(SKILLS.nova.tap).toBe(2);
-    const offers = rollOffers([], seq([0.58, 0.1, 0.5])); // 0.58 × 11 = 6.38 → floor 6 = nova in 11-skill pool
+    const offers = rollOffers([], seq([0.5, 0.1, 0.5])); // 0.5 × 13 = 6.5 → floor 6 = nova in 13-skill pool
     expect(offers).toContainEqual(expect.objectContaining({ kind: 'skill', id: 'nova', tap: 2 }));
   });
 
@@ -301,6 +301,21 @@ describe('SKILLS', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
     const offers = rollOffers(['heal'], seq([0, 0.1, 0.4, 0.7]));
     expect(offers.filter(o => o.id === 'heal')).toHaveLength(0);
+  });
+
+  it('thorns is a passive skill and appears in locked list before unlock', () => {
+    expect(SKILLS.thorns).toBeDefined();
+    expect(SKILLS.thorns.passive).toBe(true);
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers([], seq([0.99, 0.1, 0.5]));
+    const skillIds = offers.filter(o => o.kind === 'skill').map(o => o.id);
+    expect(skillIds.length).toBeGreaterThan(0);
+  });
+
+  it('thorns is not offered when already unlocked', () => {
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers(['thorns'], seq([0, 0.1, 0.4, 0.7]));
+    expect(offers.filter(o => o.id === 'thorns')).toHaveLength(0);
   });
 });
 

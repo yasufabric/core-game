@@ -643,6 +643,7 @@ function step(dt) {
     e.y += Math.sin(ang) * e.spd * slow * dt;
     if (enemyHitsCore(e, c)) {
       if (G.t >= G.shieldUntil) { c.hp -= coreDamageTaken(G.stats, e.tanky ? 14 : 7); G.shakeUntil = G.t + 0.25; sfx.hit(); }
+      if (G.unlocked.includes('thorns')) e.hp -= 4;
       e.hp = 0; e.consumed = true;
       G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 18, born: G.t, life: .3, color: '#ff5d73' });
       continue;

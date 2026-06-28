@@ -49,11 +49,11 @@ Keep items small and verifiable. A good item names *what done looks like*.
       the value; canvas pointerdown in `index.html` starts a slide when cooldown is ready;
       repositioning radial ring visible while on cooldown; enemies re-target the new position. Added CONFIG.reposCooldown=12; pointerdown triggers 0.8s slide; arc ring shows CD; 1 test passes.
 
-- [ ] Thorns passive skill: enemies that deal damage to the core are themselves hit for 4
+- [x] Thorns passive skill: enemies that deal damage to the core are themselves hit for 4
       points (before armor). Done = `SKILLS.thorns` (`passive: true`) in `engine.js`,
       offerable by `rollOffers` (test: thorns appears in locked list before unlock, not after);
       `step()` in `index.html` applies 4-damage retaliation when `G.unlocked` includes
-      `'thorns'` and an enemy hits the core.
+      `'thorns'` and an enemy hits the core. Added SKILLS.thorns passive; step() applies -4 HP on core hit; 2 tests pass; nova fixture updated for 13-skill pool.
 
 - [ ] Overload passive skill: every 8th auto-shot fires an extra burst of 8 directional shots
       at half damage. Done = `SKILLS.overload` (`passive: true`) in `engine.js` with a test
