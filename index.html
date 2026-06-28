@@ -206,7 +206,14 @@ let waveFlashTimer = 0;
 let fastMode = false;
 let fastTimer = null;
 let holdStartMs = 0, holdX = 0, holdY = 0;
+let lastWaveColored = -1;
 function cancelFast() { clearTimeout(fastTimer); fastTimer = null; fastMode = false; }
+function waveColor(w) {
+  if (w <= 1)  return '#ffffff';
+  if (w >= 20) return '#ff4444';
+  if (w <= 10) { const t = (w - 1) / 9;  return `rgb(255,${Math.round(255 - 76*t)},${Math.round(255 - 184*t)})`; }
+  const t = (w - 10) / 10; return `rgb(255,${Math.round(179 - 111*t)},${Math.round(71 - 3*t)})`;
+}
 function newGame() {
   resize();
   G = {
@@ -720,7 +727,9 @@ function step(dt) {
 
   // hud
   hudEl.classList.toggle('lowcore', c.hp / CONFIG.coreHp < 0.3);
-  document.getElementById('wave').textContent = G.wave;
+  const waveEl = document.getElementById('wave');
+  waveEl.textContent = G.wave;
+  if (G.wave !== lastWaveColored) { lastWaveColored = G.wave; waveEl.style.color = waveColor(G.wave); }
   document.getElementById('lv').textContent = G.level;
   document.getElementById('hp').textContent = Math.ceil(c.hp);
   document.getElementById('kills').textContent = G.kills;

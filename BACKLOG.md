@@ -28,10 +28,10 @@ Keep items small and verifiable. A good item names *what done looks like*.
       `e.hitFlash` (check `G.t - e.hitFlash < 0.06`). Makes high-HP tanky enemies and the boss
       feel responsive to fire. Rendering-only; no engine test needed. Added e.hitFlash=G.t at all 7 damage sites (auto-shot, pulse, lance, bomb, chain×2, nova, drone); renderer uses white fill for 60ms after hit.
 
-- [ ] Wave number color ramp: in `step()` where `textContent` of `#wave` is updated, also set
+- [x] Wave number color ramp: in `step()` where `textContent` of `#wave` is updated, also set
       its `style.color` — white for wave 1–9, linearly interpolate to amber `#ffb347` at wave
       10, then to red `#ff4444` at wave 20+; cache last wave to skip DOM write when unchanged.
-      Rendering-only; no engine test needed.
+      Rendering-only; no engine test needed. Added waveColor() helper and lastWaveColored cache; style.color set only on wave change.
 
 <!-- ── CONTENT ─────────────────────────────────────────────────── -->
 - [ ] Siphon passive skill: killing an enemy within 60 px of the core restores 1 HP (capped
