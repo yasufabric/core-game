@@ -69,6 +69,7 @@ function newGame() {
     bossFlashUntil: 0, pendingLevels: 0,
     reposLastAt: -CONFIG.reposCooldown, reposTarget: null, reposStart: null,
     autoShotCount: 0,
+    firstBloodDone: false,
   };
   cancelFast();
   renderSkillBar();
@@ -257,6 +258,7 @@ function step(dt) {
 
   const result = stepEnemies(G, d, dt);
   if (result.killCount > 0) { G.kills += result.killCount; applyXp(result.xpGained); sfx.kill(); }
+  if (result.firstBlood)    { applyXp(CONFIG.firstBloodXp); G.firstBloodDone = true; }
   if (result.waveClear)     { applyXp(CONFIG.waveClearXp); }
   if (result.clutch)        { applyXp(CONFIG.clutchXp); }
   if (result.coreHit)       { G.shakeUntil = G.t + 0.25; sfx.hit(); }

@@ -707,6 +707,28 @@ describe('stepEnemies', () => {
   });
 });
 
+describe('first-blood XP', () => {
+  it('CONFIG.firstBloodXp is 5', () => {
+    expect(CONFIG.firstBloodXp).toBe(5);
+  });
+
+  it('stepEnemies returns firstBlood=true on the first kill', () => {
+    const G = makeG({ firstBloodDone: false });
+    const d = derive(defaultStats(), 1);
+    G.enemies.push({ x: 0, y: 0, r: 8, hp: 0, maxHp: 5, spd: 0, tanky: false });
+    const result = stepEnemies(G, d, 0.016);
+    expect(result.firstBlood).toBe(true);
+  });
+
+  it('stepEnemies returns firstBlood=false when already done', () => {
+    const G = makeG({ firstBloodDone: true });
+    const d = derive(defaultStats(), 1);
+    G.enemies.push({ x: 0, y: 0, r: 8, hp: 0, maxHp: 5, spd: 0, tanky: false });
+    const result = stepEnemies(G, d, 0.016);
+    expect(result.firstBlood).toBe(false);
+  });
+});
+
 describe('collision knockback + stun', () => {
   it('stuns enemies within 80px of core when another enemy hits it', () => {
     const G = makeG({ t: 10 });

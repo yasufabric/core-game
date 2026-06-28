@@ -25,6 +25,7 @@ export const CONFIG = {
   reposCooldown: 12,         // seconds between tap-to-reposition uses
   reposDuration: 0.8,        // seconds to slide core to new position
   thornsAura: 4,             // damage per second dealt to enemies within coreRadius+50px when thorns unlocked
+  firstBloodXp: 5,           // bonus XP awarded on the very first kill of each game
 };
 
 // --- leveling -------------------------------------------------------------
@@ -525,6 +526,7 @@ export function stepEnemies(G, d, dt) {
   }
 
   const killCount = G.enemies.length - survivors.length;
+  const firstBlood = !G.firstBloodDone && killCount > 0;
   const hadEnemies = G.enemies.length > 0;
   G.enemies = survivors;
   G.enemies.push(...spawnedFromSplitters);
@@ -544,7 +546,7 @@ export function stepEnemies(G, d, dt) {
     }
   }
 
-  return { xpGained: totalXp, killCount, waveClear, clutch, coreHit };
+  return { xpGained: totalXp, killCount, firstBlood, waveClear, clutch, coreHit };
 }
 
 // Orbits the drone and zaps the nearest in-range enemy.
