@@ -93,7 +93,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 <!-- ── BALANCE (2026-06-28 review) ───────────────────────────── -->
 - [x] Ease early waves: lower `CONFIG.baseSpawnInterval` 1.6 → 2.2 and `CONFIG.baseEnemyHp` 2 → 1. Done = updated constants in `engine.js` with tests pinning both values; existing difficulty-rises tests still pass. Changed baseEnemyHp 2→1, baseSpawnInterval 1.6→2.2; 3 tests updated to reflect new wave-1 values.
 
-- [ ] Collision knockback + stun: when an enemy damages the core, push all other enemies within 80 px outward by 60 px and set `e.stunUntil = G.t + 0.4` on each; `stepEnemies` skips movement while `G.t < e.stunUntil`. Done = `e.stunUntil` field respected in `stepEnemies`; 2 engine tests (nearby enemy gets stun flag, enemy outside 80 px is unaffected).
+- [x] Collision knockback + stun: when an enemy damages the core, push all other enemies within 80 px outward by 60 px and set `e.stunUntil = G.t + 0.4` on each; `stepEnemies` skips movement while `G.t < e.stunUntil`. Done = `e.stunUntil` field respected in `stepEnemies`; 2 engine tests (nearby enemy gets stun flag, enemy outside 80 px is unaffected). Added stunUntil stun + 60px knockback in stepEnemies; 2 tests pass.
 
 - [ ] First-blood XP bonus: add `CONFIG.firstBloodXp = 5`; on the game's very first kill, award bonus XP once (`G.firstBloodDone` flag, initialised `false` in `newGame()`). Done = `CONFIG.firstBloodXp = 5` exported from `engine.js` with a test pinning the value; `stepEnemies` returns a `firstBlood` flag on the kill that triggers it; `newGame()` initialises `G.firstBloodDone = false`.
 

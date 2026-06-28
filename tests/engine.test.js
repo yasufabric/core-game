@@ -707,6 +707,28 @@ describe('stepEnemies', () => {
   });
 });
 
+describe('collision knockback + stun', () => {
+  it('stuns enemies within 80px of core when another enemy hits it', () => {
+    const G = makeG({ t: 10 });
+    const d = derive(defaultStats(), 1);
+    const hitter = { x: G.core.x, y: G.core.y, r: 100, hp: 5, maxHp: 5, spd: 0, tanky: false };
+    const nearby = { x: G.core.x + 50, y: G.core.y, r: 8, hp: 5, maxHp: 5, spd: 0, tanky: false };
+    G.enemies.push(hitter, nearby);
+    stepEnemies(G, d, 0.016);
+    expect(nearby.stunUntil).toBeGreaterThan(10);
+  });
+
+  it('does not stun enemies outside 80px of core', () => {
+    const G = makeG({ t: 10 });
+    const d = derive(defaultStats(), 1);
+    const hitter = { x: G.core.x, y: G.core.y, r: 100, hp: 5, maxHp: 5, spd: 0, tanky: false };
+    const far = { x: G.core.x + 120, y: G.core.y, r: 8, hp: 5, maxHp: 5, spd: 0, tanky: false };
+    G.enemies.push(hitter, far);
+    stepEnemies(G, d, 0.016);
+    expect(far.stunUntil).toBeUndefined();
+  });
+});
+
 describe('SKILLS auto flag', () => {
   it('missile has auto:true', () => {
     expect(SKILLS.missile.auto).toBe(true);

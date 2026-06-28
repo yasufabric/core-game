@@ -496,13 +496,27 @@ export function stepEnemies(G, d, dt) {
       continue;
     }
     const ang = Math.atan2(c.y - e.y, c.x - e.x);
-    e.x += Math.cos(ang) * e.spd * slow * dt;
-    e.y += Math.sin(ang) * e.spd * slow * dt;
+    if (G.t < (e.stunUntil || 0)) {
+      // stunned — skip movement this frame
+    } else {
+      e.x += Math.cos(ang) * e.spd * slow * dt;
+      e.y += Math.sin(ang) * e.spd * slow * dt;
+    }
     if (G.unlocked.includes('thorns') && dist(e.x, e.y, c.x, c.y) <= CONFIG.coreRadius + 50) {
       e.hp -= CONFIG.thornsAura * dt;
     }
     if (enemyHitsCore(e, c)) {
       if (G.t >= G.shieldUntil) { c.hp -= coreDamageTaken(G.stats, e.tanky ? 14 : 7); coreHit = true; }
+      for (const other of G.enemies) {
+        if (other === e || other.hp <= 0) continue;
+        if (dist(other.x, other.y, c.x, c.y) <= 80) {
+          const dx = other.x - c.x, dy = other.y - c.y;
+          const len = Math.sqrt(dx * dx + dy * dy) || 1;
+          other.x += (dx / len) * 60;
+          other.y += (dy / len) * 60;
+          other.stunUntil = G.t + 0.4;
+        }
+      }
       e.hp = 0; e.consumed = true;
       G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 18, born: G.t, life: .3, color: '#ff5d73' });
       continue;
