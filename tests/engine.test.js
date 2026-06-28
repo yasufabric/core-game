@@ -4,7 +4,7 @@ import { describe, it, expect } from 'vitest';
 import {
   xpForLevel, gainXp, defaultStats, derive, rollOffers,
   applyStatCard, dist, enemyHitsCore, coreDamageTaken, splitterChildren, xpForKill, waveForTime, clamp, SKILLS, CONFIG, isBossWave,
-  pointSegDist, createEnemy, createBoss,
+  pointSegDist, createEnemy, createBoss, isShieldBlocked,
   skillReady, executeSkill,
   stepCore, stepEnemies, stepShots, stepAutoFire,
 } from '../src/engine.js';
@@ -691,6 +691,22 @@ describe('stepEnemies', () => {
     G.enemies.push({ x: 0, y: 0, r: 8, hp: 0, maxHp: 10, spd: 50, boss: true });
     const result = stepEnemies(G, d, 0.016);
     expect(result.xpGained).toBeGreaterThan(CONFIG.xpPerKill * 4);
+  });
+});
+
+describe('shielded enemy', () => {
+  it('isShieldBlocked returns true for shot from the core direction', () => {
+    const core  = { x: 200, y: 400 };
+    const enemy = { x: 200, y: 100 };
+    const shot  = { x: 200, y: 250 }; // between enemy and core
+    expect(isShieldBlocked(shot, enemy, core)).toBe(true);
+  });
+
+  it('isShieldBlocked returns false for shot from behind the enemy', () => {
+    const core  = { x: 200, y: 400 };
+    const enemy = { x: 200, y: 100 };
+    const shot  = { x: 200, y: -50 }; // north of enemy, away from core
+    expect(isShieldBlocked(shot, enemy, core)).toBe(false);
   });
 });
 

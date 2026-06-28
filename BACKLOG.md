@@ -44,12 +44,12 @@ Keep items small and verifiable. A good item names *what done looks like*.
       apply the multiplier after all existing multipliers. Done = 2 engine tests: dart XP is
       higher than normal enemy XP at the same wave, bonus is capped at 1.5×. Added speedMult to xpForKill; 2 tests confirm faster→more XP and 1.5× cap; existing type-mult tests unaffected.
 
-- [ ] Shielded enemy type: a new `shielded` variant spawns from wave 4 onward (8 % base
+- [x] Shielded enemy type: a new `shielded` variant spawns from wave 4 onward (8 % base
       chance + 0.5 % per wave). Its frontal arc (facing toward core, ±70°) blocks auto-shots
       — they deal 0 damage. Skill hits (pulse, lance, bomb, chain, nova, repulse) bypass the
       shield entirely. Done = `isShieldBlocked(shot, enemy, core)` exported from `engine.js`
       with tests: shot arriving from the core direction returns true, shot from behind returns
-      false; shielded enemy spawned in `index.html` with a distinct visual arc indicator.
+      false; shielded enemy spawned in `index.html` with a distinct visual arc indicator. Added isShieldBlocked; shielded flag in createEnemy (wave 4+); stepShots checks shield; renderer draws cyan arc + colors enemy light-blue; 2 tests pass.
 
 - [ ] Leech drain enemy: new enemy type (pentagon, dark green, wave 6+, 5% spawn chance) that
       does not deal HP damage but drains XP at `0.5 XP/s` while within 80px of the core

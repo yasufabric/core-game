@@ -73,7 +73,7 @@ export function draw(G, ctx, W, H, DPR, getCss) {
   for (const e of G.enemies) {
     ctx.save(); ctx.translate(e.x, e.y);
     const flashing = e.hitFlash && G.t - e.hitFlash < 0.06;
-    ctx.fillStyle = flashing ? '#fff' : (e.boss ? '#ffd700' : (e.tanky ? '#ff8a4d' : e.splitter ? '#f277ff' : e.dart ? '#ff44cc' : getCss('--enemy')));
+    ctx.fillStyle = flashing ? '#fff' : (e.boss ? '#ffd700' : (e.tanky ? '#ff8a4d' : e.splitter ? '#f277ff' : e.dart ? '#ff44cc' : e.shielded ? '#66ddff' : getCss('--enemy')));
     if (e.boss && !flashing) { ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 16; }
     ctx.beginPath();
     const sides = e.boss ? 8 : (e.tanky ? 6 : e.splitter ? 4 : 3);
@@ -84,6 +84,13 @@ export function draw(G, ctx, W, H, DPR, getCss) {
     }
     ctx.closePath(); ctx.fill();
     ctx.shadowBlur = 0;
+    if (e.shielded && !flashing) {
+      const facingAng = Math.atan2(c.y - e.y, c.x - e.x);
+      ctx.strokeStyle = '#7df9ff'; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.75;
+      ctx.beginPath();
+      ctx.arc(0, 0, e.r + 5, facingAng - 1.22, facingAng + 1.22); // ±70° in radians
+      ctx.stroke(); ctx.globalAlpha = 1;
+    }
     if (e.hp < e.maxHp) {
       ctx.fillStyle = 'rgba(255,255,255,.25)';
       ctx.fillRect(-e.r, e.r + 4, e.r * 2, 2);

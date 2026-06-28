@@ -159,6 +159,16 @@ export function pointSegDist(px, py, ax, ay, bx, by) {
   return dist(px, py, ax + t * dx, ay + t * dy);
 }
 
+// Returns true when a shielded enemy's frontal arc (±70° facing the core) blocks the shot.
+export function isShieldBlocked(shot, enemy, core) {
+  const facingAng = Math.atan2(core.y - enemy.y, core.x - enemy.x);
+  const shotAng   = Math.atan2(shot.y - enemy.y, shot.x - enemy.x);
+  let diff = shotAng - facingAng;
+  while (diff > Math.PI)  diff -= Math.PI * 2;
+  while (diff < -Math.PI) diff += Math.PI * 2;
+  return Math.abs(diff) < (70 * Math.PI / 180);
+}
+
 // An enemy reaching the core deals damage and is consumed.
 export function enemyHitsCore(enemy, core) {
   return dist(enemy.x, enemy.y, core.x, core.y) <= CONFIG.coreRadius + enemy.r;
@@ -217,13 +227,14 @@ export function createEnemy(d, wave, W, H, rng) {
   const dart     = wave >= 8 && rng() < CONFIG.dartChance;
   const tanky    = !dart && rng() < 0.12 + wave * 0.01;
   const splitter = !dart && !tanky && rng() < 0.1 + wave * 0.005;
+  const shielded = !dart && !tanky && !splitter && wave >= 4 && rng() < 0.08 + 0.005 * wave;
   const hp = d.enemyHp * (tanky ? 2.4 : splitter ? 1.5 : dart ? 0.4 : 1);
   return {
     x, y,
     r:   tanky ? 13 : splitter ? 11 : 8,
     hp, maxHp: hp,
     spd: d.enemySpeed * (tanky ? 0.7 : splitter ? 0.9 : dart ? 1.8 : 1),
-    tanky, splitter, dart,
+    tanky, splitter, dart, shielded,
   };
 }
 
@@ -423,8 +434,12 @@ export function stepShots(G, dt, W, H) {
   for (const s of G.shots) {
     for (const e of G.enemies) {
       if (e.hp > 0 && dist(s.x, s.y, e.x, e.y) < e.r + 3) {
-        e.hp -= s.dmg; e.hitFlash = G.t; s.life = 0;
-        G.fx.push({ kind: 'spark', x: s.x, y: s.y, born: G.t, life: .2 });
+        if (e.shielded && isShieldBlocked(s, e, G.core)) {
+          s.life = 0; // absorbed by shield
+        } else {
+          e.hp -= s.dmg; e.hitFlash = G.t; s.life = 0;
+          G.fx.push({ kind: 'spark', x: s.x, y: s.y, born: G.t, life: .2 });
+        }
         break;
       }
     }
