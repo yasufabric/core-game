@@ -51,12 +51,12 @@ Keep items small and verifiable. A good item names *what done looks like*.
       with tests: shot arriving from the core direction returns true, shot from behind returns
       false; shielded enemy spawned in `index.html` with a distinct visual arc indicator. Added isShieldBlocked; shielded flag in createEnemy (wave 4+); stepShots checks shield; renderer draws cyan arc + colors enemy light-blue; 2 tests pass.
 
-- [ ] Leech drain enemy: new enemy type (pentagon, dark green, wave 6+, 5% spawn chance) that
+- [x] Leech drain enemy: new enemy type (pentagon, dark green, wave 6+, 5% spawn chance) that
       does not deal HP damage but drains XP at `0.5 XP/s` while within 80px of the core
       (`G.xp -= 0.5 * dt`, clamped to 0). Done = `CONFIG.leechDrainRate = 0.5` and
       `CONFIG.leechRange = 80` exported from `engine.js` with tests; `spawnEnemy()` spawns
       leech enemies; `step()` applies drain; distinct pentagon shape + dark green in renderer.
-      Mixed; 2 engine tests.
+      Mixed; 2 engine tests. Added CONFIG.leechDrainRate/Range; leech variant in createEnemy; drain in stepEnemies; no HP damage on hit; pentagon renderer; 3 tests pass.
 
 - [ ] Spawn one mini-boss spike enemy mid-wave every 7 seconds from wave 4 onward (+50% HP,
       +30% speed). Done = `CONFIG.spikeCooldown = 7`, `CONFIG.spikeHpMult = 1.5`, and

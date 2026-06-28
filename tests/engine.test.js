@@ -694,6 +694,26 @@ describe('stepEnemies', () => {
   });
 });
 
+describe('leech drain enemy', () => {
+  it('CONFIG.leechDrainRate is 0.5', () => {
+    expect(CONFIG.leechDrainRate).toBe(0.5);
+  });
+
+  it('CONFIG.leechRange is 80', () => {
+    expect(CONFIG.leechRange).toBe(80);
+  });
+
+  it('leech drains XP when within range and does not deal HP damage', () => {
+    const G = makeG({ t: 0 });
+    const d = derive(defaultStats(), 1);
+    G.enemies.push({ x: G.core.x + 50, y: G.core.y, r: 8, hp: 5, maxHp: 5, spd: 0, leech: true });
+    const startHp = G.core.hp;
+    const result = stepEnemies(G, d, 1);
+    expect(result.xpDrained).toBeCloseTo(CONFIG.leechDrainRate);
+    expect(G.core.hp).toBe(startHp); // no HP damage
+  });
+});
+
 describe('shielded enemy', () => {
   it('isShieldBlocked returns true for shot from the core direction', () => {
     const core  = { x: 200, y: 400 };

@@ -26,6 +26,8 @@ export const CONFIG = {
   reposDuration: 0.8,        // seconds to slide core to new position
   thornsAura: 4,             // damage per second dealt to enemies within coreRadius+50px when thorns unlocked
   firstBloodXp: 5,           // bonus XP awarded on the very first kill of each game
+  leechDrainRate: 0.5,       // XP drained per second while leech is within leechRange
+  leechRange: 80,            // px from core within which leech drains XP
 };
 
 // --- leveling -------------------------------------------------------------
@@ -228,13 +230,14 @@ export function createEnemy(d, wave, W, H, rng) {
   const tanky    = !dart && rng() < 0.12 + wave * 0.01;
   const splitter = !dart && !tanky && rng() < 0.1 + wave * 0.005;
   const shielded = !dart && !tanky && !splitter && wave >= 4 && rng() < 0.08 + 0.005 * wave;
+  const leech    = !dart && !tanky && !splitter && !shielded && wave >= 6 && rng() < 0.05;
   const hp = d.enemyHp * (tanky ? 2.4 : splitter ? 1.5 : dart ? 0.4 : 1);
   return {
     x, y,
     r:   tanky ? 13 : splitter ? 11 : 8,
     hp, maxHp: hp,
     spd: d.enemySpeed * (tanky ? 0.7 : splitter ? 0.9 : dart ? 1.8 : 1),
-    tanky, splitter, dart, shielded,
+    tanky, splitter, dart, shielded, leech,
   };
 }
 
@@ -491,7 +494,7 @@ export function stepMissiles(G, d, dt, rng) {
 export function stepEnemies(G, d, dt) {
   const c = G.core;
   const slow = G.t < G.slowUntil ? 0.4 : 1;
-  let totalXp = 0, coreHit = false;
+  let totalXp = 0, xpDrained = 0, coreHit = false;
   const survivors = [], spawnedFromSplitters = [];
 
   for (const e of G.enemies) {
@@ -512,11 +515,14 @@ export function stepEnemies(G, d, dt) {
       e.x += Math.cos(ang) * e.spd * slow * dt;
       e.y += Math.sin(ang) * e.spd * slow * dt;
     }
+    if (e.leech && dist(e.x, e.y, c.x, c.y) <= CONFIG.leechRange) {
+      xpDrained += CONFIG.leechDrainRate * dt;
+    }
     if (G.unlocked.includes('thorns') && dist(e.x, e.y, c.x, c.y) <= CONFIG.coreRadius + 50) {
       e.hp -= CONFIG.thornsAura * dt;
     }
     if (enemyHitsCore(e, c)) {
-      if (G.t >= G.shieldUntil) { c.hp -= coreDamageTaken(G.stats, e.tanky ? 14 : 7); coreHit = true; }
+      if (G.t >= G.shieldUntil && !e.leech) { c.hp -= coreDamageTaken(G.stats, e.tanky ? 14 : 7); coreHit = true; }
       for (const other of G.enemies) {
         if (other === e || other.hp <= 0) continue;
         if (dist(other.x, other.y, c.x, c.y) <= 80) {
@@ -555,7 +561,7 @@ export function stepEnemies(G, d, dt) {
     }
   }
 
-  return { xpGained: totalXp, killCount, firstBlood, waveClear, clutch, coreHit };
+  return { xpGained: totalXp, xpDrained, killCount, firstBlood, waveClear, clutch, coreHit };
 }
 
 // Orbits the drone and zaps the nearest in-range enemy.

@@ -73,10 +73,10 @@ export function draw(G, ctx, W, H, DPR, getCss) {
   for (const e of G.enemies) {
     ctx.save(); ctx.translate(e.x, e.y);
     const flashing = e.hitFlash && G.t - e.hitFlash < 0.06;
-    ctx.fillStyle = flashing ? '#fff' : (e.boss ? '#ffd700' : (e.tanky ? '#ff8a4d' : e.splitter ? '#f277ff' : e.dart ? '#ff44cc' : e.shielded ? '#66ddff' : getCss('--enemy')));
+    ctx.fillStyle = flashing ? '#fff' : (e.boss ? '#ffd700' : (e.tanky ? '#ff8a4d' : e.splitter ? '#f277ff' : e.dart ? '#ff44cc' : e.shielded ? '#66ddff' : e.leech ? '#2d9e3c' : getCss('--enemy')));
     if (e.boss && !flashing) { ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 16; }
     ctx.beginPath();
-    const sides = e.boss ? 8 : (e.tanky ? 6 : e.splitter ? 4 : 3);
+    const sides = e.boss ? 8 : (e.tanky ? 6 : e.splitter ? 4 : e.leech ? 5 : 3);
     for (let i = 0; i < sides; i++) {
       const a = (i / sides) * Math.PI * 2 - Math.PI / 2 + G.t * (e.boss ? .3 : e.tanky ? .5 : 1.5);
       const px = Math.cos(a) * e.r, py = Math.sin(a) * e.r;

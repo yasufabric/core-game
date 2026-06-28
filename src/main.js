@@ -259,6 +259,7 @@ function step(dt) {
   const result = stepEnemies(G, d, dt);
   if (result.killCount > 0) { G.kills += result.killCount; applyXp(result.xpGained); sfx.kill(); }
   if (result.firstBlood)    { applyXp(CONFIG.firstBloodXp); G.firstBloodDone = true; }
+  if (result.xpDrained > 0) { G.xp = Math.max(0, G.xp - result.xpDrained); }
   if (result.waveClear)     { applyXp(CONFIG.waveClearXp); }
   if (result.clutch)        { applyXp(CONFIG.clutchXp); }
   if (result.coreHit) {
