@@ -384,12 +384,12 @@ cv.addEventListener('pointerdown', (e) => {
     triggerSkill(G.aiming, x, y);
     setAiming(null);
   } else {
+    cv.setPointerCapture(e.pointerId);
     fastTimer = setTimeout(() => { fastMode = true; }, 150);
   }
 });
 cv.addEventListener('pointerup',     cancelFast);
 cv.addEventListener('pointercancel', cancelFast);
-cv.addEventListener('pointerleave',  cancelFast);
 
 // --- HUD: skill bar ------------------------------------------------------
 const skillsEl = document.getElementById('skills');
