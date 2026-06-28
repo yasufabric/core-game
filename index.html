@@ -37,6 +37,7 @@
   }
   .stat { color: var(--muted); }
   .stat b { color: var(--ink); font-weight: 600; }
+  #slow-badge { color: #9d7bff; font-size: 11px; font-weight: 700; letter-spacing: .18em; opacity: 0; transition: opacity .3s; pointer-events: none; }
   #hud.lowcore .topbar .stat:last-child b { color: var(--enemy); text-shadow: 0 0 12px rgba(255,93,115,.65); animation: lowcorePulse .75s ease-in-out infinite alternate; }
   #hud.lowcore .xpbar { box-shadow: 0 0 12px rgba(255,93,115,.28); }
   .xpbar { position: absolute; top: max(112px, calc(48px + env(safe-area-inset-top))); left: 16px; right: 16px; height: 3px; background: #1a2230; border-radius: 2px; }
@@ -121,6 +122,7 @@
     <div class="topbar">
       <div class="stat">WAVE <b id="wave">1</b></div>
       <div class="stat">LV <b id="lv">1</b></div>
+      <div id="slow-badge">SLOW</div>
       <div class="stat">CORE <b id="hp">100</b></div>
     </div>
     <div class="xpbar"><i id="xpfill"></i></div>
@@ -517,7 +519,7 @@ function step(dt) {
   }
 
   // spawn
-  if (G.t - G.lastSpawn > d.spawnInterval) { spawnEnemy(); G.lastSpawn = G.t; }
+  if (G.t >= CONFIG.warmupSec && G.t - G.lastSpawn > d.spawnInterval) { spawnEnemy(); G.lastSpawn = G.t; }
 
   for (const f of G.fx) {
     if (f.kind === 'nova' && !f.hit && G.t >= f.hitAt) {
@@ -663,6 +665,7 @@ function step(dt) {
   document.getElementById('wave').textContent = G.wave;
   document.getElementById('lv').textContent = G.level;
   document.getElementById('hp').textContent = Math.ceil(c.hp);
+  document.getElementById('slow-badge').style.opacity = G.t < G.slowUntil ? '1' : '0';
   document.getElementById('xpfill').style.width = (100 * G.xp / G.xpNeeded) + '%';
   updateSkillBar();
 

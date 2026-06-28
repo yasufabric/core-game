@@ -12,10 +12,10 @@ Keep items small and verifiable. A good item names *what done looks like*.
 
 - [x] Drone damage boost: drone zap damage 1×power → 3×power so the drone stays relevant past wave 3; update the 1 test that checks drone power if one exists, or add one. Added CONFIG.droneDamageMult=3 in engine.js; index.html uses it; test pins value at 3.
 
-- [ ] Warmup grace period: first enemy spawns no earlier than 3s after `newGame()`; add a `CONFIG.warmupSec = 3` constant and gate `spawnEnemy` behind `G.t >= CONFIG.warmupSec`; 1 engine test pins the boundary.
+- [x] Warmup grace period: first enemy spawns no earlier than 3s after `newGame()`; add a `CONFIG.warmupSec = 3` constant and gate `spawnEnemy` behind `G.t >= CONFIG.warmupSec`; 1 engine test pins the boundary. Added CONFIG.warmupSec=3 in engine.js; spawn gated in index.html; test pins value at 3.
 
 <!-- ── POLISH ──────────────────────────────────────────────────── -->
-- [ ] Slow-active HUD indicator: while slowfield is active, show a small "SLOW" badge in the HUD topbar (purple, fades out when `G.t >= G.slowUntil`); renderer-only, no engine change.
+- [x] Slow-active HUD indicator: while slowfield is active, show a small "SLOW" badge in the HUD topbar (purple, fades out when `G.t >= G.slowUntil`); renderer-only, no engine change. Added #slow-badge element in topbar; opacity toggled in step() HUD block; CSS transition fades it out.
 
 - [ ] Shield expiry flash: when the shield drops (`G.t` crosses `G.shieldUntil`), push a `ring` FX (white, r=coreRadius, max=coreRadius+30, life=0.3s) so the player sees the shield fall; renderer/step change only.
 
@@ -71,6 +71,39 @@ Keep items small and verifiable. A good item names *what done looks like*.
       shield entirely. Done = `isShieldBlocked(shot, enemy, core)` exported from `engine.js`
       with tests: shot arriving from the core direction returns true, shot from behind returns
       false; shielded enemy spawned in `index.html` with a distinct visual arc indicator.
+
+<!-- ── FROM REVIEW 2026-06-28 ──────────────────────────────────── -->
+- [ ] Spawn one mini-boss spike enemy mid-wave every 7 seconds from wave 4 onward (+50% HP,
+      +30% speed). Done = `CONFIG.spikeCooldown = 7`, `CONFIG.spikeHpMult = 1.5`, and
+      `CONFIG.spikeSpeedMult = 1.3` exported from `engine.js`, each with a test pinning the
+      value; `step()` in `index.html` spawns one spike enemy when
+      `G.t - G.lastSpikeAt >= CONFIG.spikeCooldown` and `G.wave >= 4`; `G.lastSpikeAt` reset
+      in `newGame()`. Mixed; 3 engine tests.
+
+- [ ] Grant `CONFIG.synergyXp = 3` bonus XP when 2 different skills are activated within 1
+      second of each other; track `G.lastSkillAt` (timestamp) and `G.lastSkillId` (skill name)
+      in game state and reset both in `newGame()`. Done = `CONFIG.synergyXp = 3` in `engine.js`
+      with a test pinning the value; `triggerSkill()` checks `G.t - G.lastSkillAt < 1 &&
+      skillName !== G.lastSkillId` and calls `gainXp(CONFIG.synergyXp)` when met; 2 engine
+      tests (config value pinned, synergy XP granted on eligible combo). Mixed.
+
+- [ ] Add `SKILLS.leech` passive skill: when any active skill hits an enemy, restore
+      `Math.round(0.3 * stats.power)` HP to the core (capped at `CONFIG.coreHp`). Done =
+      `SKILLS.leech` (`passive: true`) in `engine.js`, offerable by `rollOffers` (test: leech
+      appears in locked list before unlock, not after); `step()` in `index.html` applies HP
+      restore per skill-hit when `G.unlocked` includes `'leech'`; 2 engine tests (skill defined
+      and offerable, restore formula rounds correctly). Mixed.
+
+- [ ] When a crit auto-shot fires and `'drone'` is in `G.unlocked`, reset `G.droneCd` to 0.
+      Done = logic added to the auto-shot crit branch in `step()` in `index.html`;
+      `G.droneCd = 0` set immediately after crit damage is applied when drone is unlocked;
+      visible as drone firing immediately after a crit. Rendering/input-only; no engine test
+      needed.
+
+- [ ] Push a white ring-burst FX (radius 0→20, life=0.15s) at the spawn point each time an
+      enemy enters the arena. Done = renderer in `index.html` pushes a `ring` FX entry at
+      enemy spawn coordinates; ring visibly expands and fades within 0.15s at wave 3+.
+      Rendering-only; no test needed.
 
 ## Done
 <!-- the loop appends finished items here with a one-line note -->

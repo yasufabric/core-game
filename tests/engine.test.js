@@ -251,6 +251,10 @@ describe('SKILLS', () => {
     expect(CONFIG.droneDamageMult).toBe(3);
   });
 
+  it('warmup grace period is 3 seconds', () => {
+    expect(CONFIG.warmupSec).toBe(3);
+  });
+
   it('repulse exists as a 1-tap skill with cooldown >= 15', () => {
     expect(SKILLS.repulse).toBeDefined();
     expect(SKILLS.repulse.tap).toBe(1);
