@@ -26,7 +26,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 <!-- ── CONTENT ─────────────────────────────────────────────────── -->
 - [x] Heal skill: `SKILLS.heal` (1-tap, 22s cooldown), restores `min(20, CONFIG.coreHp - c.hp)` HP to the core, green ring FX; 2 engine tests (skill defined, not offered when unlocked). Added SKILLS.heal to engine.js; heal branch in triggerSkill() with green ring FX; 2 tests pass.
 
-- [ ] Fast enemy type ("dart"): starting wave 8, 8% chance per spawn of a dart (triangle, 1.8× speed, 0.4× HP, sides=3, magenta); add `dart` flag to enemy; `xpForKill` returns 0.8× for darts; 2 tests.
+- [x] Fast enemy type ("dart"): starting wave 8, 8% chance per spawn of a dart (triangle, 1.8× speed, 0.4× HP, sides=3, magenta); add `dart` flag to enemy; `xpForKill` returns 0.8× for darts; 2 tests. Added CONFIG.dartChance=0.08; dart spawns from wave 8 in spawnEnemy(); magenta in renderer; xpForKill 0.8×; 2 tests pass.
 
 - [ ] Wave-clear bonus XP: when `G.enemies.length` drops to 0 and the wave is still active, award `CONFIG.waveClearXp = 3` bonus XP and push a brief gold ring FX at core; 1 engine test.
 

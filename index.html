@@ -254,14 +254,15 @@ function spawnEnemy() {
   else if (edge === 2) { x = Math.random() * W; y = H + m; }
   else { x = -m; y = Math.random() * H; }
   // occasional tanky variant
-  const tanky = Math.random() < 0.12 + G.wave * 0.01;
-  const splitter = !tanky && Math.random() < 0.1 + G.wave * 0.005;
-  const hp = d.enemyHp * (tanky ? 2.4 : splitter ? 1.5 : 1);
+  const dart = G.wave >= 8 && Math.random() < CONFIG.dartChance;
+  const tanky = !dart && Math.random() < 0.12 + G.wave * 0.01;
+  const splitter = !dart && !tanky && Math.random() < 0.1 + G.wave * 0.005;
+  const hp = d.enemyHp * (tanky ? 2.4 : splitter ? 1.5 : dart ? 0.4 : 1);
   G.enemies.push({
     x, y, r: tanky ? 13 : splitter ? 11 : 8,
     hp, maxHp: hp,
-    spd: d.enemySpeed * (tanky ? 0.7 : splitter ? 0.9 : 1),
-    tanky, splitter,
+    spd: d.enemySpeed * (tanky ? 0.7 : splitter ? 0.9 : dart ? 1.8 : 1),
+    tanky, splitter, dart,
   });
 }
 

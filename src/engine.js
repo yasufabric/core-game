@@ -18,6 +18,7 @@ export const CONFIG = {
   xpPerSkillUse: 2,          // XP awarded each time any skill is activated
   droneDamageMult: 3,        // drone zap = droneDamageMult × power
   warmupSec: 3,              // no enemies spawn before this many seconds after newGame()
+  dartChance: 0.08,          // probability per spawn of a dart enemy (wave 8+)
 };
 
 // --- leveling -------------------------------------------------------------
@@ -163,7 +164,7 @@ export function splitterChildren(enemy) {
 
 export function xpForKill(stats, enemy) {
   const mult = enemy
-    ? (enemy.boss ? 5 : enemy.tanky ? 2 : enemy.splitter ? 1.5 : 1)
+    ? (enemy.boss ? 5 : enemy.tanky ? 2 : enemy.splitter ? 1.5 : enemy.dart ? 0.8 : 1)
     : 1;
   return CONFIG.xpPerKill * mult * (1 + (stats.magnet || 0));
 }

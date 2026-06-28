@@ -72,7 +72,7 @@ export function draw(G, ctx, W, H, DPR, getCss) {
   // enemies
   for (const e of G.enemies) {
     ctx.save(); ctx.translate(e.x, e.y);
-    ctx.fillStyle = e.boss ? '#ffd700' : (e.tanky ? '#ff8a4d' : e.splitter ? '#f277ff' : getCss('--enemy'));
+    ctx.fillStyle = e.boss ? '#ffd700' : (e.tanky ? '#ff8a4d' : e.splitter ? '#f277ff' : e.dart ? '#ff44cc' : getCss('--enemy'));
     if (e.boss) { ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 16; }
     ctx.beginPath();
     const sides = e.boss ? 8 : (e.tanky ? 6 : e.splitter ? 4 : 3);

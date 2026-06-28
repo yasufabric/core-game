@@ -168,6 +168,14 @@ describe('stats', () => {
   it('xpForKill gives 5× for boss enemy', () => {
     expect(xpForKill(defaultStats(), { boss: true })).toBeCloseTo(CONFIG.xpPerKill * 5);
   });
+
+  it('CONFIG.dartChance is 0.08', () => {
+    expect(CONFIG.dartChance).toBe(0.08);
+  });
+
+  it('xpForKill gives 0.8× for dart enemy', () => {
+    expect(xpForKill(defaultStats(), { dart: true })).toBeCloseTo(CONFIG.xpPerKill * 0.8);
+  });
 });
 
 describe('SKILLS', () => {
