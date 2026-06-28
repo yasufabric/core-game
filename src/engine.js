@@ -19,6 +19,7 @@ export const CONFIG = {
   droneDamageMult: 3,        // drone zap = droneDamageMult × power
   warmupSec: 3,              // no enemies spawn before this many seconds after newGame()
   dartChance: 0.08,          // probability per spawn of a dart enemy (wave 8+)
+  waveClearXp: 3,            // bonus XP awarded when all enemies are wiped
 };
 
 // --- leveling -------------------------------------------------------------

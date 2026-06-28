@@ -635,12 +635,17 @@ function step(dt) {
     survivors.push(e);
   }
   const removed = G.enemies.length - survivors.length;
+  const hadEnemies = G.enemies.length > 0;
   G.enemies = survivors;
   G.enemies.push(...spawnedFromSplitters);
   if (removed > 0) {
     G.kills += removed;
     applyXp(totalXp);
     sfx.kill();
+  }
+  if (hadEnemies && G.enemies.length === 0) {
+    applyXp(CONFIG.waveClearXp);
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 40, born: G.t, life: 0.5, color: '#ffd700' });
   }
 
   // drone auto-zap

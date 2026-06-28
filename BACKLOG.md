@@ -28,7 +28,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 
 - [x] Fast enemy type ("dart"): starting wave 8, 8% chance per spawn of a dart (triangle, 1.8× speed, 0.4× HP, sides=3, magenta); add `dart` flag to enemy; `xpForKill` returns 0.8× for darts; 2 tests. Added CONFIG.dartChance=0.08; dart spawns from wave 8 in spawnEnemy(); magenta in renderer; xpForKill 0.8×; 2 tests pass.
 
-- [ ] Wave-clear bonus XP: when `G.enemies.length` drops to 0 and the wave is still active, award `CONFIG.waveClearXp = 3` bonus XP and push a brief gold ring FX at core; 1 engine test.
+- [x] Wave-clear bonus XP: when `G.enemies.length` drops to 0 and the wave is still active, award `CONFIG.waveClearXp = 3` bonus XP and push a brief gold ring FX at core; 1 engine test. Added CONFIG.waveClearXp=3; step() awards XP + gold ring on enemies→0 transition; 1 test passes.
 
 - [ ] Low-HP clutch bonus: when a wave is cleared with core HP at or below 10% of max
       (`c.hp <= CONFIG.coreHp * 0.1`), award `CONFIG.clutchXp = 8` bonus XP and flash a

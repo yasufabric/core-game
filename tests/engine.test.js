@@ -176,6 +176,10 @@ describe('stats', () => {
   it('xpForKill gives 0.8× for dart enemy', () => {
     expect(xpForKill(defaultStats(), { dart: true })).toBeCloseTo(CONFIG.xpPerKill * 0.8);
   });
+
+  it('CONFIG.waveClearXp is 3', () => {
+    expect(CONFIG.waveClearXp).toBe(3);
+  });
 });
 
 describe('SKILLS', () => {
