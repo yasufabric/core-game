@@ -79,11 +79,11 @@ Keep items small and verifiable. A good item names *what done looks like*.
       restore per skill-hit when `G.unlocked` includes `'leech'`; 2 engine tests (skill defined
       and offerable, restore formula rounds correctly). Mixed. Added SKILLS.leech passive; executeSkill heals on activation when leech unlocked; 3 tests pass; nova fixture updated for 16-skill pool.
 
-- [ ] When a crit auto-shot fires and `'drone'` is in `G.unlocked`, reset `G.droneCd` to 0.
+- [x] When a crit auto-shot fires and `'drone'` is in `G.unlocked`, reset `G.droneCd` to 0.
       Done = logic added to the auto-shot crit branch in `step()` in `index.html`;
       `G.droneCd = 0` set immediately after crit damage is applied when drone is unlocked;
       visible as drone firing immediately after a crit. Rendering/input-only; no engine test
-      needed.
+      needed. Added isCrit && drone unlock check in stepAutoFire; G.drone.lastZap = 0 on crit.
 
 - [ ] Push a white ring-burst FX (radius 0→20, life=0.15s) at the spawn point each time an
       enemy enters the arena. Done = renderer in `index.html` pushes a `ring` FX entry at

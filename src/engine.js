@@ -456,6 +456,9 @@ export function stepAutoFire(G, d, rng) {
       const isCrit = rng() < d.critChance;
       G.shots.push({ x: c.x, y: c.y, vx: Math.cos(ang) * 420, vy: Math.sin(ang) * 420, dmg: isCrit ? d.autoDamage * 2 : d.autoDamage, crit: isCrit, life: 1.2 });
       G.autoShotCount++;
+      if (isCrit && G.unlocked.includes('drone')) {
+        G.drone.lastZap = 0; // reset drone cooldown on crit so it fires immediately
+      }
       if (G.unlocked.includes('overload') && G.autoShotCount % 8 === 0) {
         for (let i = 0; i < 8; i++) {
           const a = (i / 8) * Math.PI * 2;
