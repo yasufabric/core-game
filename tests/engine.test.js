@@ -243,7 +243,7 @@ describe('SKILLS', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
     expect(SKILLS.nova).toBeDefined();
     expect(SKILLS.nova.tap).toBe(2);
-    const offers = rollOffers([], seq([0.5, 0.1, 0.5])); // 0.5 × 13 = 6.5 → floor 6 = nova in 13-skill pool
+    const offers = rollOffers([], seq([0.46, 0.1, 0.5])); // 0.46 × 14 = 6.44 → floor 6 = nova in 14-skill pool
     expect(offers).toContainEqual(expect.objectContaining({ kind: 'skill', id: 'nova', tap: 2 }));
   });
 
@@ -316,6 +316,14 @@ describe('SKILLS', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
     const offers = rollOffers(['thorns'], seq([0, 0.1, 0.4, 0.7]));
     expect(offers.filter(o => o.id === 'thorns')).toHaveLength(0);
+  });
+
+  it('overload is a passive skill and is offerable', () => {
+    expect(SKILLS.overload).toBeDefined();
+    expect(SKILLS.overload.passive).toBe(true);
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers([], seq([0, 0.1, 0.5]));
+    expect(offers.some(o => o.kind === 'skill')).toBe(true);
   });
 });
 

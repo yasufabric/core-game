@@ -229,6 +229,7 @@ function newGame() {
     drone: { angle: 0, lastZap: 0 },
     bossFlashUntil: 0, pendingLevels: 0,
     reposLastAt: -CONFIG.reposCooldown, reposTarget: null, reposStart: null,
+    autoShotCount: 0,
   };
   cancelFast();
   renderSkillBar();
@@ -571,6 +572,13 @@ function step(dt) {
       const ang = Math.atan2(best.y - c.y, best.x - c.x);
       const isCrit = Math.random() < d.critChance;
       G.shots.push({ x: c.x, y: c.y, vx: Math.cos(ang) * 420, vy: Math.sin(ang) * 420, dmg: isCrit ? d.autoDamage * 2 : d.autoDamage, crit: isCrit, life: 1.2 });
+      G.autoShotCount++;
+      if (G.unlocked.includes('overload') && G.autoShotCount % 8 === 0) {
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI * 2;
+          G.shots.push({ x: c.x, y: c.y, vx: Math.cos(a) * 420, vy: Math.sin(a) * 420, dmg: d.autoDamage * 0.5, life: 1.2 });
+        }
+      }
       G.lastAuto = G.t;
     }
   }

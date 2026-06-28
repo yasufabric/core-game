@@ -55,10 +55,10 @@ Keep items small and verifiable. A good item names *what done looks like*.
       `step()` in `index.html` applies 4-damage retaliation when `G.unlocked` includes
       `'thorns'` and an enemy hits the core. Added SKILLS.thorns passive; step() applies -4 HP on core hit; 2 tests pass; nova fixture updated for 13-skill pool.
 
-- [ ] Overload passive skill: every 8th auto-shot fires an extra burst of 8 directional shots
+- [x] Overload passive skill: every 8th auto-shot fires an extra burst of 8 directional shots
       at half damage. Done = `SKILLS.overload` (`passive: true`) in `engine.js` with a test
       asserting it is offerable; `G.autoShotCount` tracked in state; when count % 8 === 0
-      and `'overload'` is unlocked, 8 radial shots pushed in `step()`.
+      and `'overload'` is unlocked, 8 radial shots pushed in `step()`. Added SKILLS.overload passive; G.autoShotCount tracked; 8-way burst on count%8; 1 test; nova fixture updated for 14-skill pool.
 
 - [ ] Siphon passive skill: killing an enemy within 60 px of the core restores 1 HP (capped
       at `CONFIG.coreHp`). Done = `SKILLS.siphon` (`passive: true`) in `engine.js`, test
