@@ -66,6 +66,7 @@
   #skills .skill .nm { font-weight: 600; }
   #skills .skill .tap { font-size: 9px; color: var(--muted); }
   #skills .skill .cd { position: absolute; inset: 0; background: rgba(10,14,20,.78); transform-origin: bottom; }
+  #skills .skill .cd-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; pointer-events: none; }
   #skills .skill.aiming { border-color: var(--core); box-shadow: 0 0 0 1px var(--core); }
 
   /* level-up overlay */
@@ -405,7 +406,7 @@ function renderSkillBar() {
     const b = document.createElement('button');
     b.className = 'skill';
     b.dataset.id = id;
-    b.innerHTML = `<span class="nm">${sk.name}</span><span class="tap">${sk.tap === 2 ? 'AIM·TAP' : 'TAP'}</span><i class="cd"></i>`;
+    b.innerHTML = `<span class="nm">${sk.name}</span><span class="tap">${sk.tap === 2 ? 'AIM·TAP' : 'TAP'}</span><i class="cd"></i><span class="cd-text"></span>`;
     b.addEventListener('pointerdown', (ev) => {
       ev.stopPropagation();
       if (G.paused) return;
@@ -427,9 +428,11 @@ function updateSkillBar() {
   [...skillsEl.children].forEach(b => {
     const id = b.dataset.id, sk = SKILLS[id];
     const cd = b.querySelector('.cd');
+    const cdText = b.querySelector('.cd-text');
     const total = sk.cooldown * G.stats.cooldown;
     const remain = Math.max(0, (G.cooldowns[id] || 0) - G.t);
     cd.style.transform = `scaleY(${remain / total})`;
+    if (cdText) cdText.textContent = remain > 0.5 ? Math.ceil(remain) + 's' : '';
   });
 }
 

@@ -19,7 +19,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 
 - [x] Shield expiry flash: when the shield drops (`G.t` crosses `G.shieldUntil`), push a `ring` FX (white, r=coreRadius, max=coreRadius+30, life=0.3s) so the player sees the shield fall; renderer/step change only. Added crossing-detection in step() using G.t - dt < G.shieldUntil guard.
 
-- [ ] Cooldown countdown text: inside each skill button, show the integer seconds remaining (e.g. "3s") centred over the cooldown fill when cd > 0.5s; hide when ready; HUD-only change.
+- [x] Cooldown countdown text: inside each skill button, show the integer seconds remaining (e.g. "3s") centred over the cooldown fill when cd > 0.5s; hide when ready; HUD-only change. Added .cd-text span in button HTML, styled absolute-centered, updated updateSkillBar() to set Math.ceil(remain)+'s' when remain > 0.5.
 
 - [ ] Kill counter in HUD: add `KILLS <b id="kills">0</b>` to the topbar and update it in `step()` alongside the existing wave/lv/hp updates; no engine change needed.
 
