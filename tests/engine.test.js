@@ -318,6 +318,10 @@ describe('SKILLS', () => {
     expect(offers.filter(o => o.id === 'thorns')).toHaveLength(0);
   });
 
+  it('CONFIG.thornsAura is 4', () => {
+    expect(CONFIG.thornsAura).toBe(4);
+  });
+
   it('overload is a passive skill and is offerable', () => {
     expect(SKILLS.overload).toBeDefined();
     expect(SKILLS.overload.passive).toBe(true);

@@ -659,9 +659,11 @@ function step(dt) {
     const ang = Math.atan2(c.y - e.y, c.x - e.x);
     e.x += Math.cos(ang) * e.spd * slow * dt;
     e.y += Math.sin(ang) * e.spd * slow * dt;
+    if (G.unlocked.includes('thorns') && dist(e.x, e.y, c.x, c.y) <= CONFIG.coreRadius + 50) {
+      e.hp -= CONFIG.thornsAura * dt;
+    }
     if (enemyHitsCore(e, c)) {
       if (G.t >= G.shieldUntil) { c.hp -= coreDamageTaken(G.stats, e.tanky ? 14 : 7); G.shakeUntil = G.t + 0.25; sfx.hit(); }
-      if (G.unlocked.includes('thorns')) e.hp -= 4;
       e.hp = 0; e.consumed = true;
       G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 18, born: G.t, life: .3, color: '#ff5d73' });
       continue;

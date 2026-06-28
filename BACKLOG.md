@@ -15,12 +15,12 @@ Keep items small and verifiable. A good item names *what done looks like*.
       `waitForTimeout(300)` + `mouse.up()` instead of `page.mouse.click()`. Rendering/input-only;
       no engine test needed. Changed pointerdown to record holdStartMs/holdX/holdY; pointerup checks Date.now() diff ≥ 200ms; smoke test updated to long-press.
 
-- [ ] Thorns redesign (currently a no-op): the existing `e.hp -= 4` fires immediately before
+- [x] Thorns redesign (currently a no-op): the existing `e.hp -= 4` fires immediately before
       `e.hp = 0`, so thorns damage is always overwritten. Replace with a passive aura: every
       frame, deal `CONFIG.thornsAura = 4` damage per second to all enemies within
       `CONFIG.coreRadius + 50` px of the core. Done = `CONFIG.thornsAura = 4` exported from
       `engine.js` with a test pinning the value; `step()` applies `e.hp -= CONFIG.thornsAura * dt`
-      to nearby enemies when `'thorns'` is unlocked; remove the old dead-code hit line. Mixed; 1 engine test.
+      to nearby enemies when `'thorns'` is unlocked; remove the old dead-code hit line. Mixed; 1 engine test. Added CONFIG.thornsAura=4; aura loop in step() before enemyHitsCore check; dead-code hit line removed; 1 test added.
 
 <!-- ── POLISH ──────────────────────────────────────────────────── -->
 - [ ] Enemy hit flash on damage: when any enemy takes a non-lethal hit, set `e.hitFlash = G.t`

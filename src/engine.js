@@ -24,6 +24,7 @@ export const CONFIG = {
   waveClearHeal: 5,          // HP restored when all enemies are wiped
   reposCooldown: 12,         // seconds between tap-to-reposition uses
   reposDuration: 0.8,        // seconds to slide core to new position
+  thornsAura: 4,             // damage per second dealt to enemies within coreRadius+50px when thorns unlocked
 };
 
 // --- leveling -------------------------------------------------------------
@@ -92,7 +93,7 @@ export const SKILLS = {
   drone:    { id: 'drone',    name: 'Drone',    tap: 1, cooldown: 1.5, desc: 'Orbiting satellite that auto-zaps the nearest enemy in range' },
   repulse:  { id: 'repulse',  name: 'Repulse',  tap: 1, cooldown: 18, desc: 'Blast all enemies outward from the core' },
   heal:     { id: 'heal',     name: 'Heal',     tap: 1, cooldown: 22, desc: 'Restore up to 20 HP to the core' },
-  thorns:   { id: 'thorns',   name: 'Thorns',   passive: true,       desc: 'Enemies that hit the core take 4 damage' },
+  thorns:   { id: 'thorns',   name: 'Thorns',   passive: true,       desc: 'Enemies within range of the core take 4 damage/sec' },
   overload: { id: 'overload', name: 'Overload', passive: true,       desc: 'Every 8th auto-shot fires a burst of 8 radial shots at half damage' },
 };
 
