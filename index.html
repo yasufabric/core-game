@@ -517,7 +517,7 @@ function step(dt) {
   }
 
   // spawn
-  if (G.t - G.lastSpawn > d.spawnInterval) { spawnEnemy(); G.lastSpawn = G.t; }
+  if (G.t >= CONFIG.warmupSec && G.t - G.lastSpawn > d.spawnInterval) { spawnEnemy(); G.lastSpawn = G.t; }
 
   for (const f of G.fx) {
     if (f.kind === 'nova' && !f.hit && G.t >= f.hitAt) {

@@ -17,6 +17,7 @@ export const CONFIG = {
   doublePickChance: 0.15,    // probability per level-up of choosing two cards
   xpPerSkillUse: 2,          // XP awarded each time any skill is activated
   droneDamageMult: 3,        // drone zap = droneDamageMult × power
+  warmupSec: 3,              // no enemies spawn before this many seconds after newGame()
 };
 
 // --- leveling -------------------------------------------------------------
