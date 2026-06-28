@@ -199,6 +199,9 @@ window.addEventListener('resize', resize);
 let G = null;
 let bestWave = parseInt(localStorage.getItem('bestWave') || '0', 10);
 let waveFlashTimer = 0;
+let fastMode = false;
+let fastTimer = null;
+function cancelFast() { clearTimeout(fastTimer); fastTimer = null; fastMode = false; }
 function newGame() {
   resize();
   G = {
@@ -222,6 +225,7 @@ function newGame() {
     drone: { angle: 0, lastZap: 0 },
     bossFlashUntil: 0, pendingLevels: 0,
   };
+  cancelFast();
   renderSkillBar();
   overlay.classList.remove('show');
   waveFlashEl.classList.remove('show');
@@ -379,8 +383,13 @@ cv.addEventListener('pointerdown', (e) => {
   if (G.aiming) {
     triggerSkill(G.aiming, x, y);
     setAiming(null);
+  } else {
+    fastTimer = setTimeout(() => { fastMode = true; }, 150);
   }
 });
+cv.addEventListener('pointerup',     cancelFast);
+cv.addEventListener('pointercancel', cancelFast);
+cv.addEventListener('pointerleave',  cancelFast);
 
 // --- HUD: skill bar ------------------------------------------------------
 const skillsEl = document.getElementById('skills');
@@ -467,10 +476,17 @@ let prev = 0;
 function frame(now) {
   requestAnimationFrame(frame);
   if (!G || !G.running) return;
-  const dt = Math.min(0.05, (now - prev) / 1000 || 0);
+  const dt = Math.min(0.05, (now - prev) / 1000 || 0) * (fastMode ? 2 : 1);
   prev = now;
   if (!G.paused && !G.pageHidden) step(dt);
   draw();
+  if (fastMode) {
+    ctx.save();
+    ctx.font = 'bold 16px system-ui';
+    ctx.fillStyle = 'rgba(255,220,50,0.9)';
+    ctx.fillText('2×', 10, 28);
+    ctx.restore();
+  }
 }
 function step(dt) {
   G.t += dt;
