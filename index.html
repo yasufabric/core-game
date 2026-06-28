@@ -531,8 +531,9 @@ function step(dt) {
     G.lastBossWave = G.wave;
   }
 
-  // spawn
-  if (G.t >= CONFIG.warmupSec && G.t - G.lastSpawn > d.spawnInterval) { spawnEnemy(); G.lastSpawn = G.t; }
+  // spawn — suppress regular enemies while boss is alive
+  const bossAlive = G.enemies.some(e => e.boss);
+  if (G.t >= CONFIG.warmupSec && G.t - G.lastSpawn > d.spawnInterval && !bossAlive) { spawnEnemy(); G.lastSpawn = G.t; }
 
   for (const f of G.fx) {
     if (f.kind === 'nova' && !f.hit && G.t >= f.hitAt) {
