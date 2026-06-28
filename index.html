@@ -395,7 +395,7 @@ cv.addEventListener('pointerdown', (e) => {
     setAiming(null);
   } else if (G.t - G.reposLastAt >= CONFIG.reposCooldown && !G.blinkHome) {
     G.reposTarget = { x: clamp(x, 40, W - 40), y: clamp(y, 40, H - 40) };
-    G.reposStart = { x: c.x, y: c.y, t: G.t };
+    G.reposStart = { x: G.core.x, y: G.core.y, t: G.t };
     G.reposLastAt = G.t;
   } else {
     cv.setPointerCapture(e.pointerId);
@@ -413,6 +413,7 @@ function renderSkillBar() {
   for (const id of G.unlocked) {
     if (id === 'missile') continue; // auto-fires; no button needed
     if (id === 'drone') continue;   // passive orbit; no button needed
+    if (sk.passive) continue;       // passive skills need no button
     const sk = SKILLS[id];
     const b = document.createElement('button');
     b.className = 'skill';
@@ -544,6 +545,7 @@ function step(dt) {
   if (isBossWave(G.wave) && G.wave > G.lastBossWave) {
     spawnBoss();
     G.lastBossWave = G.wave;
+    G.bossFlashUntil = G.t + 2;
   }
 
   // spawn — suppress regular enemies while boss is alive
@@ -701,11 +703,6 @@ function step(dt) {
         G.drone.lastZap = G.t;
       }
     }
-  }
-
-  // boss arrival announcement
-  if (!G.bossFlashUntil && G.enemies.some(e => e.boss)) {
-    G.bossFlashUntil = G.t + 2;
   }
 
   // fx ttl
