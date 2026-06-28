@@ -90,6 +90,17 @@ Keep items small and verifiable. A good item names *what done looks like*.
       enemy spawn coordinates; ring visibly expands and fades within 0.15s at wave 3+.
       Rendering-only; no test needed.
 
+<!-- ── BALANCE (2026-06-28 review) ───────────────────────────── -->
+- [x] Ease early waves: lower `CONFIG.baseSpawnInterval` 1.6 → 2.2 and `CONFIG.baseEnemyHp` 2 → 1. Done = updated constants in `engine.js` with tests pinning both values; existing difficulty-rises tests still pass. Changed baseEnemyHp 2→1, baseSpawnInterval 1.6→2.2; 3 tests updated to reflect new wave-1 values.
+
+- [ ] Collision knockback + stun: when an enemy damages the core, push all other enemies within 80 px outward by 60 px and set `e.stunUntil = G.t + 0.4` on each; `stepEnemies` skips movement while `G.t < e.stunUntil`. Done = `e.stunUntil` field respected in `stepEnemies`; 2 engine tests (nearby enemy gets stun flag, enemy outside 80 px is unaffected).
+
+- [ ] First-blood XP bonus: add `CONFIG.firstBloodXp = 5`; on the game's very first kill, award bonus XP once (`G.firstBloodDone` flag, initialised `false` in `newGame()`). Done = `CONFIG.firstBloodXp = 5` exported from `engine.js` with a test pinning the value; `stepEnemies` returns a `firstBlood` flag on the kill that triggers it; `newGame()` initialises `G.firstBloodDone = false`.
+
+- [ ] Replace Blink with Flash skill (1-tap, CD 12s): remove `SKILLS.blink` and add `SKILLS.flash` — while active (`G.flashUntil`, 1.5s duration), triple the auto-fire rate and emit a 12-shot radial burst at activation. Done = `SKILLS.flash` defined in `engine.js` with 2 tests (offerable, not offered when already unlocked); `SKILLS.blink` removed; `G.flashUntil` respected in `stepAutoFire`; blink references cleaned from `newGame()` and `stepCore`.
+
+- [ ] Core hit shake + red ring: on every core hit (not just shielded), update `G.shakeUntil = G.t + 0.2` (only when `G.t + 0.2 > G.shakeUntil`) and push a red ring FX at the core (r=coreRadius, max=coreRadius+30, life=0.25s, colour `#ff4444`). Done = shake triggered for every `coreHit` result in `main.js`; red ring FX visible in-game; no engine test needed (rendering + state flag only).
+
 <!-- ── COMPLETED ───────────────────────────────────────────────── -->
 - [x] Persist best score: `bestWave` loaded from `localStorage` on init; saved back on game over; RETRY splash unchanged; no engine change.
 

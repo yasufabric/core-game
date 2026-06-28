@@ -70,12 +70,12 @@ describe('stats', () => {
     expect(derive(defaultStats(), 999).spawnInterval).toBeGreaterThanOrEqual(0.28);
   });
 
-  it('wave 1 enemyHp is 2 with gentler hpScale', () => {
-    expect(derive(defaultStats(), 1).enemyHp).toBe(2); // 2 + floor(1*0.6) = 2
+  it('wave 1 enemyHp is 1 with eased baseline', () => {
+    expect(derive(defaultStats(), 1).enemyHp).toBe(1); // 1 + floor(1*0.6) = 1
   });
 
-  it('wave 2 enemyHp is 3 with enemyHpScale=0.6 (gentler ramp)', () => {
-    expect(derive(defaultStats(), 2).enemyHp).toBe(3); // 2 + floor(2*0.6) = 3
+  it('wave 2 enemyHp is 2 with eased baseline', () => {
+    expect(derive(defaultStats(), 2).enemyHp).toBe(2); // 1 + floor(2*0.6) = 2
   });
 
   it('wave 1 enemySpeed reflects baseEnemySpeed + 1×scale', () => {
@@ -83,7 +83,7 @@ describe('stats', () => {
   });
 
   it('wave 1 spawnInterval matches raised baseline', () => {
-    expect(derive(defaultStats(), 1).spawnInterval).toBeCloseTo(1.54, 2); // 1.6 - 1*0.06
+    expect(derive(defaultStats(), 1).spawnInterval).toBeCloseTo(2.14, 2); // 2.2 - 1*0.06
   });
 
   it('defaultStats has crit at 0', () => {
