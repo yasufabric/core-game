@@ -17,7 +17,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 <!-- ── POLISH ──────────────────────────────────────────────────── -->
 - [x] Slow-active HUD indicator: while slowfield is active, show a small "SLOW" badge in the HUD topbar (purple, fades out when `G.t >= G.slowUntil`); renderer-only, no engine change. Added #slow-badge element in topbar; opacity toggled in step() HUD block; CSS transition fades it out.
 
-- [ ] Shield expiry flash: when the shield drops (`G.t` crosses `G.shieldUntil`), push a `ring` FX (white, r=coreRadius, max=coreRadius+30, life=0.3s) so the player sees the shield fall; renderer/step change only.
+- [x] Shield expiry flash: when the shield drops (`G.t` crosses `G.shieldUntil`), push a `ring` FX (white, r=coreRadius, max=coreRadius+30, life=0.3s) so the player sees the shield fall; renderer/step change only. Added crossing-detection in step() using G.t - dt < G.shieldUntil guard.
 
 - [ ] Cooldown countdown text: inside each skill button, show the integer seconds remaining (e.g. "3s") centred over the cooldown fill when cd > 0.5s; hide when ready; HUD-only change.
 

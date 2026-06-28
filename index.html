@@ -512,6 +512,11 @@ function step(dt) {
     G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
   }
 
+  // shield expiry flash
+  if (G.shieldUntil > 0 && G.t >= G.shieldUntil && G.t - dt < G.shieldUntil) {
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 30, born: G.t, life: .3, color: '#ffffff' });
+  }
+
   // boss spawn — one per 5th wave
   if (isBossWave(G.wave) && G.wave > G.lastBossWave) {
     spawnBoss();
