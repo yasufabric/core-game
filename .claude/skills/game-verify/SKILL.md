@@ -5,20 +5,23 @@ description: Verify a change to the CORE game before considering it done. Use af
 
 # Verifying a CORE change
 
-Run these in order. Do not declare a task done until every step passes. If a step fails,
-fix the cause (not the test) and re-run from the top.
+Run these steps in order. **A single failure means the item is not done.**
+Fix the root cause (never edit a test just to make it pass), then re-run from Step 1.
 
-## 1. Logic suite
+---
+
+## Step 1 — Logic suite
 
 ```
 npm test
 ```
 
 All tests in `tests/engine.test.js` must pass. If you changed a rule in `engine.js`,
-there must be a corresponding test change in the same diff — if there isn't, the task
-is not done; add the test.
+there must be a corresponding test change in the same diff — if there isn't, add it now.
 
-## 2. Invariant spot-checks (cheap, catches the common regressions)
+---
+
+## Step 2 — Invariant spot-checks
 
 Run this one-liner. It must print `INVARIANTS OK`:
 
@@ -34,21 +37,31 @@ node -e "import('./src/engine.js').then(m=>{
 })"
 ```
 
-## 3. Static site sanity
+---
 
-The game must run with no build step. Confirm `index.html` imports only from
-`./src/engine.js`, contains no `import` of a bundler/npm package, and that
-`npm run dev` serves it. A quick check that it boots without a JS parse error:
+## Step 3 — Static site sanity
+
+The game must run with no build step. Confirm `index.html` has no bundler imports:
 
 ```
-node --check index.html 2>/dev/null || echo "note: index.html is HTML; verify the <script type=module> block parses by loading it in a browser"
+node --check index.html 2>/dev/null || echo "note: index.html is HTML; JS module block parses on load"
 ```
 
-For real UI/E2E verification, load http://localhost:8080 in a headless browser
-(Playwright) and assert `window.__CORE()` returns a state object after pressing START.
-This is the right place to grow E2E coverage later.
+---
 
-## 4. Report
+## Verdict (required — the loop reads this)
 
-State plainly: which steps passed, what you changed, and whether any invariant in
-`CLAUDE.md` was touched. If anything is uncertain, say so — do not paper over a failure.
+After all steps, output exactly one of these lines as your final verdict:
+
+```
+VERIFY PASS — all steps green
+```
+
+or
+
+```
+VERIFY FAIL — step N: <one sentence describing what failed>
+```
+
+The `/loop` skill treats anything other than `VERIFY PASS` as a failure.
+Do not soften or qualify the verdict. State plainly what happened.
