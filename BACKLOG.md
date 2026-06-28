@@ -99,7 +99,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 
 - [x] Replace Blink with Flash skill (1-tap, CD 12s): remove `SKILLS.blink` and add `SKILLS.flash` — while active (`G.flashUntil`, 1.5s duration), triple the auto-fire rate and emit a 12-shot radial burst at activation. Done = `SKILLS.flash` defined in `engine.js` with 2 tests (offerable, not offered when already unlocked); `SKILLS.blink` removed; `G.flashUntil` respected in `stepAutoFire`; blink references cleaned from `newGame()` and `stepCore`. Blink removed, Flash added as 1-tap with 12-shot burst + 3× autofire for 1.5s; all tests updated.
 
-- [ ] Core hit shake + red ring: on every core hit (not just shielded), update `G.shakeUntil = G.t + 0.2` (only when `G.t + 0.2 > G.shakeUntil`) and push a red ring FX at the core (r=coreRadius, max=coreRadius+30, life=0.25s, colour `#ff4444`). Done = shake triggered for every `coreHit` result in `main.js`; red ring FX visible in-game; no engine test needed (rendering + state flag only).
+- [x] Core hit shake + red ring: on every core hit (not just shielded), update `G.shakeUntil = G.t + 0.2` (only when `G.t + 0.2 > G.shakeUntil`) and push a red ring FX at the core (r=coreRadius, max=coreRadius+30, life=0.25s, colour `#ff4444`). Done = shake triggered for every `coreHit` result in `main.js`; red ring FX visible in-game; no engine test needed (rendering + state flag only). Clamped shake update + red ring FX added to step() coreHit branch.
 
 <!-- ── COMPLETED ───────────────────────────────────────────────── -->
 - [x] Persist best score: `bestWave` loaded from `localStorage` on init; saved back on game over; RETRY splash unchanged; no engine change.

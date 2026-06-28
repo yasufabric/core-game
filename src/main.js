@@ -261,7 +261,11 @@ function step(dt) {
   if (result.firstBlood)    { applyXp(CONFIG.firstBloodXp); G.firstBloodDone = true; }
   if (result.waveClear)     { applyXp(CONFIG.waveClearXp); }
   if (result.clutch)        { applyXp(CONFIG.clutchXp); }
-  if (result.coreHit)       { G.shakeUntil = G.t + 0.25; sfx.hit(); }
+  if (result.coreHit) {
+    if (G.t + 0.2 > G.shakeUntil) G.shakeUntil = G.t + 0.2;
+    G.fx.push({ kind: 'ring', x: G.core.x, y: G.core.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 30, born: G.t, life: 0.25, color: '#ff4444' });
+    sfx.hit();
+  }
 
   stepDrone(G, dt);
 
