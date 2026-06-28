@@ -23,10 +23,10 @@ Keep items small and verifiable. A good item names *what done looks like*.
       to nearby enemies when `'thorns'` is unlocked; remove the old dead-code hit line. Mixed; 1 engine test. Added CONFIG.thornsAura=4; aura loop in step() before enemyHitsCore check; dead-code hit line removed; 1 test added.
 
 <!-- ── POLISH ──────────────────────────────────────────────────── -->
-- [ ] Enemy hit flash on damage: when any enemy takes a non-lethal hit, set `e.hitFlash = G.t`
+- [x] Enemy hit flash on damage: when any enemy takes a non-lethal hit, set `e.hitFlash = G.t`
       on the enemy object; in `src/renderer.js`, render the enemy white for the first 60ms after
       `e.hitFlash` (check `G.t - e.hitFlash < 0.06`). Makes high-HP tanky enemies and the boss
-      feel responsive to fire. Rendering-only; no engine test needed.
+      feel responsive to fire. Rendering-only; no engine test needed. Added e.hitFlash=G.t at all 7 damage sites (auto-shot, pulse, lance, bomb, chain×2, nova, drone); renderer uses white fill for 60ms after hit.
 
 - [ ] Wave number color ramp: in `step()` where `textContent` of `#wave` is updated, also set
       its `style.color` — white for wave 1–9, linearly interpolate to amber `#ffb347` at wave
