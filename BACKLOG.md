@@ -65,12 +65,12 @@ Keep items small and verifiable. A good item names *what done looks like*.
       `G.t - G.lastSpikeAt >= CONFIG.spikeCooldown` and `G.wave >= 4`; `G.lastSpikeAt` reset
       in `newGame()`. Mixed; 3 engine tests. Added CONFIG values; createSpike+stepSpikeSpawn in engine.js; called in main.js step(); orange 7-sided renderer; 3 tests pass.
 
-- [ ] Grant `CONFIG.synergyXp = 3` bonus XP when 2 different skills are activated within 1
+- [x] Grant `CONFIG.synergyXp = 3` bonus XP when 2 different skills are activated within 1
       second of each other; track `G.lastSkillAt` (timestamp) and `G.lastSkillId` (skill name)
       in game state and reset both in `newGame()`. Done = `CONFIG.synergyXp = 3` in `engine.js`
       with a test pinning the value; `triggerSkill()` checks `G.t - G.lastSkillAt < 1 &&
       skillName !== G.lastSkillId` and calls `gainXp(CONFIG.synergyXp)` when met; 2 engine
-      tests (config value pinned, synergy XP granted on eligible combo). Mixed.
+      tests (config value pinned, synergy XP granted on eligible combo). Mixed. Added CONFIG.synergyXp=3; synergy check inside executeSkill returns bonus XP; 2 tests pass.
 
 - [ ] Add `SKILLS.leech` passive skill: when any active skill hits an enemy, restore
       `Math.round(0.3 * stats.power)` HP to the core (capped at `CONFIG.coreHp`). Done =

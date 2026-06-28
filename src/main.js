@@ -71,6 +71,7 @@ function newGame() {
     autoShotCount: 0,
     firstBloodDone: false,
     lastSpikeAt: -CONFIG.spikeCooldown,
+    lastSkillAt: 0, lastSkillId: null,
   };
   cancelFast();
   renderSkillBar();

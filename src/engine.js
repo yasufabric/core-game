@@ -31,6 +31,7 @@ export const CONFIG = {
   spikeCooldown: 7,          // seconds between spike mini-boss spawns (wave 4+)
   spikeHpMult: 1.5,          // HP multiplier for spike relative to base wave HP
   spikeSpeedMult: 1.3,       // speed multiplier for spike relative to base wave speed
+  synergyXp: 3,              // bonus XP when 2 different skills are used within 1 second
 };
 
 // --- leveling -------------------------------------------------------------
@@ -283,6 +284,10 @@ export function executeSkill(G, id, aimX, aimY, W, H) {
   const c = G.core;
   G.cooldowns[id] = G.t + sk.cooldown * G.stats.cooldown;
 
+  const synergy = G.lastSkillAt && G.t - G.lastSkillAt < 1 && G.lastSkillId !== id;
+  G.lastSkillAt = G.t;
+  G.lastSkillId = id;
+
   if (id === 'pulse') {
     for (const e of G.enemies) {
       if (dist(e.x, e.y, c.x, c.y) < 150) { e.hp -= 6 * G.stats.power; e.hitFlash = G.t; }
@@ -357,7 +362,7 @@ export function executeSkill(G, id, aimX, aimY, W, H) {
     G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 120, born: G.t, life: .5, color: '#ffe066' });
   }
 
-  return CONFIG.xpPerSkillUse;
+  return CONFIG.xpPerSkillUse + (synergy ? CONFIG.synergyXp : 0);
 }
 
 // --- per-frame step functions -------------------------------------------------

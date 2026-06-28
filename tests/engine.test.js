@@ -694,6 +694,18 @@ describe('stepEnemies', () => {
   });
 });
 
+describe('synergy XP', () => {
+  it('CONFIG.synergyXp is 3', () => {
+    expect(CONFIG.synergyXp).toBe(3);
+  });
+
+  it('executeSkill returns extra synergyXp when two different skills used within 1s', () => {
+    const G = makeG({ t: 10, lastSkillAt: 9.5, lastSkillId: 'pulse' });
+    const xp = executeSkill(G, 'slow', 0, 0, 400, 700);
+    expect(xp).toBe(CONFIG.xpPerSkillUse + CONFIG.synergyXp);
+  });
+});
+
 describe('spike mini-boss config', () => {
   it('CONFIG.spikeCooldown is 7', () => {
     expect(CONFIG.spikeCooldown).toBe(7);
