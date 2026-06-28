@@ -241,16 +241,16 @@ describe('SKILLS', () => {
     expect(offers.filter(o => o.id === 'bomb')).toHaveLength(0);
   });
 
-  it('blink exists as a 2-tap skill with cooldown >= 10', () => {
-    expect(SKILLS.blink).toBeDefined();
-    expect(SKILLS.blink.tap).toBe(2);
-    expect(SKILLS.blink.cooldown).toBeGreaterThanOrEqual(10);
+  it('flash exists as a 1-tap skill with cooldown 12', () => {
+    expect(SKILLS.flash).toBeDefined();
+    expect(SKILLS.flash.tap).toBe(1);
+    expect(SKILLS.flash.cooldown).toBe(12);
   });
 
-  it('blink is not offered when already unlocked', () => {
+  it('flash is not offered when already unlocked', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
-    const offers = rollOffers(['blink'], seq([0, 0.1, 0.4, 0.7]));
-    expect(offers.filter(o => o.id === 'blink')).toHaveLength(0);
+    const offers = rollOffers(['flash'], seq([0, 0.1, 0.4, 0.7]));
+    expect(offers.filter(o => o.id === 'flash')).toHaveLength(0);
   });
 
   it('nova exists as a 2-tap skill and is offerable', () => {
@@ -615,15 +615,6 @@ describe('executeSkill', () => {
     expect(G.enemies[1].hp).toBeLessThan(20);
   });
 
-  it('blink moves core to aim point and saves home position', () => {
-    const G = makeG();
-    const origX = G.core.x, origY = G.core.y;
-    executeSkill(G, 'blink', 300, 500, 400, 700);
-    expect(G.blinkHome).toEqual({ x: origX, y: origY });
-    expect(G.core.x).toBe(300);
-    expect(G.core.y).toBe(500);
-  });
-
   it('executeSkill returns CONFIG.xpPerSkillUse', () => {
     const G = makeG();
     const xp = executeSkill(G, 'pulse', 0, 0, 400, 700);
@@ -648,15 +639,11 @@ describe('stepCore', () => {
     expect(G.core.hp).toBe(CONFIG.coreHp);
   });
 
-  it('blink snap-back restores core position when blinkReturn reached', () => {
-    const G = makeG({ t: 5 });
-    G.blinkHome = { x: 100, y: 200 };
-    G.blinkReturn = 5;
-    G.core.x = 300; G.core.y = 400;
-    stepCore(G, 0);
-    expect(G.core.x).toBe(100);
-    expect(G.core.y).toBe(200);
-    expect(G.blinkHome).toBeNull();
+  it('flash sets flashUntil 1.5s into the future and fires 12 radial shots', () => {
+    const G = makeG({ t: 10, flashUntil: 0 });
+    executeSkill(G, 'flash', 0, 0, 400, 700);
+    expect(G.flashUntil).toBeCloseTo(11.5);
+    expect(G.shots.filter(s => !s.crit)).toHaveLength(12);
   });
 });
 

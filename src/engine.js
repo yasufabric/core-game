@@ -89,7 +89,7 @@ export const SKILLS = {
   bomb:    { id: 'bomb',    name: 'Bomb',     tap: 1, cooldown: 20, desc: 'Damage all enemies on screen' },
   chain:   { id: 'chain',  name: 'Chain',    tap: 1, cooldown: 8,  desc: 'Zap nearest enemy, arc to 3 nearby foes' },
   nova:    { id: 'nova',   name: 'Nova',     tap: 2, cooldown: 12, desc: 'Aim a delayed area blast' },
-  blink:   { id: 'blink',   name: 'Blink',   tap: 2, cooldown: 12, desc: 'Teleport core to aim point for 1.5s, then snap back' },
+  flash:   { id: 'flash',   name: 'Flash',   tap: 1, cooldown: 12, desc: '12-shot burst + 3× auto-fire rate for 1.5s' },
   missile: { id: 'missile', name: 'Missile', tap: 1, cooldown: 6,   auto: true, desc: 'Fire a homing missile that tracks the nearest enemy' },
   drone:   { id: 'drone',   name: 'Drone',   tap: 1, cooldown: 1.5, auto: true, desc: 'Orbiting satellite that auto-zaps the nearest enemy in range' },
   repulse:  { id: 'repulse',  name: 'Repulse',  tap: 1, cooldown: 18, desc: 'Blast all enemies outward from the core' },
@@ -319,13 +319,13 @@ export function executeSkill(G, id, aimX, aimY, W, H) {
       if (dd < targetD) { targetD = dd; target = e; }
     }
     G.missiles.push({ x: c.x, y: c.y, vx: 0, vy: -120, target, tail: [], life: 8 });
-  } else if (id === 'blink') {
-    G.blinkHome = { x: c.x, y: c.y };
-    G.blinkReturn = G.t + 1.5;
-    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
-    c.x = clamp(aimX, 40, W - 40);
-    c.y = clamp(aimY, 40, H - 40);
-    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
+  } else if (id === 'flash') {
+    G.flashUntil = G.t + 1.5;
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2;
+      G.shots.push({ x: c.x, y: c.y, vx: Math.cos(a) * 420, vy: Math.sin(a) * 420, dmg: G.stats.power, life: 1.2 });
+    }
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 120, born: G.t, life: .5, color: '#ffe066' });
   }
 
   return CONFIG.xpPerSkillUse;
@@ -339,13 +339,6 @@ export function executeSkill(G, id, aimX, aimY, W, H) {
 export function stepCore(G, dt) {
   const c = G.core;
   if (G.stats.regen) c.hp = clamp(c.hp + G.stats.regen * dt, 0, CONFIG.coreHp);
-
-  if (G.blinkHome && G.t >= G.blinkReturn) {
-    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
-    c.x = G.blinkHome.x; c.y = G.blinkHome.y;
-    G.blinkHome = null; G.blinkReturn = 0;
-    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
-  }
 
   if (G.reposTarget) {
     const elapsed = G.t - G.reposStart.t;
@@ -401,7 +394,8 @@ export function stepNovaDet(G) {
 // rng: random source (Math.random in game, seeded fn in tests).
 export function stepAutoFire(G, d, rng) {
   const c = G.core;
-  if (G.t - G.lastAuto > 1 / d.autoRate) {
+  const effectiveRate = (G.flashUntil && G.t < G.flashUntil) ? d.autoRate * 3 : d.autoRate;
+  if (G.t - G.lastAuto > 1 / effectiveRate) {
     let best = null, bestD = d.autoRange;
     for (const e of G.enemies) {
       const dd = dist(e.x, e.y, c.x, c.y);

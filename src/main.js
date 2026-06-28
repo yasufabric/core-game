@@ -63,7 +63,7 @@ function newGame() {
     paused: false,
     pageHidden: document.hidden,
     lastBossWave: 0,
-    blinkHome: null, blinkReturn: 0,
+    flashUntil: 0,
     kills: 0,
     drone: { angle: 0, lastZap: 0 },
     bossFlashUntil: 0, pendingLevels: 0,
@@ -121,7 +121,7 @@ cv.addEventListener('pointerdown', (e) => {
 cv.addEventListener('pointerup', () => {
   if (G && G.running && !G.paused && holdStartMs &&
       Date.now() - holdStartMs >= 200 &&
-      G.t - G.reposLastAt >= CONFIG.reposCooldown && !G.blinkHome) {
+      G.t - G.reposLastAt >= CONFIG.reposCooldown) {
     G.reposTarget = { x: clamp(holdX, 40, W - 40), y: clamp(holdY, 40, H - 40) };
     G.reposStart  = { x: G.core.x, y: G.core.y, t: G.t };
     G.reposLastAt = G.t;
