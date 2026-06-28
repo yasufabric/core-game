@@ -103,6 +103,7 @@ export const SKILLS = {
   thorns:   { id: 'thorns',   name: 'Thorns',   passive: true,       desc: 'Enemies within range of the core take 4 damage/sec' },
   overload: { id: 'overload', name: 'Overload', passive: true,       desc: 'Every 8th auto-shot fires a burst of 8 radial shots at half damage' },
   siphon:   { id: 'siphon',   name: 'Siphon',   passive: true,       desc: 'Killing an enemy within 60px of the core restores 1 HP' },
+  leech:    { id: 'leech',    name: 'Leech',    passive: true,       desc: 'Every skill activation restores Math.round(0.3×power) HP to the core' },
 };
 
 export const STAT_CARDS = [
@@ -360,6 +361,11 @@ export function executeSkill(G, id, aimX, aimY, W, H) {
       G.shots.push({ x: c.x, y: c.y, vx: Math.cos(a) * 420, vy: Math.sin(a) * 420, dmg: G.stats.power, life: 1.2 });
     }
     G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 120, born: G.t, life: .5, color: '#ffe066' });
+  }
+
+  if (G.unlocked.includes('leech')) {
+    const restore = Math.round(0.3 * G.stats.power);
+    c.hp = Math.min(CONFIG.coreHp, c.hp + restore);
   }
 
   return CONFIG.xpPerSkillUse + (synergy ? CONFIG.synergyXp : 0);

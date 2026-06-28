@@ -257,7 +257,7 @@ describe('SKILLS', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
     expect(SKILLS.nova).toBeDefined();
     expect(SKILLS.nova.tap).toBe(2);
-    const offers = rollOffers([], seq([0.46, 0.1, 0.5])); // 0.46 × 15 = 6.9 → floor 6 = nova in 15-skill pool
+    const offers = rollOffers([], seq([0.39, 0.1, 0.5])); // 0.39 × 16 = 6.24 → floor 6 = nova in 16-skill pool
     expect(offers).toContainEqual(expect.objectContaining({ kind: 'skill', id: 'nova', tap: 2 }));
   });
 
@@ -691,6 +691,31 @@ describe('stepEnemies', () => {
     G.enemies.push({ x: 0, y: 0, r: 8, hp: 0, maxHp: 10, spd: 50, boss: true });
     const result = stepEnemies(G, d, 0.016);
     expect(result.xpGained).toBeGreaterThan(CONFIG.xpPerKill * 4);
+  });
+});
+
+describe('SKILLS.leech passive', () => {
+  it('leech is a passive skill and is offerable', () => {
+    expect(SKILLS.leech).toBeDefined();
+    expect(SKILLS.leech.passive).toBe(true);
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers([], seq([0.99, 0.1, 0.5]));
+    expect(offers.some(o => o.kind === 'skill')).toBe(true);
+  });
+
+  it('leech is not offered when already unlocked', () => {
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers(['leech'], seq([0, 0.1, 0.4, 0.7]));
+    expect(offers.filter(o => o.id === 'leech')).toHaveLength(0);
+  });
+
+  it('executeSkill with leech unlocked restores HP proportional to power', () => {
+    const G = makeG();
+    G.core.hp = 50;
+    G.stats = { ...defaultStats(), power: 4 };
+    G.unlocked = ['leech'];
+    executeSkill(G, 'pulse', 0, 0, 400, 700);
+    expect(G.core.hp).toBeGreaterThan(50); // Math.round(0.3*4)=1 restored
   });
 });
 

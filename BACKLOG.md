@@ -72,12 +72,12 @@ Keep items small and verifiable. A good item names *what done looks like*.
       skillName !== G.lastSkillId` and calls `gainXp(CONFIG.synergyXp)` when met; 2 engine
       tests (config value pinned, synergy XP granted on eligible combo). Mixed. Added CONFIG.synergyXp=3; synergy check inside executeSkill returns bonus XP; 2 tests pass.
 
-- [ ] Add `SKILLS.leech` passive skill: when any active skill hits an enemy, restore
+- [x] Add `SKILLS.leech` passive skill: when any active skill hits an enemy, restore
       `Math.round(0.3 * stats.power)` HP to the core (capped at `CONFIG.coreHp`). Done =
       `SKILLS.leech` (`passive: true`) in `engine.js`, offerable by `rollOffers` (test: leech
       appears in locked list before unlock, not after); `step()` in `index.html` applies HP
       restore per skill-hit when `G.unlocked` includes `'leech'`; 2 engine tests (skill defined
-      and offerable, restore formula rounds correctly). Mixed.
+      and offerable, restore formula rounds correctly). Mixed. Added SKILLS.leech passive; executeSkill heals on activation when leech unlocked; 3 tests pass; nova fixture updated for 16-skill pool.
 
 - [ ] When a crit auto-shot fires and `'drone'` is in `G.unlocked`, reset `G.droneCd` to 0.
       Done = logic added to the auto-shot crit branch in `step()` in `index.html`;
