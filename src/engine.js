@@ -22,6 +22,8 @@ export const CONFIG = {
   waveClearXp: 3,            // bonus XP awarded when all enemies are wiped
   clutchXp: 8,               // bonus XP for wave-clear at ≤10% HP
   waveClearHeal: 5,          // HP restored when all enemies are wiped
+  reposCooldown: 12,         // seconds between tap-to-reposition uses
+  reposDuration: 0.8,        // seconds to slide core to new position
 };
 
 // --- leveling -------------------------------------------------------------

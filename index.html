@@ -228,6 +228,7 @@ function newGame() {
     kills: 0,
     drone: { angle: 0, lastZap: 0 },
     bossFlashUntil: 0, pendingLevels: 0,
+    reposLastAt: -CONFIG.reposCooldown, reposTarget: null, reposStart: null,
   };
   cancelFast();
   renderSkillBar();
@@ -391,6 +392,10 @@ cv.addEventListener('pointerdown', (e) => {
   if (G.aiming) {
     triggerSkill(G.aiming, x, y);
     setAiming(null);
+  } else if (G.t - G.reposLastAt >= CONFIG.reposCooldown && !G.blinkHome) {
+    G.reposTarget = { x: clamp(x, 40, W - 40), y: clamp(y, 40, H - 40) };
+    G.reposStart = { x: c.x, y: c.y, t: G.t };
+    G.reposLastAt = G.t;
   } else {
     cv.setPointerCapture(e.pointerId);
     fastTimer = setTimeout(() => { fastMode = true; }, 150);
@@ -518,6 +523,15 @@ function step(dt) {
     c.x = G.blinkHome.x; c.y = G.blinkHome.y;
     G.blinkHome = null; G.blinkReturn = 0;
     G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
+  }
+
+  // tap-to-reposition slide
+  if (G.reposTarget) {
+    const elapsed = G.t - G.reposStart.t;
+    const frac = Math.min(1, elapsed / CONFIG.reposDuration);
+    c.x = G.reposStart.x + (G.reposTarget.x - G.reposStart.x) * frac;
+    c.y = G.reposStart.y + (G.reposTarget.y - G.reposStart.y) * frac;
+    if (frac >= 1) G.reposTarget = null;
   }
 
   // shield expiry flash

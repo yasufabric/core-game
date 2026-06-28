@@ -161,6 +161,13 @@ export function draw(G, ctx, W, H, DPR, getCss) {
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(0, 0, CONFIG.coreRadius + 14 + pulse * 4, 0, Math.PI * 2); ctx.stroke();
   }
+  // reposition cooldown arc
+  const reposCd = G.reposLastAt + CONFIG.reposCooldown - G.t;
+  if (reposCd > 0) {
+    const frac = reposCd / CONFIG.reposCooldown;
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, CONFIG.coreRadius + 22, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * frac); ctx.stroke();
+  }
   ctx.restore();
 
   // boss arrival flash

@@ -42,12 +42,12 @@ Keep items small and verifiable. A good item names *what done looks like*.
       `Math.min(CONFIG.waveClearHeal, CONFIG.coreHp - c.hp)` when enemies drop to 0; green ring
       FX pushed at core on heal. Mixed; 1 engine test. Added CONFIG.waveClearHeal=5; step() heals on clear + green ring FX; 1 test passes.
 
-- [ ] Tap-to-reposition: tapping the arena canvas (outside skill buttons) slides the core to
+- [x] Tap-to-reposition: tapping the arena canvas (outside skill buttons) slides the core to
       that point over 0.8 s; a 12 s cooldown (stored in `CONFIG.reposCooldown`) prevents
       spamming; a radial arc ring drawn around the core shows remaining cooldown.
       Done = `CONFIG.reposCooldown = 12` exported from `engine.js` with a test asserting
       the value; canvas pointerdown in `index.html` starts a slide when cooldown is ready;
-      repositioning radial ring visible while on cooldown; enemies re-target the new position.
+      repositioning radial ring visible while on cooldown; enemies re-target the new position. Added CONFIG.reposCooldown=12; pointerdown triggers 0.8s slide; arc ring shows CD; 1 test passes.
 
 - [ ] Thorns passive skill: enemies that deal damage to the core are themselves hit for 4
       points (before armor). Done = `SKILLS.thorns` (`passive: true`) in `engine.js`,

@@ -188,6 +188,10 @@ describe('stats', () => {
   it('CONFIG.waveClearHeal is 5', () => {
     expect(CONFIG.waveClearHeal).toBe(5);
   });
+
+  it('CONFIG.reposCooldown is 12', () => {
+    expect(CONFIG.reposCooldown).toBe(12);
+  });
 });
 
 describe('SKILLS', () => {
