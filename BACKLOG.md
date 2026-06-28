@@ -72,6 +72,39 @@ Keep items small and verifiable. A good item names *what done looks like*.
       with tests: shot arriving from the core direction returns true, shot from behind returns
       false; shielded enemy spawned in `index.html` with a distinct visual arc indicator.
 
+<!-- ── FROM REVIEW 2026-06-28 ──────────────────────────────────── -->
+- [ ] Spawn one mini-boss spike enemy mid-wave every 7 seconds from wave 4 onward (+50% HP,
+      +30% speed). Done = `CONFIG.spikeCooldown = 7`, `CONFIG.spikeHpMult = 1.5`, and
+      `CONFIG.spikeSpeedMult = 1.3` exported from `engine.js`, each with a test pinning the
+      value; `step()` in `index.html` spawns one spike enemy when
+      `G.t - G.lastSpikeAt >= CONFIG.spikeCooldown` and `G.wave >= 4`; `G.lastSpikeAt` reset
+      in `newGame()`. Mixed; 3 engine tests.
+
+- [ ] Grant `CONFIG.synergyXp = 3` bonus XP when 2 different skills are activated within 1
+      second of each other; track `G.lastSkillAt` (timestamp) and `G.lastSkillId` (skill name)
+      in game state and reset both in `newGame()`. Done = `CONFIG.synergyXp = 3` in `engine.js`
+      with a test pinning the value; `triggerSkill()` checks `G.t - G.lastSkillAt < 1 &&
+      skillName !== G.lastSkillId` and calls `gainXp(CONFIG.synergyXp)` when met; 2 engine
+      tests (config value pinned, synergy XP granted on eligible combo). Mixed.
+
+- [ ] Add `SKILLS.leech` passive skill: when any active skill hits an enemy, restore
+      `Math.round(0.3 * stats.power)` HP to the core (capped at `CONFIG.coreHp`). Done =
+      `SKILLS.leech` (`passive: true`) in `engine.js`, offerable by `rollOffers` (test: leech
+      appears in locked list before unlock, not after); `step()` in `index.html` applies HP
+      restore per skill-hit when `G.unlocked` includes `'leech'`; 2 engine tests (skill defined
+      and offerable, restore formula rounds correctly). Mixed.
+
+- [ ] When a crit auto-shot fires and `'drone'` is in `G.unlocked`, reset `G.droneCd` to 0.
+      Done = logic added to the auto-shot crit branch in `step()` in `index.html`;
+      `G.droneCd = 0` set immediately after crit damage is applied when drone is unlocked;
+      visible as drone firing immediately after a crit. Rendering/input-only; no engine test
+      needed.
+
+- [ ] Push a white ring-burst FX (radius 0→20, life=0.15s) at the spawn point each time an
+      enemy enters the arena. Done = renderer in `index.html` pushes a `ring` FX entry at
+      enemy spawn coordinates; ring visibly expands and fades within 0.15s at wave 3+.
+      Rendering-only; no test needed.
+
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
 - [x] Armor stat: added capped `armor` upgrades plus `coreDamageTaken`; enemy core hits now use the helper and tests cover default, upgrade, reduction, and cap behavior.
