@@ -647,6 +647,10 @@ function step(dt) {
   if (hadEnemies && G.enemies.length === 0) {
     applyXp(CONFIG.waveClearXp);
     G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 40, born: G.t, life: 0.5, color: '#ffd700' });
+    if (c.hp <= CONFIG.coreHp * 0.1) {
+      applyXp(CONFIG.clutchXp);
+      G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 55, born: G.t, life: 0.6, color: '#ff4400' });
+    }
   }
 
   // drone auto-zap

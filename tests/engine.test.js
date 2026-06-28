@@ -180,6 +180,10 @@ describe('stats', () => {
   it('CONFIG.waveClearXp is 3', () => {
     expect(CONFIG.waveClearXp).toBe(3);
   });
+
+  it('CONFIG.clutchXp is 8', () => {
+    expect(CONFIG.clutchXp).toBe(8);
+  });
 });
 
 describe('SKILLS', () => {

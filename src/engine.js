@@ -20,6 +20,7 @@ export const CONFIG = {
   warmupSec: 3,              // no enemies spawn before this many seconds after newGame()
   dartChance: 0.08,          // probability per spawn of a dart enemy (wave 8+)
   waveClearXp: 3,            // bonus XP awarded when all enemies are wiped
+  clutchXp: 8,               // bonus XP for wave-clear at ≤10% HP
 };
 
 // --- leveling -------------------------------------------------------------

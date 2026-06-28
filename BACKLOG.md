@@ -30,11 +30,11 @@ Keep items small and verifiable. A good item names *what done looks like*.
 
 - [x] Wave-clear bonus XP: when `G.enemies.length` drops to 0 and the wave is still active, award `CONFIG.waveClearXp = 3` bonus XP and push a brief gold ring FX at core; 1 engine test. Added CONFIG.waveClearXp=3; step() awards XP + gold ring on enemies→0 transition; 1 test passes.
 
-- [ ] Low-HP clutch bonus: when a wave is cleared with core HP at or below 10% of max
+- [x] Low-HP clutch bonus: when a wave is cleared with core HP at or below 10% of max
       (`c.hp <= CONFIG.coreHp * 0.1`), award `CONFIG.clutchXp = 8` bonus XP and flash a
       red-gold ring FX at the core. Done = `CONFIG.clutchXp = 8` exported from `engine.js`
       with a test pinning the value; `step()` checks the HP threshold when enemies drop to 0
-      and only awards the bonus when the low-HP condition is met. Mixed; 1 engine test.
+      and only awards the bonus when the low-HP condition is met. Mixed; 1 engine test. Added CONFIG.clutchXp=8; step() awards +8 XP + red ring when c.hp ≤ 10% on clear; 1 test passes.
 
 - [ ] Wave-clear HP recovery: when all enemies are wiped out, restore `CONFIG.waveClearHeal = 5`
       HP to the core (capped at `CONFIG.coreHp`). Done = `CONFIG.waveClearHeal = 5` exported
