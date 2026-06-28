@@ -177,6 +177,17 @@ describe('stats', () => {
     expect(xpForKill(defaultStats(), { dart: true })).toBeCloseTo(CONFIG.xpPerKill * 0.8);
   });
 
+  it('xpForKill scales with enemy speed — faster enemy yields more XP', () => {
+    const slow = xpForKill(defaultStats(), { spd: CONFIG.baseEnemySpeed });
+    const fast = xpForKill(defaultStats(), { spd: CONFIG.baseEnemySpeed * 2 });
+    expect(fast).toBeGreaterThan(slow);
+  });
+
+  it('xpForKill speed bonus is capped at 1.5×', () => {
+    const xp = xpForKill(defaultStats(), { spd: CONFIG.baseEnemySpeed * 100 });
+    expect(xp).toBeCloseTo(CONFIG.xpPerKill * 1.5);
+  });
+
   it('CONFIG.waveClearXp is 3', () => {
     expect(CONFIG.waveClearXp).toBe(3);
   });

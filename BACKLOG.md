@@ -39,10 +39,10 @@ Keep items small and verifiable. A good item names *what done looks like*.
       asserting it is offerable; `step()` checks `dist(e.x, e.y, c.x, c.y) < 60` on kill and
       heals when `'siphon'` is unlocked. Added SKILLS.siphon passive; heal on close kill in step(); 2 tests (offerable, not re-offered); nova fixture updated for 15-skill pool.
 
-- [ ] Speed-scaled enemy XP: in `xpForKill`, multiply by `Math.min(1.5, 1 + 0.1 * (enemy.spd /
+- [x] Speed-scaled enemy XP: in `xpForKill`, multiply by `Math.min(1.5, 1 + 0.1 * (enemy.spd /
       CONFIG.baseEnemySpeed - 1))` so faster enemies yield more XP (darts and high-wave normals);
       apply the multiplier after all existing multipliers. Done = 2 engine tests: dart XP is
-      higher than normal enemy XP at the same wave, bonus is capped at 1.5×.
+      higher than normal enemy XP at the same wave, bonus is capped at 1.5×. Added speedMult to xpForKill; 2 tests confirm faster→more XP and 1.5× cap; existing type-mult tests unaffected.
 
 - [ ] Shielded enemy type: a new `shielded` variant spawns from wave 4 onward (8 % base
       chance + 0.5 % per wave). Its frontal arc (facing toward core, ±70°) blocks auto-shots

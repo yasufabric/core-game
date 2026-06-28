@@ -172,10 +172,13 @@ export function splitterChildren(enemy) {
 }
 
 export function xpForKill(stats, enemy) {
-  const mult = enemy
+  const typeMult = enemy
     ? (enemy.boss ? 5 : enemy.tanky ? 2 : enemy.splitter ? 1.5 : enemy.dart ? 0.8 : 1)
     : 1;
-  return CONFIG.xpPerKill * mult * (1 + (stats.magnet || 0));
+  const speedMult = (enemy && enemy.spd)
+    ? Math.min(1.5, 1 + 0.1 * (enemy.spd / CONFIG.baseEnemySpeed - 1))
+    : 1;
+  return CONFIG.xpPerKill * typeMult * speedMult * (1 + (stats.magnet || 0));
 }
 
 export function waveForTime(elapsedSec) {
