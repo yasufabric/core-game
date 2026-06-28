@@ -651,6 +651,11 @@ function step(dt) {
       applyXp(CONFIG.clutchXp);
       G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 55, born: G.t, life: 0.6, color: '#ff4400' });
     }
+    const healed = Math.min(CONFIG.waveClearHeal, CONFIG.coreHp - c.hp);
+    if (healed > 0) {
+      c.hp += healed;
+      G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 30, born: G.t, life: 0.4, color: '#4cff91' });
+    }
   }
 
   // drone auto-zap

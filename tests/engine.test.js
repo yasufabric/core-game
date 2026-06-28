@@ -184,6 +184,10 @@ describe('stats', () => {
   it('CONFIG.clutchXp is 8', () => {
     expect(CONFIG.clutchXp).toBe(8);
   });
+
+  it('CONFIG.waveClearHeal is 5', () => {
+    expect(CONFIG.waveClearHeal).toBe(5);
+  });
 });
 
 describe('SKILLS', () => {

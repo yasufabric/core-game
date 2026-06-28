@@ -36,11 +36,11 @@ Keep items small and verifiable. A good item names *what done looks like*.
       with a test pinning the value; `step()` checks the HP threshold when enemies drop to 0
       and only awards the bonus when the low-HP condition is met. Mixed; 1 engine test. Added CONFIG.clutchXp=8; step() awards +8 XP + red ring when c.hp ≤ 10% on clear; 1 test passes.
 
-- [ ] Wave-clear HP recovery: when all enemies are wiped out, restore `CONFIG.waveClearHeal = 5`
+- [x] Wave-clear HP recovery: when all enemies are wiped out, restore `CONFIG.waveClearHeal = 5`
       HP to the core (capped at `CONFIG.coreHp`). Done = `CONFIG.waveClearHeal = 5` exported
       from `engine.js` with a test pinning the value; `step()` in `index.html` heals `c.hp` by
       `Math.min(CONFIG.waveClearHeal, CONFIG.coreHp - c.hp)` when enemies drop to 0; green ring
-      FX pushed at core on heal. Mixed; 1 engine test.
+      FX pushed at core on heal. Mixed; 1 engine test. Added CONFIG.waveClearHeal=5; step() heals on clear + green ring FX; 1 test passes.
 
 - [ ] Tap-to-reposition: tapping the arena canvas (outside skill buttons) slides the core to
       that point over 0.8 s; a 12 s cooldown (stored in `CONFIG.reposCooldown`) prevents
