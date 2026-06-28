@@ -5,6 +5,8 @@ import {
   xpForLevel, gainXp, defaultStats, derive, rollOffers,
   applyStatCard, dist, enemyHitsCore, coreDamageTaken, splitterChildren, xpForKill, waveForTime, clamp, SKILLS, CONFIG, isBossWave,
   pointSegDist, createEnemy, createBoss,
+  skillReady, executeSkill,
+  stepCore, stepEnemies, stepShots, stepAutoFire,
 } from '../src/engine.js';
 
 describe('xp / leveling', () => {
@@ -518,5 +520,203 @@ describe('boss wave cadence', () => {
     expect(waveForTime(wave5Start)).toBe(5);
     expect(isBossWave(waveForTime(wave5Start))).toBe(true);
     expect(isBossWave(waveForTime(wave5Start - 1))).toBe(false);
+  });
+});
+
+// Minimal G factory for testing engine step functions.
+function makeG(overrides = {}) {
+  return {
+    t: 0,
+    core: { x: 200, y: 400, hp: CONFIG.coreHp },
+    stats: defaultStats(),
+    enemies: [], shots: [], fx: [], missiles: [],
+    unlocked: [],
+    cooldowns: {},
+    slowUntil: 0, shieldUntil: 0,
+    blinkHome: null, blinkReturn: 0,
+    reposTarget: null, reposStart: null,
+    drone: { angle: 0, lastZap: 0 },
+    lastAuto: 0, autoShotCount: 0,
+    lastSpawn: 0, wave: 1,
+    lastBossWave: 0, bossFlashUntil: 0,
+    ...overrides,
+  };
+}
+
+describe('skillReady', () => {
+  it('returns true when no cooldown set', () => {
+    const G = makeG();
+    expect(skillReady(G, 'pulse')).toBe(true);
+  });
+
+  it('returns false while on cooldown', () => {
+    const G = makeG({ t: 5 });
+    G.cooldowns['pulse'] = 10;
+    expect(skillReady(G, 'pulse')).toBe(false);
+  });
+
+  it('returns true once cooldown expires', () => {
+    const G = makeG({ t: 10 });
+    G.cooldowns['pulse'] = 10;
+    expect(skillReady(G, 'pulse')).toBe(true);
+  });
+});
+
+describe('executeSkill', () => {
+  it('pulse damages enemies within 150px and pushes a ring fx', () => {
+    const G = makeG();
+    G.enemies.push({ x: G.core.x, y: G.core.y + 100, r: 8, hp: 10 });
+    G.enemies.push({ x: G.core.x, y: G.core.y + 200, r: 8, hp: 10 });
+    executeSkill(G, 'pulse', 0, 0, 400, 700);
+    expect(G.enemies[0].hp).toBeLessThan(10);
+    expect(G.enemies[1].hp).toBe(10); // out of 150px range
+    expect(G.fx.some(f => f.kind === 'ring')).toBe(true);
+  });
+
+  it('pulse sets cooldown on G', () => {
+    const G = makeG();
+    executeSkill(G, 'pulse', 0, 0, 400, 700);
+    expect(G.cooldowns['pulse']).toBeGreaterThan(0);
+  });
+
+  it('heal increases core hp and pushes ring fx', () => {
+    const G = makeG();
+    G.core.hp = 50;
+    executeSkill(G, 'heal', 0, 0, 400, 700);
+    expect(G.core.hp).toBeGreaterThan(50);
+    expect(G.fx.some(f => f.kind === 'ring' && f.color === '#4cff91')).toBe(true);
+  });
+
+  it('heal cannot exceed CONFIG.coreHp', () => {
+    const G = makeG();
+    G.core.hp = CONFIG.coreHp - 1;
+    executeSkill(G, 'heal', 0, 0, 400, 700);
+    expect(G.core.hp).toBe(CONFIG.coreHp);
+  });
+
+  it('slow sets slowUntil 3 seconds into the future', () => {
+    const G = makeG({ t: 10 });
+    executeSkill(G, 'slow', 0, 0, 400, 700);
+    expect(G.slowUntil).toBe(13);
+  });
+
+  it('shield sets shieldUntil 2.5 seconds into the future', () => {
+    const G = makeG({ t: 5 });
+    executeSkill(G, 'shield', 0, 0, 400, 700);
+    expect(G.shieldUntil).toBeCloseTo(7.5);
+  });
+
+  it('bomb damages all enemies on screen', () => {
+    const G = makeG();
+    G.enemies.push({ x: 0, y: 0, r: 8, hp: 20 });
+    G.enemies.push({ x: 800, y: 800, r: 8, hp: 20 });
+    executeSkill(G, 'bomb', 0, 0, 400, 700);
+    expect(G.enemies[0].hp).toBeLessThan(20);
+    expect(G.enemies[1].hp).toBeLessThan(20);
+  });
+
+  it('blink moves core to aim point and saves home position', () => {
+    const G = makeG();
+    const origX = G.core.x, origY = G.core.y;
+    executeSkill(G, 'blink', 300, 500, 400, 700);
+    expect(G.blinkHome).toEqual({ x: origX, y: origY });
+    expect(G.core.x).toBe(300);
+    expect(G.core.y).toBe(500);
+  });
+
+  it('executeSkill returns CONFIG.xpPerSkillUse', () => {
+    const G = makeG();
+    const xp = executeSkill(G, 'pulse', 0, 0, 400, 700);
+    expect(xp).toBe(CONFIG.xpPerSkillUse);
+  });
+});
+
+describe('stepCore', () => {
+  it('regen increases core hp over time', () => {
+    const G = makeG();
+    G.core.hp = 50;
+    G.stats.regen = 10;
+    stepCore(G, 1);
+    expect(G.core.hp).toBeCloseTo(60);
+  });
+
+  it('regen cannot exceed CONFIG.coreHp', () => {
+    const G = makeG();
+    G.core.hp = CONFIG.coreHp - 1;
+    G.stats.regen = 100;
+    stepCore(G, 1);
+    expect(G.core.hp).toBe(CONFIG.coreHp);
+  });
+
+  it('blink snap-back restores core position when blinkReturn reached', () => {
+    const G = makeG({ t: 5 });
+    G.blinkHome = { x: 100, y: 200 };
+    G.blinkReturn = 5;
+    G.core.x = 300; G.core.y = 400;
+    stepCore(G, 0);
+    expect(G.core.x).toBe(100);
+    expect(G.core.y).toBe(200);
+    expect(G.blinkHome).toBeNull();
+  });
+});
+
+describe('stepEnemies', () => {
+  it('moves enemies toward core', () => {
+    const G = makeG();
+    const d = derive(defaultStats(), 1);
+    const startY = G.core.y + 300;
+    G.enemies.push({ x: G.core.x, y: startY, r: 8, hp: 10, maxHp: 10, spd: 50, tanky: false });
+    stepEnemies(G, d, 0.1);
+    expect(G.enemies[0].y).toBeLessThan(startY); // moved toward core (smaller y)
+  });
+
+  it('detects wave clear when all enemies die', () => {
+    const G = makeG();
+    const d = derive(defaultStats(), 1);
+    G.enemies.push({ x: G.core.x, y: G.core.y, r: 8, hp: 0, maxHp: 10, spd: 50, tanky: false });
+    const result = stepEnemies(G, d, 0.016);
+    expect(result.waveClear).toBe(true);
+    expect(result.killCount).toBe(1);
+  });
+
+  it('does not report waveClear when no enemies were present', () => {
+    const G = makeG();
+    const d = derive(defaultStats(), 1);
+    const result = stepEnemies(G, d, 0.016);
+    expect(result.waveClear).toBe(false);
+    expect(result.killCount).toBe(0);
+  });
+
+  it('shield blocks core damage', () => {
+    const G = makeG({ t: 10 });
+    G.shieldUntil = 15;
+    const d = derive(defaultStats(), 1);
+    const startHp = G.core.hp;
+    G.enemies.push({ x: G.core.x, y: G.core.y, r: 100, hp: 5, maxHp: 5, spd: 0, tanky: false });
+    stepEnemies(G, d, 0.016);
+    expect(G.core.hp).toBe(startHp); // no damage through shield
+    expect(result => result).toBeDefined();
+  });
+
+  it('accumulates xp from kills including enemy type multipliers', () => {
+    const G = makeG();
+    const d = derive(defaultStats(), 1);
+    G.enemies.push({ x: 0, y: 0, r: 8, hp: 0, maxHp: 10, spd: 50, boss: true });
+    const result = stepEnemies(G, d, 0.016);
+    expect(result.xpGained).toBeGreaterThan(CONFIG.xpPerKill * 4);
+  });
+});
+
+describe('SKILLS auto flag', () => {
+  it('missile has auto:true', () => {
+    expect(SKILLS.missile.auto).toBe(true);
+  });
+
+  it('drone has auto:true', () => {
+    expect(SKILLS.drone.auto).toBe(true);
+  });
+
+  it('pulse does not have auto:true', () => {
+    expect(SKILLS.pulse.auto).toBeFalsy();
   });
 });
