@@ -7,7 +7,14 @@ Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
 
-<!-- ── FIXES ──────────────────────────────────────────────────── -->
+<!-- ── FIXES (highest priority) ───────────────────────────────── -->
+- [ ] Long-press to reposition: replace the tap-to-reposition trigger with a 200ms long-press.
+      `pointerdown` records `G.holdStart = G.t`; `pointerup` only repositions when
+      `G.t - G.holdStart >= 0.2` AND cooldown is ready AND `!G.blinkHome`. Quick taps (skills,
+      accidental) are ignored. Update `tests/smoke.test.js` test 1 to use `mouse.down()` +
+      `waitForTimeout(300)` + `mouse.up()` instead of `page.mouse.click()`. Rendering/input-only;
+      no engine test needed.
+
 - [ ] Thorns redesign (currently a no-op): the existing `e.hp -= 4` fires immediately before
       `e.hp = 0`, so thorns damage is always overwritten. Replace with a passive aura: every
       frame, deal `CONFIG.thornsAura = 4` damage per second to all enemies within
@@ -15,6 +22,75 @@ Keep items small and verifiable. A good item names *what done looks like*.
       `engine.js` with a test pinning the value; `step()` applies `e.hp -= CONFIG.thornsAura * dt`
       to nearby enemies when `'thorns'` is unlocked; remove the old dead-code hit line. Mixed; 1 engine test.
 
+<!-- ── POLISH ──────────────────────────────────────────────────── -->
+- [ ] Enemy hit flash on damage: when any enemy takes a non-lethal hit, set `e.hitFlash = G.t`
+      on the enemy object; in `src/renderer.js`, render the enemy white for the first 60ms after
+      `e.hitFlash` (check `G.t - e.hitFlash < 0.06`). Makes high-HP tanky enemies and the boss
+      feel responsive to fire. Rendering-only; no engine test needed.
+
+- [ ] Wave number color ramp: in `step()` where `textContent` of `#wave` is updated, also set
+      its `style.color` — white for wave 1–9, linearly interpolate to amber `#ffb347` at wave
+      10, then to red `#ff4444` at wave 20+; cache last wave to skip DOM write when unchanged.
+      Rendering-only; no engine test needed.
+
+<!-- ── CONTENT ─────────────────────────────────────────────────── -->
+- [ ] Siphon passive skill: killing an enemy within 60 px of the core restores 1 HP (capped
+      at `CONFIG.coreHp`). Done = `SKILLS.siphon` (`passive: true`) in `engine.js`, test
+      asserting it is offerable; `step()` checks `dist(e.x, e.y, c.x, c.y) < 60` on kill and
+      heals when `'siphon'` is unlocked.
+
+- [ ] Speed-scaled enemy XP: in `xpForKill`, multiply by `Math.min(1.5, 1 + 0.1 * (enemy.spd /
+      CONFIG.baseEnemySpeed - 1))` so faster enemies yield more XP (darts and high-wave normals);
+      apply the multiplier after all existing multipliers. Done = 2 engine tests: dart XP is
+      higher than normal enemy XP at the same wave, bonus is capped at 1.5×.
+
+- [ ] Shielded enemy type: a new `shielded` variant spawns from wave 4 onward (8 % base
+      chance + 0.5 % per wave). Its frontal arc (facing toward core, ±70°) blocks auto-shots
+      — they deal 0 damage. Skill hits (pulse, lance, bomb, chain, nova, repulse) bypass the
+      shield entirely. Done = `isShieldBlocked(shot, enemy, core)` exported from `engine.js`
+      with tests: shot arriving from the core direction returns true, shot from behind returns
+      false; shielded enemy spawned in `index.html` with a distinct visual arc indicator.
+
+- [ ] Leech drain enemy: new enemy type (pentagon, dark green, wave 6+, 5% spawn chance) that
+      does not deal HP damage but drains XP at `0.5 XP/s` while within 80px of the core
+      (`G.xp -= 0.5 * dt`, clamped to 0). Done = `CONFIG.leechDrainRate = 0.5` and
+      `CONFIG.leechRange = 80` exported from `engine.js` with tests; `spawnEnemy()` spawns
+      leech enemies; `step()` applies drain; distinct pentagon shape + dark green in renderer.
+      Mixed; 2 engine tests.
+
+- [ ] Spawn one mini-boss spike enemy mid-wave every 7 seconds from wave 4 onward (+50% HP,
+      +30% speed). Done = `CONFIG.spikeCooldown = 7`, `CONFIG.spikeHpMult = 1.5`, and
+      `CONFIG.spikeSpeedMult = 1.3` exported from `engine.js`, each with a test pinning the
+      value; `step()` in `index.html` spawns one spike enemy when
+      `G.t - G.lastSpikeAt >= CONFIG.spikeCooldown` and `G.wave >= 4`; `G.lastSpikeAt` reset
+      in `newGame()`. Mixed; 3 engine tests.
+
+- [ ] Grant `CONFIG.synergyXp = 3` bonus XP when 2 different skills are activated within 1
+      second of each other; track `G.lastSkillAt` (timestamp) and `G.lastSkillId` (skill name)
+      in game state and reset both in `newGame()`. Done = `CONFIG.synergyXp = 3` in `engine.js`
+      with a test pinning the value; `triggerSkill()` checks `G.t - G.lastSkillAt < 1 &&
+      skillName !== G.lastSkillId` and calls `gainXp(CONFIG.synergyXp)` when met; 2 engine
+      tests (config value pinned, synergy XP granted on eligible combo). Mixed.
+
+- [ ] Add `SKILLS.leech` passive skill: when any active skill hits an enemy, restore
+      `Math.round(0.3 * stats.power)` HP to the core (capped at `CONFIG.coreHp`). Done =
+      `SKILLS.leech` (`passive: true`) in `engine.js`, offerable by `rollOffers` (test: leech
+      appears in locked list before unlock, not after); `step()` in `index.html` applies HP
+      restore per skill-hit when `G.unlocked` includes `'leech'`; 2 engine tests (skill defined
+      and offerable, restore formula rounds correctly). Mixed.
+
+- [ ] When a crit auto-shot fires and `'drone'` is in `G.unlocked`, reset `G.droneCd` to 0.
+      Done = logic added to the auto-shot crit branch in `step()` in `index.html`;
+      `G.droneCd = 0` set immediately after crit damage is applied when drone is unlocked;
+      visible as drone firing immediately after a crit. Rendering/input-only; no engine test
+      needed.
+
+- [ ] Push a white ring-burst FX (radius 0→20, life=0.15s) at the spawn point each time an
+      enemy enters the arena. Done = renderer in `index.html` pushes a `ring` FX entry at
+      enemy spawn coordinates; ring visibly expands and fades within 0.15s at wave 3+.
+      Rendering-only; no test needed.
+
+<!-- ── COMPLETED ───────────────────────────────────────────────── -->
 - [x] Persist best score: `bestWave` loaded from `localStorage` on init; saved back on game over; RETRY splash unchanged; no engine change.
 
 - [x] Drone damage boost: drone zap damage 1×power → 3×power so the drone stays relevant past wave 3; update the 1 test that checks drone power if one exists, or add one. Added CONFIG.droneDamageMult=3 in engine.js; index.html uses it; test pins value at 3.
@@ -66,51 +142,6 @@ Keep items small and verifiable. A good item names *what done looks like*.
       at half damage. Done = `SKILLS.overload` (`passive: true`) in `engine.js` with a test
       asserting it is offerable; `G.autoShotCount` tracked in state; when count % 8 === 0
       and `'overload'` is unlocked, 8 radial shots pushed in `step()`. Added SKILLS.overload passive; G.autoShotCount tracked; 8-way burst on count%8; 1 test; nova fixture updated for 14-skill pool.
-
-- [ ] Siphon passive skill: killing an enemy within 60 px of the core restores 1 HP (capped
-      at `CONFIG.coreHp`). Done = `SKILLS.siphon` (`passive: true`) in `engine.js`, test
-      asserting it is offerable; `step()` checks `dist(e.x, e.y, c.x, c.y) < 60` on kill and
-      heals when `'siphon'` is unlocked.
-
-- [ ] Shielded enemy type: a new `shielded` variant spawns from wave 4 onward (8 % base
-      chance + 0.5 % per wave). Its frontal arc (facing toward core, ±70°) blocks auto-shots
-      — they deal 0 damage. Skill hits (pulse, lance, bomb, chain, nova, repulse) bypass the
-      shield entirely. Done = `isShieldBlocked(shot, enemy, core)` exported from `engine.js`
-      with tests: shot arriving from the core direction returns true, shot from behind returns
-      false; shielded enemy spawned in `index.html` with a distinct visual arc indicator.
-
-<!-- ── FROM REVIEW 2026-06-28 ──────────────────────────────────── -->
-- [ ] Spawn one mini-boss spike enemy mid-wave every 7 seconds from wave 4 onward (+50% HP,
-      +30% speed). Done = `CONFIG.spikeCooldown = 7`, `CONFIG.spikeHpMult = 1.5`, and
-      `CONFIG.spikeSpeedMult = 1.3` exported from `engine.js`, each with a test pinning the
-      value; `step()` in `index.html` spawns one spike enemy when
-      `G.t - G.lastSpikeAt >= CONFIG.spikeCooldown` and `G.wave >= 4`; `G.lastSpikeAt` reset
-      in `newGame()`. Mixed; 3 engine tests.
-
-- [ ] Grant `CONFIG.synergyXp = 3` bonus XP when 2 different skills are activated within 1
-      second of each other; track `G.lastSkillAt` (timestamp) and `G.lastSkillId` (skill name)
-      in game state and reset both in `newGame()`. Done = `CONFIG.synergyXp = 3` in `engine.js`
-      with a test pinning the value; `triggerSkill()` checks `G.t - G.lastSkillAt < 1 &&
-      skillName !== G.lastSkillId` and calls `gainXp(CONFIG.synergyXp)` when met; 2 engine
-      tests (config value pinned, synergy XP granted on eligible combo). Mixed.
-
-- [ ] Add `SKILLS.leech` passive skill: when any active skill hits an enemy, restore
-      `Math.round(0.3 * stats.power)` HP to the core (capped at `CONFIG.coreHp`). Done =
-      `SKILLS.leech` (`passive: true`) in `engine.js`, offerable by `rollOffers` (test: leech
-      appears in locked list before unlock, not after); `step()` in `index.html` applies HP
-      restore per skill-hit when `G.unlocked` includes `'leech'`; 2 engine tests (skill defined
-      and offerable, restore formula rounds correctly). Mixed.
-
-- [ ] When a crit auto-shot fires and `'drone'` is in `G.unlocked`, reset `G.droneCd` to 0.
-      Done = logic added to the auto-shot crit branch in `step()` in `index.html`;
-      `G.droneCd = 0` set immediately after crit damage is applied when drone is unlocked;
-      visible as drone firing immediately after a crit. Rendering/input-only; no engine test
-      needed.
-
-- [ ] Push a white ring-burst FX (radius 0→20, life=0.15s) at the spawn point each time an
-      enemy enters the arena. Done = renderer in `index.html` pushes a `ring` FX entry at
-      enemy spawn coordinates; ring visibly expands and fades within 0.15s at wave 3+.
-      Rendering-only; no test needed.
 
 ## Done
 <!-- the loop appends finished items here with a one-line note -->
