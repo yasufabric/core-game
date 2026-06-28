@@ -32,8 +32,7 @@ src/engine.js           pure game logic — leveling, stats, difficulty, skills,
 tests/engine.test.js    the verification spine (vitest)
 CLAUDE.md               working notes + invariants for Claude Code
 BACKLOG.md              the queue the loop pulls from
-.claude/commands/       /loop and /goal
-.claude/skills/         game-verify (how to check a change is really done)
+.claude/skills/         loop, goal, game-verify, brainstorm, review-candidates, add-backlog
 .github/workflows/      @claude on GitHub Actions
 ```
 
