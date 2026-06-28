@@ -658,6 +658,9 @@ function step(dt) {
   for (const e of G.enemies) {
     if (e.hp <= 0) {
       totalXp += xpForKill(G.stats, e);
+      if (G.unlocked.includes('siphon') && dist(e.x, e.y, c.x, c.y) < 60) {
+        c.hp = Math.min(CONFIG.coreHp, c.hp + 1);
+      }
       const col = e.boss ? '#ffd700' : e.tanky ? '#ff8a4d' : e.splitter ? '#f277ff' : getCss('--enemy');
       G.fx.push({ kind: 'burst', x: e.x, y: e.y, color: col, born: G.t, life: 0.4, n: 7 });
       spawnedFromSplitters.push(...splitterChildren(e));

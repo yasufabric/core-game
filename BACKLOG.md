@@ -34,10 +34,10 @@ Keep items small and verifiable. A good item names *what done looks like*.
       Rendering-only; no engine test needed. Added waveColor() helper and lastWaveColored cache; style.color set only on wave change.
 
 <!-- ── CONTENT ─────────────────────────────────────────────────── -->
-- [ ] Siphon passive skill: killing an enemy within 60 px of the core restores 1 HP (capped
+- [x] Siphon passive skill: killing an enemy within 60 px of the core restores 1 HP (capped
       at `CONFIG.coreHp`). Done = `SKILLS.siphon` (`passive: true`) in `engine.js`, test
       asserting it is offerable; `step()` checks `dist(e.x, e.y, c.x, c.y) < 60` on kill and
-      heals when `'siphon'` is unlocked.
+      heals when `'siphon'` is unlocked. Added SKILLS.siphon passive; heal on close kill in step(); 2 tests (offerable, not re-offered); nova fixture updated for 15-skill pool.
 
 - [ ] Speed-scaled enemy XP: in `xpForKill`, multiply by `Math.min(1.5, 1 + 0.1 * (enemy.spd /
       CONFIG.baseEnemySpeed - 1))` so faster enemies yield more XP (darts and high-wave normals);

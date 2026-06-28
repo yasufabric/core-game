@@ -95,6 +95,7 @@ export const SKILLS = {
   heal:     { id: 'heal',     name: 'Heal',     tap: 1, cooldown: 22, desc: 'Restore up to 20 HP to the core' },
   thorns:   { id: 'thorns',   name: 'Thorns',   passive: true,       desc: 'Enemies within range of the core take 4 damage/sec' },
   overload: { id: 'overload', name: 'Overload', passive: true,       desc: 'Every 8th auto-shot fires a burst of 8 radial shots at half damage' },
+  siphon:   { id: 'siphon',   name: 'Siphon',   passive: true,       desc: 'Killing an enemy within 60px of the core restores 1 HP' },
 };
 
 export const STAT_CARDS = [
