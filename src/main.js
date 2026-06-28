@@ -49,7 +49,7 @@ function newGame() {
   resize();
   G = {
     running: true,
-    t: 0, lastSpawn: 0,
+    t: 0, waveTime: 0, lastSpawn: 0,
     core: { x: W / 2, y: H * 0.46, hp: CONFIG.coreHp },
     stats: defaultStats(),
     level: 1, xp: 0, xpNeeded: xpForLevel(1),
@@ -246,7 +246,8 @@ function frame(now) {
 
 function step(dt) {
   G.t += dt;
-  const nextWave = waveForTime(G.t);
+  if (!G.enemies.some(e => e.boss && e.hp > 0)) G.waveTime += dt;
+  const nextWave = waveForTime(G.waveTime);
   if (nextWave !== G.wave) { G.wave = nextWave; announceWave(G.wave); }
   const d = derive(G.stats, G.wave);
 

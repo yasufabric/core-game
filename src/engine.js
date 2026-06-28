@@ -565,10 +565,6 @@ export function stepEnemies(G, d, dt) {
       for (const other of G.enemies) {
         if (other === e || other.hp <= 0) continue;
         if (dist(other.x, other.y, c.x, c.y) <= 80) {
-          const dx = other.x - c.x, dy = other.y - c.y;
-          const len = Math.sqrt(dx * dx + dy * dy) || 1;
-          other.x += (dx / len) * 60;
-          other.y += (dy / len) * 60;
           other.stunUntil = G.t + 0.4;
         }
       }
