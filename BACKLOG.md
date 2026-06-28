@@ -8,6 +8,13 @@ Keep items small and verifiable. A good item names *what done looks like*.
 ## Up next
 
 <!-- ── FIXES ──────────────────────────────────────────────────── -->
+- [ ] Thorns redesign (currently a no-op): the existing `e.hp -= 4` fires immediately before
+      `e.hp = 0`, so thorns damage is always overwritten. Replace with a passive aura: every
+      frame, deal `CONFIG.thornsAura = 4` damage per second to all enemies within
+      `CONFIG.coreRadius + 50` px of the core. Done = `CONFIG.thornsAura = 4` exported from
+      `engine.js` with a test pinning the value; `step()` applies `e.hp -= CONFIG.thornsAura * dt`
+      to nearby enemies when `'thorns'` is unlocked; remove the old dead-code hit line. Mixed; 1 engine test.
+
 - [x] Persist best score: `bestWave` loaded from `localStorage` on init; saved back on game over; RETRY splash unchanged; no engine change.
 
 - [x] Drone damage boost: drone zap damage 1×power → 3×power so the drone stays relevant past wave 3; update the 1 test that checks drone power if one exists, or add one. Added CONFIG.droneDamageMult=3 in engine.js; index.html uses it; test pins value at 3.
