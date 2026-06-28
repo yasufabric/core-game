@@ -2,7 +2,7 @@ import {
   CONFIG, xpForLevel, gainXp, defaultStats, derive,
   rollOffers, applyStatCard, waveForTime, clamp, SKILLS,
   skillReady, executeSkill,
-  stepCore, stepBossSpawn, stepSpawn, stepNovaDet, stepAutoFire,
+  stepCore, stepBossSpawn, stepSpawn, stepSpikeSpawn, stepNovaDet, stepAutoFire,
   stepShots, stepMissiles, stepEnemies, stepDrone,
 } from './engine.js';
 import { draw as drawFrame } from './renderer.js';
@@ -70,6 +70,7 @@ function newGame() {
     reposLastAt: -CONFIG.reposCooldown, reposTarget: null, reposStart: null,
     autoShotCount: 0,
     firstBloodDone: false,
+    lastSpikeAt: -CONFIG.spikeCooldown,
   };
   cancelFast();
   renderSkillBar();
@@ -251,6 +252,7 @@ function step(dt) {
   stepCore(G, dt);
   stepBossSpawn(G, d, W, H, Math.random);
   stepSpawn(G, d, W, H, Math.random);
+  stepSpikeSpawn(G, d, W, H, Math.random);
   stepNovaDet(G);
   stepAutoFire(G, d, Math.random);
   stepShots(G, dt, W, H);

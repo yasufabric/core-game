@@ -28,6 +28,9 @@ export const CONFIG = {
   firstBloodXp: 5,           // bonus XP awarded on the very first kill of each game
   leechDrainRate: 0.5,       // XP drained per second while leech is within leechRange
   leechRange: 80,            // px from core within which leech drains XP
+  spikeCooldown: 7,          // seconds between spike mini-boss spawns (wave 4+)
+  spikeHpMult: 1.5,          // HP multiplier for spike relative to base wave HP
+  spikeSpeedMult: 1.3,       // speed multiplier for spike relative to base wave speed
 };
 
 // --- leveling -------------------------------------------------------------
@@ -253,6 +256,18 @@ export function createBoss(d, W, H, rng) {
   return { x, y, r: 28, hp, maxHp: hp, spd: d.enemySpeed * 0.35, tanky: false, boss: true };
 }
 
+export function createSpike(d, W, H, rng) {
+  const edge = Math.floor(rng() * 4);
+  const m = 20;
+  let x, y;
+  if (edge === 0)      { x = rng() * W; y = -m; }
+  else if (edge === 1) { x = W + m;     y = rng() * H; }
+  else if (edge === 2) { x = rng() * W; y = H + m; }
+  else                 { x = -m;        y = rng() * H; }
+  const hp = d.enemyHp * CONFIG.spikeHpMult;
+  return { x, y, r: 11, hp, maxHp: hp, spd: d.enemySpeed * CONFIG.spikeSpeedMult, spike: true };
+}
+
 // --- skill readiness ----------------------------------------------------------
 
 export function skillReady(G, id) {
@@ -389,6 +404,16 @@ export function stepSpawn(G, d, W, H, rng) {
     return true;
   }
   return false;
+}
+
+// Spawns a spike mini-boss every CONFIG.spikeCooldown seconds from wave 4 onward.
+export function stepSpikeSpawn(G, d, W, H, rng) {
+  if (G.wave < 4) return false;
+  if (G.enemies.some(e => e.boss)) return false;
+  if (G.t - (G.lastSpikeAt || -CONFIG.spikeCooldown) < CONFIG.spikeCooldown) return false;
+  G.enemies.push(createSpike(d, W, H, rng));
+  G.lastSpikeAt = G.t;
+  return true;
 }
 
 // Detonates nova FX that have passed their trigger time.

@@ -58,12 +58,12 @@ Keep items small and verifiable. A good item names *what done looks like*.
       leech enemies; `step()` applies drain; distinct pentagon shape + dark green in renderer.
       Mixed; 2 engine tests. Added CONFIG.leechDrainRate/Range; leech variant in createEnemy; drain in stepEnemies; no HP damage on hit; pentagon renderer; 3 tests pass.
 
-- [ ] Spawn one mini-boss spike enemy mid-wave every 7 seconds from wave 4 onward (+50% HP,
+- [x] Spawn one mini-boss spike enemy mid-wave every 7 seconds from wave 4 onward (+50% HP,
       +30% speed). Done = `CONFIG.spikeCooldown = 7`, `CONFIG.spikeHpMult = 1.5`, and
       `CONFIG.spikeSpeedMult = 1.3` exported from `engine.js`, each with a test pinning the
       value; `step()` in `index.html` spawns one spike enemy when
       `G.t - G.lastSpikeAt >= CONFIG.spikeCooldown` and `G.wave >= 4`; `G.lastSpikeAt` reset
-      in `newGame()`. Mixed; 3 engine tests.
+      in `newGame()`. Mixed; 3 engine tests. Added CONFIG values; createSpike+stepSpikeSpawn in engine.js; called in main.js step(); orange 7-sided renderer; 3 tests pass.
 
 - [ ] Grant `CONFIG.synergyXp = 3` bonus XP when 2 different skills are activated within 1
       second of each other; track `G.lastSkillAt` (timestamp) and `G.lastSkillId` (skill name)

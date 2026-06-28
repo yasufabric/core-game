@@ -694,6 +694,20 @@ describe('stepEnemies', () => {
   });
 });
 
+describe('spike mini-boss config', () => {
+  it('CONFIG.spikeCooldown is 7', () => {
+    expect(CONFIG.spikeCooldown).toBe(7);
+  });
+
+  it('CONFIG.spikeHpMult is 1.5', () => {
+    expect(CONFIG.spikeHpMult).toBe(1.5);
+  });
+
+  it('CONFIG.spikeSpeedMult is 1.3', () => {
+    expect(CONFIG.spikeSpeedMult).toBe(1.3);
+  });
+});
+
 describe('leech drain enemy', () => {
   it('CONFIG.leechDrainRate is 0.5', () => {
     expect(CONFIG.leechDrainRate).toBe(0.5);
