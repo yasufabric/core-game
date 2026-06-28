@@ -20,7 +20,6 @@
       "Edit(CLAUDE.md)"
     ],
     "ask": [
-      "Bash(git push:*)",
       "Bash(npm install:*)"
     ],
     "deny": [
