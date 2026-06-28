@@ -13,8 +13,11 @@ test.describe('CORE smoke', () => {
 
     const canvas = page.locator('canvas');
     const box = await canvas.boundingBox();
-    // reposLastAt starts at -reposCooldown so CD is ready from t=0
-    await page.mouse.click(box.x + box.width * 0.25, box.y + box.height * 0.25);
+    // long-press (≥200ms) triggers reposition; reposLastAt starts at -reposCooldown so CD is ready
+    await page.mouse.move(box.x + box.width * 0.25, box.y + box.height * 0.25);
+    await page.mouse.down();
+    await page.waitForTimeout(300);
+    await page.mouse.up();
     await page.waitForTimeout(1000); // let slide complete
 
     const core = await page.evaluate(() => {

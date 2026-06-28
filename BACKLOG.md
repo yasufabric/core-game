@@ -8,12 +8,12 @@ Keep items small and verifiable. A good item names *what done looks like*.
 ## Up next
 
 <!-- ── FIXES (highest priority) ───────────────────────────────── -->
-- [ ] Long-press to reposition: replace the tap-to-reposition trigger with a 200ms long-press.
+- [x] Long-press to reposition: replace the tap-to-reposition trigger with a 200ms long-press.
       `pointerdown` records `G.holdStart = G.t`; `pointerup` only repositions when
       `G.t - G.holdStart >= 0.2` AND cooldown is ready AND `!G.blinkHome`. Quick taps (skills,
       accidental) are ignored. Update `tests/smoke.test.js` test 1 to use `mouse.down()` +
       `waitForTimeout(300)` + `mouse.up()` instead of `page.mouse.click()`. Rendering/input-only;
-      no engine test needed.
+      no engine test needed. Changed pointerdown to record holdStartMs/holdX/holdY; pointerup checks Date.now() diff ≥ 200ms; smoke test updated to long-press.
 
 - [ ] Thorns redesign (currently a no-op): the existing `e.hp -= 4` fires immediately before
       `e.hp = 0`, so thorns damage is always overwritten. Replace with a passive aura: every

@@ -205,6 +205,7 @@ let bestWave = parseInt(localStorage.getItem('bestWave') || '0', 10);
 let waveFlashTimer = 0;
 let fastMode = false;
 let fastTimer = null;
+let holdStartMs = 0, holdX = 0, holdY = 0;
 function cancelFast() { clearTimeout(fastTimer); fastTimer = null; fastMode = false; }
 function newGame() {
   resize();
@@ -393,17 +394,24 @@ cv.addEventListener('pointerdown', (e) => {
   if (G.aiming) {
     triggerSkill(G.aiming, x, y);
     setAiming(null);
-  } else if (G.t - G.reposLastAt >= CONFIG.reposCooldown && !G.blinkHome) {
-    G.reposTarget = { x: clamp(x, 40, W - 40), y: clamp(y, 40, H - 40) };
+    return;
+  }
+  holdX = x; holdY = y; holdStartMs = Date.now();
+  cv.setPointerCapture(e.pointerId);
+  fastTimer = setTimeout(() => { fastMode = true; }, 150);
+});
+cv.addEventListener('pointerup', () => {
+  if (G && G.running && !G.paused && holdStartMs &&
+      Date.now() - holdStartMs >= 200 &&
+      G.t - G.reposLastAt >= CONFIG.reposCooldown && !G.blinkHome) {
+    G.reposTarget = { x: clamp(holdX, 40, W - 40), y: clamp(holdY, 40, H - 40) };
     G.reposStart = { x: G.core.x, y: G.core.y, t: G.t };
     G.reposLastAt = G.t;
-  } else {
-    cv.setPointerCapture(e.pointerId);
-    fastTimer = setTimeout(() => { fastMode = true; }, 150);
   }
+  holdStartMs = 0;
+  cancelFast();
 });
-cv.addEventListener('pointerup',     cancelFast);
-cv.addEventListener('pointercancel', cancelFast);
+cv.addEventListener('pointercancel', () => { holdStartMs = 0; cancelFast(); });
 cv.addEventListener('contextmenu',   e => e.preventDefault());
 
 // --- HUD: skill bar ------------------------------------------------------
