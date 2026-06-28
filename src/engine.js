@@ -547,6 +547,13 @@ export function stepEnemies(G, d, dt) {
       spawnedFromSplitters.push(...splitterChildren(e));
       continue;
     }
+    if (e.vx || e.vy) {
+      e.x += (e.vx || 0) * dt;
+      e.y += (e.vy || 0) * dt;
+      const decay = Math.pow(0.001, dt);
+      e.vx = (e.vx || 0) * decay;
+      e.vy = (e.vy || 0) * decay;
+    }
     const ang = Math.atan2(c.y - e.y, c.x - e.x);
     if (G.t < (e.stunUntil || 0)) {
       // stunned — skip movement this frame
@@ -565,6 +572,10 @@ export function stepEnemies(G, d, dt) {
       for (const other of G.enemies) {
         if (other === e || other.hp <= 0) continue;
         if (dist(other.x, other.y, c.x, c.y) <= 80) {
+          const dx = other.x - c.x, dy = other.y - c.y;
+          const len = Math.sqrt(dx * dx + dy * dy) || 1;
+          other.vx = (dx / len) * 200;
+          other.vy = (dy / len) * 200;
           other.stunUntil = G.t + 0.4;
         }
       }
