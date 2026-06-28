@@ -89,8 +89,8 @@ export const SKILLS = {
   chain:   { id: 'chain',  name: 'Chain',    tap: 1, cooldown: 8,  desc: 'Zap nearest enemy, arc to 3 nearby foes' },
   nova:    { id: 'nova',   name: 'Nova',     tap: 2, cooldown: 12, desc: 'Aim a delayed area blast' },
   blink:   { id: 'blink',   name: 'Blink',   tap: 2, cooldown: 12, desc: 'Teleport core to aim point for 1.5s, then snap back' },
-  missile: { id: 'missile', name: 'Missile', tap: 1, cooldown: 6,  desc: 'Fire a homing missile that tracks the nearest enemy' },
-  drone:    { id: 'drone',    name: 'Drone',    tap: 1, cooldown: 1.5, desc: 'Orbiting satellite that auto-zaps the nearest enemy in range' },
+  missile: { id: 'missile', name: 'Missile', tap: 1, cooldown: 6,   auto: true, desc: 'Fire a homing missile that tracks the nearest enemy' },
+  drone:   { id: 'drone',   name: 'Drone',   tap: 1, cooldown: 1.5, auto: true, desc: 'Orbiting satellite that auto-zaps the nearest enemy in range' },
   repulse:  { id: 'repulse',  name: 'Repulse',  tap: 1, cooldown: 18, desc: 'Blast all enemies outward from the core' },
   heal:     { id: 'heal',     name: 'Heal',     tap: 1, cooldown: 22, desc: 'Restore up to 20 HP to the core' },
   thorns:   { id: 'thorns',   name: 'Thorns',   passive: true,       desc: 'Enemies within range of the core take 4 damage/sec' },
@@ -236,4 +236,323 @@ export function createBoss(d, W, H, rng) {
   else                 { x = -m;        y = rng() * H; }
   const hp = d.enemyHp * 8;
   return { x, y, r: 28, hp, maxHp: hp, spd: d.enemySpeed * 0.35, tanky: false, boss: true };
+}
+
+// --- skill readiness ----------------------------------------------------------
+
+export function skillReady(G, id) {
+  return (G.cooldowns[id] || 0) <= G.t;
+}
+
+// --- skill execution ----------------------------------------------------------
+// Executes a skill's game-state effect on G. Caller must verify skillReady first.
+// Modifies G in place (enemies, fx, core position, cooldowns).
+// Returns the XP amount to award to the caller.
+export function executeSkill(G, id, aimX, aimY, W, H) {
+  const sk = SKILLS[id];
+  const c = G.core;
+  G.cooldowns[id] = G.t + sk.cooldown * G.stats.cooldown;
+
+  if (id === 'pulse') {
+    for (const e of G.enemies) {
+      if (dist(e.x, e.y, c.x, c.y) < 150) { e.hp -= 6 * G.stats.power; e.hitFlash = G.t; }
+    }
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 150, born: G.t, life: .45, color: '#7df9ff' });
+  } else if (id === 'slow') {
+    G.slowUntil = G.t + 3;
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: Math.max(W, H), born: G.t, life: .6, color: '#9d7bff' });
+  } else if (id === 'shield') {
+    G.shieldUntil = G.t + 2.5;
+  } else if (id === 'lance') {
+    const ang = Math.atan2(aimY - c.y, aimX - c.x);
+    const len = Math.max(W, H);
+    const ex = c.x + Math.cos(ang) * len, ey = c.y + Math.sin(ang) * len;
+    for (const e of G.enemies) {
+      if (pointSegDist(e.x, e.y, c.x, c.y, ex, ey) < e.r + 14) { e.hp -= 20 * G.stats.power; e.hitFlash = G.t; }
+    }
+    G.fx.push({ kind: 'beam', x1: c.x, y1: c.y, x2: ex, y2: ey, born: G.t, life: .25 });
+  } else if (id === 'bomb') {
+    for (const e of G.enemies) { e.hp -= 15 * G.stats.power; e.hitFlash = G.t; }
+    G.fx.push({ kind: 'flash', born: G.t, life: .35 });
+  } else if (id === 'repulse') {
+    for (const e of G.enemies) {
+      const edx = e.x - c.x, edy = e.y - c.y;
+      const len = Math.sqrt(edx * edx + edy * edy) || 1;
+      e.x += (edx / len) * 220; e.y += (edy / len) * 220;
+    }
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: Math.max(W, H) * 0.6, born: G.t, life: .45, color: '#fff' });
+  } else if (id === 'heal') {
+    c.hp = Math.min(CONFIG.coreHp, c.hp + Math.min(20, CONFIG.coreHp - c.hp));
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: CONFIG.coreRadius + 40, born: G.t, life: .5, color: '#4cff91' });
+  } else if (id === 'chain') {
+    let first = null, firstD = Infinity;
+    for (const e of G.enemies) {
+      const dd = dist(e.x, e.y, c.x, c.y);
+      if (dd < firstD) { firstD = dd; first = e; }
+    }
+    if (first) {
+      first.hp -= 10 * G.stats.power; first.hitFlash = G.t;
+      G.fx.push({ kind: 'arc', x1: c.x, y1: c.y, x2: first.x, y2: first.y, born: G.t, life: .3 });
+      const chained = new Set([first]);
+      let prev = first;
+      for (let i = 0; i < 3; i++) {
+        let next = null, nextD = 120;
+        for (const e of G.enemies) {
+          if (chained.has(e)) continue;
+          const dd = dist(e.x, e.y, prev.x, prev.y);
+          if (dd < nextD) { nextD = dd; next = e; }
+        }
+        if (!next) break;
+        next.hp -= 6 * G.stats.power; next.hitFlash = G.t;
+        G.fx.push({ kind: 'arc', x1: prev.x, y1: prev.y, x2: next.x, y2: next.y, born: G.t, life: .3 });
+        chained.add(next);
+        prev = next;
+      }
+    }
+  } else if (id === 'nova') {
+    G.fx.push({ kind: 'nova', x: aimX, y: aimY, r: 0, max: 120, born: G.t, life: .85, hitAt: G.t + .45, hit: false, damage: 18 * G.stats.power });
+  } else if (id === 'missile') {
+    let target = null, targetD = Infinity;
+    for (const e of G.enemies) {
+      const dd = dist(e.x, e.y, c.x, c.y);
+      if (dd < targetD) { targetD = dd; target = e; }
+    }
+    G.missiles.push({ x: c.x, y: c.y, vx: 0, vy: -120, target, tail: [], life: 8 });
+  } else if (id === 'blink') {
+    G.blinkHome = { x: c.x, y: c.y };
+    G.blinkReturn = G.t + 1.5;
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
+    c.x = clamp(aimX, 40, W - 40);
+    c.y = clamp(aimY, 40, H - 40);
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
+  }
+
+  return CONFIG.xpPerSkillUse;
+}
+
+// --- per-frame step functions -------------------------------------------------
+// Each function handles one game subsystem. They mutate G directly.
+// Call them in order from main.js's step().
+
+// Handles regen, blink snap-back, reposition slide, shield-expiry flash.
+export function stepCore(G, dt) {
+  const c = G.core;
+  if (G.stats.regen) c.hp = clamp(c.hp + G.stats.regen * dt, 0, CONFIG.coreHp);
+
+  if (G.blinkHome && G.t >= G.blinkReturn) {
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
+    c.x = G.blinkHome.x; c.y = G.blinkHome.y;
+    G.blinkHome = null; G.blinkReturn = 0;
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: 60, born: G.t, life: .4, color: '#b39dff' });
+  }
+
+  if (G.reposTarget) {
+    const elapsed = G.t - G.reposStart.t;
+    const frac = Math.min(1, elapsed / CONFIG.reposDuration);
+    c.x = G.reposStart.x + (G.reposTarget.x - G.reposStart.x) * frac;
+    c.y = G.reposStart.y + (G.reposTarget.y - G.reposStart.y) * frac;
+    if (frac >= 1) G.reposTarget = null;
+  }
+
+  if (G.shieldUntil > 0 && G.t >= G.shieldUntil && G.t - dt < G.shieldUntil) {
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 30, born: G.t, life: .3, color: '#ffffff' });
+  }
+}
+
+// Spawns a boss if this is a boss wave and one hasn't been spawned yet.
+// Returns true if a boss was spawned.
+export function stepBossSpawn(G, d, W, H, rng) {
+  if (isBossWave(G.wave) && G.wave > G.lastBossWave) {
+    G.enemies.push(createBoss(d, W, H, rng));
+    G.lastBossWave = G.wave;
+    G.bossFlashUntil = G.t + 2;
+    return true;
+  }
+  return false;
+}
+
+// Spawns a regular enemy when the interval has elapsed (suppressed during boss fights).
+// Returns true if an enemy was spawned.
+export function stepSpawn(G, d, W, H, rng) {
+  const bossAlive = G.enemies.some(e => e.boss);
+  if (G.t >= CONFIG.warmupSec && G.t - G.lastSpawn > d.spawnInterval && !bossAlive) {
+    G.enemies.push(createEnemy(d, G.wave, W, H, rng));
+    G.lastSpawn = G.t;
+    return true;
+  }
+  return false;
+}
+
+// Detonates nova FX that have passed their trigger time.
+export function stepNovaDet(G) {
+  for (const f of G.fx) {
+    if (f.kind === 'nova' && !f.hit && G.t >= f.hitAt) {
+      f.hit = true;
+      for (const e of G.enemies) {
+        if (dist(e.x, e.y, f.x, f.y) <= f.max + e.r) { e.hp -= f.damage; e.hitFlash = G.t; }
+      }
+      G.fx.push({ kind: 'ring', x: f.x, y: f.y, r: 24, max: f.max, born: G.t, life: .25, color: '#ffec99' });
+    }
+  }
+}
+
+// Fires auto-shots toward the nearest enemy in range.
+// rng: random source (Math.random in game, seeded fn in tests).
+export function stepAutoFire(G, d, rng) {
+  const c = G.core;
+  if (G.t - G.lastAuto > 1 / d.autoRate) {
+    let best = null, bestD = d.autoRange;
+    for (const e of G.enemies) {
+      const dd = dist(e.x, e.y, c.x, c.y);
+      if (dd < bestD) { bestD = dd; best = e; }
+    }
+    if (best) {
+      const ang    = Math.atan2(best.y - c.y, best.x - c.x);
+      const isCrit = rng() < d.critChance;
+      G.shots.push({ x: c.x, y: c.y, vx: Math.cos(ang) * 420, vy: Math.sin(ang) * 420, dmg: isCrit ? d.autoDamage * 2 : d.autoDamage, crit: isCrit, life: 1.2 });
+      G.autoShotCount++;
+      if (G.unlocked.includes('overload') && G.autoShotCount % 8 === 0) {
+        for (let i = 0; i < 8; i++) {
+          const a = (i / 8) * Math.PI * 2;
+          G.shots.push({ x: c.x, y: c.y, vx: Math.cos(a) * 420, vy: Math.sin(a) * 420, dmg: d.autoDamage * 0.5, life: 1.2 });
+        }
+      }
+      G.lastAuto = G.t;
+    }
+  }
+}
+
+// Moves shots and resolves hits against enemies.
+export function stepShots(G, dt, W, H) {
+  for (const s of G.shots) { s.x += s.vx * dt; s.y += s.vy * dt; s.life -= dt; }
+  for (const s of G.shots) {
+    for (const e of G.enemies) {
+      if (e.hp > 0 && dist(s.x, s.y, e.x, e.y) < e.r + 3) {
+        e.hp -= s.dmg; e.hitFlash = G.t; s.life = 0;
+        G.fx.push({ kind: 'spark', x: s.x, y: s.y, born: G.t, life: .2 });
+        break;
+      }
+    }
+  }
+  G.shots = G.shots.filter(s => s.life > 0 && s.x > -20 && s.x < W + 20 && s.y > -20 && s.y < H + 20);
+}
+
+// Auto-launches missiles when ready, and homes active missiles toward their target.
+export function stepMissiles(G, d, dt, rng) {
+  const c = G.core;
+  if (G.unlocked.includes('missile') && skillReady(G, 'missile') && G.enemies.length > 0) {
+    let target = null, targetD = Infinity;
+    for (const e of G.enemies) { const dd = dist(e.x, e.y, c.x, c.y); if (dd < targetD) { targetD = dd; target = e; } }
+    G.missiles.push({ x: c.x, y: c.y, vx: 0, vy: -120, target, tail: [], life: 8 });
+    G.cooldowns['missile'] = G.t + SKILLS.missile.cooldown * G.stats.cooldown;
+  }
+  for (const m of G.missiles) {
+    m.life -= dt;
+    if (!m.target || m.target.hp <= 0) {
+      let best = null, bestD = Infinity;
+      for (const e of G.enemies) { if (e.hp > 0) { const dd = dist(m.x, m.y, e.x, e.y); if (dd < bestD) { bestD = dd; best = e; } } }
+      m.target = best;
+    }
+    if (m.target) {
+      const ang  = Math.atan2(m.target.y - m.y, m.target.x - m.x);
+      const curr = Math.atan2(m.vy, m.vx);
+      let diff = ang - curr;
+      while (diff > Math.PI)  diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+      const newAng = curr + Math.sign(diff) * Math.min(Math.abs(diff), 3.5 * dt);
+      const spd = 140;
+      m.vx = Math.cos(newAng) * spd; m.vy = Math.sin(newAng) * spd;
+    }
+    m.tail.push({ x: m.x, y: m.y });
+    if (m.tail.length > 4) m.tail.shift();
+    m.x += m.vx * dt; m.y += m.vy * dt;
+    if (m.target && m.target.hp > 0 && dist(m.x, m.y, m.target.x, m.target.y) < m.target.r + 10) {
+      m.target.hp -= 25 * G.stats.power;
+      G.fx.push({ kind: 'ring', x: m.x, y: m.y, r: 0, max: 40, born: G.t, life: .3, color: '#ff4dff' });
+      m.life = 0;
+    }
+  }
+  G.missiles = G.missiles.filter(m => m.life > 0);
+}
+
+// Moves enemies toward the core, applies thorns, resolves core collisions, handles deaths.
+// Returns { xpGained, killCount, waveClear, clutch, coreHit }
+// coreHit signals main.js to trigger screen-shake and hit sfx.
+export function stepEnemies(G, d, dt) {
+  const c = G.core;
+  const slow = G.t < G.slowUntil ? 0.4 : 1;
+  let totalXp = 0, coreHit = false;
+  const survivors = [], spawnedFromSplitters = [];
+
+  for (const e of G.enemies) {
+    if (e.hp <= 0) {
+      totalXp += xpForKill(G.stats, e);
+      if (G.unlocked.includes('siphon') && dist(e.x, e.y, c.x, c.y) < 60) {
+        c.hp = Math.min(CONFIG.coreHp, c.hp + 1);
+      }
+      const col = e.boss ? '#ffd700' : e.tanky ? '#ff8a4d' : e.splitter ? '#f277ff' : '#ff5d73';
+      G.fx.push({ kind: 'burst', x: e.x, y: e.y, color: col, born: G.t, life: 0.4, n: 7 });
+      spawnedFromSplitters.push(...splitterChildren(e));
+      continue;
+    }
+    const ang = Math.atan2(c.y - e.y, c.x - e.x);
+    e.x += Math.cos(ang) * e.spd * slow * dt;
+    e.y += Math.sin(ang) * e.spd * slow * dt;
+    if (G.unlocked.includes('thorns') && dist(e.x, e.y, c.x, c.y) <= CONFIG.coreRadius + 50) {
+      e.hp -= CONFIG.thornsAura * dt;
+    }
+    if (enemyHitsCore(e, c)) {
+      if (G.t >= G.shieldUntil) { c.hp -= coreDamageTaken(G.stats, e.tanky ? 14 : 7); coreHit = true; }
+      e.hp = 0; e.consumed = true;
+      G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 18, born: G.t, life: .3, color: '#ff5d73' });
+      continue;
+    }
+    survivors.push(e);
+  }
+
+  const killCount = G.enemies.length - survivors.length;
+  const hadEnemies = G.enemies.length > 0;
+  G.enemies = survivors;
+  G.enemies.push(...spawnedFromSplitters);
+
+  let waveClear = false, clutch = false;
+  if (hadEnemies && G.enemies.length === 0) {
+    waveClear = true;
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 40, born: G.t, life: 0.5, color: '#ffd700' });
+    if (c.hp <= CONFIG.coreHp * 0.1) {
+      clutch = true;
+      G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 55, born: G.t, life: 0.6, color: '#ff4400' });
+    }
+    const healed = Math.min(CONFIG.waveClearHeal, CONFIG.coreHp - c.hp);
+    if (healed > 0) {
+      c.hp += healed;
+      G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 30, born: G.t, life: 0.4, color: '#4cff91' });
+    }
+  }
+
+  return { xpGained: totalXp, killCount, waveClear, clutch, coreHit };
+}
+
+// Orbits the drone and zaps the nearest in-range enemy.
+export function stepDrone(G, dt) {
+  if (!G.unlocked.includes('drone')) return;
+  const c = G.core;
+  G.drone.angle += 1.4 * dt;
+  const dr = CONFIG.coreRadius + 20;
+  const dx = c.x + Math.cos(G.drone.angle) * dr;
+  const dy = c.y + Math.sin(G.drone.angle) * dr;
+  const zapInterval = SKILLS.drone.cooldown * G.stats.cooldown;
+  if (G.t - G.drone.lastZap >= zapInterval) {
+    let best = null, bestD = Infinity;
+    for (const e of G.enemies) {
+      if (e.hp <= 0) continue;
+      const dd = dist(dx, dy, e.x, e.y);
+      if (dd < 140 && dd < bestD) { bestD = dd; best = e; }
+    }
+    if (best) {
+      best.hp -= CONFIG.droneDamageMult * G.stats.power; best.hitFlash = G.t;
+      G.fx.push({ kind: 'arc', x1: dx, y1: dy, x2: best.x, y2: best.y, born: G.t, life: .25 });
+      G.drone.lastZap = G.t;
+    }
+  }
 }
