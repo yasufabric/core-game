@@ -30,6 +30,12 @@ Keep items small and verifiable. A good item names *what done looks like*.
 
 - [ ] Wave-clear bonus XP: when `G.enemies.length` drops to 0 and the wave is still active, award `CONFIG.waveClearXp = 3` bonus XP and push a brief gold ring FX at core; 1 engine test.
 
+- [ ] Wave-clear HP recovery: when all enemies are wiped out, restore `CONFIG.waveClearHeal = 5`
+      HP to the core (capped at `CONFIG.coreHp`). Done = `CONFIG.waveClearHeal = 5` exported
+      from `engine.js` with a test pinning the value; `step()` in `index.html` heals `c.hp` by
+      `Math.min(CONFIG.waveClearHeal, CONFIG.coreHp - c.hp)` when enemies drop to 0; green ring
+      FX pushed at core on heal. Mixed; 1 engine test.
+
 - [ ] Tap-to-reposition: tapping the arena canvas (outside skill buttons) slides the core to
       that point over 0.8 s; a 12 s cooldown (stored in `CONFIG.reposCooldown`) prevents
       spamming; a radial arc ring drawn around the core shows remaining cooldown.
