@@ -413,8 +413,8 @@ function renderSkillBar() {
   for (const id of G.unlocked) {
     if (id === 'missile') continue; // auto-fires; no button needed
     if (id === 'drone') continue;   // passive orbit; no button needed
-    if (sk.passive) continue;       // passive skills need no button
     const sk = SKILLS[id];
+    if (sk.passive) continue;       // passive skills need no button
     const b = document.createElement('button');
     b.className = 'skill';
     b.dataset.id = id;
@@ -754,6 +754,7 @@ requestAnimationFrame(frame);
 
 // expose for headless/e2e probing (loop verification can read window.__CORE)
 window.__CORE = () => G;
+window.__renderSkillBar = () => G && renderSkillBar();
 </script>
 </body>
 </html>

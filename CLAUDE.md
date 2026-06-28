@@ -38,6 +38,21 @@ When you add a game rule (new stat, new enemy behavior, new XP curve), put the r
 - Prefer small pure functions in `engine.js`; the renderer calls them.
 - Run a single test file when iterating, not the whole suite, for speed.
 
+## Common bugs to avoid (learned from post-mortems)
+
+- **Event handlers**: Never use variables defined inside `step()` (`c`, `d`, `slow`, etc.).
+  In a `pointerdown` or other DOM handler, always use `G.core`, `G.stats`, etc. directly.
+  `const c = G.core` only lives inside `step()` — outside that scope `c` resolves to
+  `window.c` (the canvas element), silently producing `undefined` / NaN.
+
+- **Adding a passive skill** (`passive: true`): declare `const sk = SKILLS[id]` BEFORE
+  checking `sk.passive` in `renderSkillBar()`. The guard is already there — don't add
+  hardcoded `id` checks alongside it.
+
+- **Boolean flags / timestamps** (`G.bossFlashUntil`, etc.): set the flag at the event
+  that triggers it (e.g. inside the boss-spawn block), not in a separate polling check.
+  Polling with `!flag` breaks as soon as the flag has ever been set to a non-zero value.
+
 ## When you (Claude) make a mistake
 
 If a change breaks a test or an invariant and a review catches it, add a line to this

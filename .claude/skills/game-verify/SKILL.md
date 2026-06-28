@@ -49,6 +49,18 @@ node --check index.html 2>/dev/null || echo "note: index.html is HTML; JS module
 
 ---
 
+## Step 4 — Smoke tests (runtime sanity)
+
+```
+npm run test:smoke
+```
+
+All 3 Playwright tests must pass. These catch bugs that unit tests miss (DOM scope errors,
+passive-skill rendering, JS exceptions during play). If a test fails, fix the root cause
+in `index.html` — never skip or comment out the test.
+
+---
+
 ## Verdict (required — the loop reads this)
 
 After all steps, output exactly one of these lines as your final verdict:

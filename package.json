@@ -7,7 +7,8 @@
     "dev": "http-server -p 8080 -c-1 .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "vitest run"
+    "verify": "vitest run",
+    "test:smoke": "playwright test --config playwright.config.js"
   },
   "devDependencies": {
     "http-server": "^14.1.1",
