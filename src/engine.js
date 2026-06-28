@@ -150,6 +150,14 @@ export function dist(ax, ay, bx, by) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
+export function pointSegDist(px, py, ax, ay, bx, by) {
+  const dx = bx - ax, dy = by - ay;
+  const l2 = dx * dx + dy * dy || 1;
+  let t = ((px - ax) * dx + (py - ay) * dy) / l2;
+  t = clamp(t, 0, 1);
+  return dist(px, py, ax + t * dx, ay + t * dy);
+}
+
 // An enemy reaching the core deals damage and is consumed.
 export function enemyHitsCore(enemy, core) {
   return dist(enemy.x, enemy.y, core.x, core.y) <= CONFIG.coreRadius + enemy.r;
@@ -193,4 +201,39 @@ export function isBossWave(wave) {
 // Clamp helper used by regen and shield logic.
 export function clamp(v, lo, hi) {
   return Math.max(lo, Math.min(hi, v));
+}
+
+// --- enemy factories (pure: no DOM, no random side effects) --------------
+
+export function createEnemy(d, wave, W, H, rng) {
+  const edge = Math.floor(rng() * 4);
+  const m = 20;
+  let x, y;
+  if (edge === 0)      { x = rng() * W; y = -m; }
+  else if (edge === 1) { x = W + m;     y = rng() * H; }
+  else if (edge === 2) { x = rng() * W; y = H + m; }
+  else                 { x = -m;        y = rng() * H; }
+  const dart     = wave >= 8 && rng() < CONFIG.dartChance;
+  const tanky    = !dart && rng() < 0.12 + wave * 0.01;
+  const splitter = !dart && !tanky && rng() < 0.1 + wave * 0.005;
+  const hp = d.enemyHp * (tanky ? 2.4 : splitter ? 1.5 : dart ? 0.4 : 1);
+  return {
+    x, y,
+    r:   tanky ? 13 : splitter ? 11 : 8,
+    hp, maxHp: hp,
+    spd: d.enemySpeed * (tanky ? 0.7 : splitter ? 0.9 : dart ? 1.8 : 1),
+    tanky, splitter, dart,
+  };
+}
+
+export function createBoss(d, W, H, rng) {
+  const edge = Math.floor(rng() * 4);
+  const m = 40;
+  let x, y;
+  if (edge === 0)      { x = rng() * W; y = -m; }
+  else if (edge === 1) { x = W + m;     y = rng() * H; }
+  else if (edge === 2) { x = rng() * W; y = H + m; }
+  else                 { x = -m;        y = rng() * H; }
+  const hp = d.enemyHp * 8;
+  return { x, y, r: 28, hp, maxHp: hp, spd: d.enemySpeed * 0.35, tanky: false, boss: true };
 }

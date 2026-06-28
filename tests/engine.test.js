@@ -4,6 +4,7 @@ import { describe, it, expect } from 'vitest';
 import {
   xpForLevel, gainXp, defaultStats, derive, rollOffers,
   applyStatCard, dist, enemyHitsCore, coreDamageTaken, splitterChildren, xpForKill, waveForTime, clamp, SKILLS, CONFIG, isBossWave,
+  pointSegDist, createEnemy, createBoss,
 } from '../src/engine.js';
 
 describe('xp / leveling', () => {
@@ -398,6 +399,18 @@ describe('geometry / collision', () => {
     expect(dist(0, 0, 3, 4)).toBe(5);
   });
 
+  it('pointSegDist returns 0 for point on segment', () => {
+    expect(pointSegDist(1, 0, 0, 0, 2, 0)).toBeCloseTo(0);
+  });
+
+  it('pointSegDist returns perpendicular distance for point off segment', () => {
+    expect(pointSegDist(1, 3, 0, 0, 2, 0)).toBeCloseTo(3);
+  });
+
+  it('pointSegDist clamps to nearest endpoint when beyond segment', () => {
+    expect(pointSegDist(5, 0, 0, 0, 2, 0)).toBeCloseTo(3);
+  });
+
   it('enemyHitsCore true when overlapping', () => {
     const core = { x: 100, y: 100 };
     const enemy = { x: 100, y: 100 + CONFIG.coreRadius, r: 5 };
@@ -440,6 +453,45 @@ describe('splitter enemies', () => {
   it('splitterChildren returns no children for non-splitters or consumed enemies', () => {
     expect(splitterChildren({ splitter: false })).toEqual([]);
     expect(splitterChildren({ splitter: true, consumed: true })).toEqual([]);
+  });
+});
+
+describe('enemy factories', () => {
+  const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+
+  it('createEnemy returns a valid enemy object', () => {
+    const d = derive(defaultStats(), 1);
+    const e = createEnemy(d, 1, 400, 700, seq([0.1, 0.5, 0.3, 0.7, 0.9, 0.2, 0.4]));
+    expect(e.hp).toBeGreaterThan(0);
+    expect(e.maxHp).toBe(e.hp);
+    expect(e.r).toBeGreaterThan(0);
+    expect(e.spd).toBeGreaterThan(0);
+  });
+
+  it('createEnemy hp and radius scale correctly for tanky variant', () => {
+    const d = derive(defaultStats(), 1);
+    // force tanky: edge=0, x-rand, dart-rand<dartChance=no (wave<8), tanky-rand < 0.13
+    const e = createEnemy(d, 1, 400, 700, seq([0, 0.5, 0, 0.05]));
+    expect(e.tanky).toBe(true);
+    expect(e.r).toBe(13);
+    expect(e.hp).toBeCloseTo(d.enemyHp * 2.4);
+  });
+
+  it('createBoss returns a boss with 8× enemyHp and r=28', () => {
+    const d = derive(defaultStats(), 5);
+    const boss = createBoss(d, 400, 700, seq([0.5, 0.3]));
+    expect(boss.boss).toBe(true);
+    expect(boss.r).toBe(28);
+    expect(boss.hp).toBeCloseTo(d.enemyHp * 8);
+    expect(boss.maxHp).toBe(boss.hp);
+  });
+
+  it('createBoss spawns off the edge of the screen', () => {
+    const d = derive(defaultStats(), 5);
+    const W = 400, H = 700;
+    const boss = createBoss(d, W, H, seq([0.5, 0.3]));
+    const onEdge = boss.x < 0 || boss.x > W || boss.y < 0 || boss.y > H;
+    expect(onEdge).toBe(true);
   });
 });
 
