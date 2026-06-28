@@ -21,7 +21,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 
 - [x] Cooldown countdown text: inside each skill button, show the integer seconds remaining (e.g. "3s") centred over the cooldown fill when cd > 0.5s; hide when ready; HUD-only change. Added .cd-text span in button HTML, styled absolute-centered, updated updateSkillBar() to set Math.ceil(remain)+'s' when remain > 0.5.
 
-- [ ] Kill counter in HUD: add `KILLS <b id="kills">0</b>` to the topbar and update it in `step()` alongside the existing wave/lv/hp updates; no engine change needed.
+- [x] Kill counter in HUD: add `KILLS <b id="kills">0</b>` to the topbar and update it in `step()` alongside the existing wave/lv/hp updates; no engine change needed. Added stat div to topbar HTML; G.kills updated in step() HUD block.
 
 <!-- ── CONTENT ─────────────────────────────────────────────────── -->
 - [ ] Heal skill: `SKILLS.heal` (1-tap, 22s cooldown), restores `min(20, CONFIG.coreHp - c.hp)` HP to the core, green ring FX; 2 engine tests (skill defined, not offered when unlocked).

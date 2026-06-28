@@ -125,6 +125,7 @@
       <div class="stat">LV <b id="lv">1</b></div>
       <div id="slow-badge">SLOW</div>
       <div class="stat">CORE <b id="hp">100</b></div>
+      <div class="stat">KILLS <b id="kills">0</b></div>
     </div>
     <div class="xpbar"><i id="xpfill"></i></div>
     <div id="waveflash"></div>
@@ -673,6 +674,7 @@ function step(dt) {
   document.getElementById('wave').textContent = G.wave;
   document.getElementById('lv').textContent = G.level;
   document.getElementById('hp').textContent = Math.ceil(c.hp);
+  document.getElementById('kills').textContent = G.kills;
   document.getElementById('slow-badge').style.opacity = G.t < G.slowUntil ? '1' : '0';
   document.getElementById('xpfill').style.width = (100 * G.xp / G.xpNeeded) + '%';
   updateSkillBar();
