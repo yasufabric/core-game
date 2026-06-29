@@ -73,10 +73,10 @@ export function draw(G, ctx, W, H, DPR, getCss) {
   for (const e of G.enemies) {
     ctx.save(); ctx.translate(e.x, e.y);
     const flashing = e.hitFlash && G.t - e.hitFlash < 0.06;
-    ctx.fillStyle = flashing ? '#fff' : (e.boss ? (e.enraged ? '#ff8c00' : '#ffd700') : (e.spike ? '#ff7700' : (e.tanky ? '#ff8a4d' : e.splitter ? '#f277ff' : e.dart ? '#ff44cc' : e.shielded ? '#66ddff' : e.leech ? '#2d9e3c' : getCss('--enemy'))));
+    ctx.fillStyle = flashing ? '#fff' : (e.boss ? (e.enraged ? '#ff8c00' : '#ffd700') : (e.spike ? '#ff7700' : (e.tanky ? '#ff8a4d' : e.splitter ? '#f277ff' : e.dart ? '#ff44cc' : e.shielded ? '#66ddff' : e.leech ? '#2d9e3c' : e.bomber ? '#ff2200' : getCss('--enemy'))));
     if (e.boss && !flashing) { ctx.shadowColor = e.enraged ? '#ff8c00' : '#ffd700'; ctx.shadowBlur = e.enraged ? 24 : 16; }
     ctx.beginPath();
-    const sides = e.boss ? 8 : (e.spike ? 7 : (e.tanky ? 6 : e.splitter ? 4 : e.leech ? 5 : 3));
+    const sides = e.boss ? 8 : (e.spike ? 7 : (e.tanky ? 6 : e.splitter ? 4 : (e.leech || e.bomber) ? 5 : 3));
     for (let i = 0; i < sides; i++) {
       const a = (i / sides) * Math.PI * 2 - Math.PI / 2 + G.t * (e.boss ? .3 : e.tanky ? .5 : 1.5);
       const px = Math.cos(a) * e.r, py = Math.sin(a) * e.r;
@@ -90,6 +90,12 @@ export function draw(G, ctx, W, H, DPR, getCss) {
       ctx.beginPath();
       ctx.arc(0, 0, e.r + 5, facingAng - 1.22, facingAng + 1.22); // ±70° in radians
       ctx.stroke(); ctx.globalAlpha = 1;
+    }
+    if (e.bomber && e.fuseAt) {
+      const fuseLeft = Math.max(0, e.fuseAt - G.t) / CONFIG.bomberFuseTime;
+      ctx.strokeStyle = '#ff2200'; ctx.lineWidth = 2; ctx.globalAlpha = 0.8;
+      ctx.beginPath(); ctx.arc(0, 0, e.r + 6 + fuseLeft * 10, 0, Math.PI * 2 * fuseLeft); ctx.stroke();
+      ctx.globalAlpha = 1;
     }
     if (e.hp < e.maxHp) {
       ctx.fillStyle = 'rgba(255,255,255,.25)';

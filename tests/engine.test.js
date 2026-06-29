@@ -786,6 +786,31 @@ describe('spike mini-boss config', () => {
   });
 });
 
+describe('bomber enemy', () => {
+  it('CONFIG.bomberFuseTime is 1.5', () => { expect(CONFIG.bomberFuseTime).toBe(1.5); });
+  it('CONFIG.bomberRange is 90', () => { expect(CONFIG.bomberRange).toBe(90); });
+  it('CONFIG.bomberDamage is 12', () => { expect(CONFIG.bomberDamage).toBe(12); });
+  it('CONFIG.bomberRadius is 120', () => { expect(CONFIG.bomberRadius).toBe(120); });
+
+  it('bomber sets fuseAt when within bomberRange of core', () => {
+    const G = { t: 5, core: { x: 200, y: 200, hp: 100 }, enemies: [], fx: [], unlocked: [], shieldUntil: 0, slowUntil: 0, firstBloodDone: true };
+    const bomber = { x: 200, y: 200 + CONFIG.bomberRange - 10, r: 10, hp: 5, maxHp: 5, spd: 20, bomber: true, fuseAt: null };
+    G.enemies.push(bomber);
+    stepEnemies(G, derive(defaultStats(), 5), 0.016);
+    expect(bomber.fuseAt).toBeCloseTo(5 + CONFIG.bomberFuseTime, 1);
+  });
+
+  it('bomber detonates and deals damage after fuse', () => {
+    const G = { t: 10, core: { x: 200, y: 200, hp: 100 }, stats: defaultStats(), enemies: [], fx: [], unlocked: [], shieldUntil: 0, slowUntil: 0, firstBloodDone: true };
+    const bomber = { x: 200, y: 200 + 50, r: 10, hp: 5, maxHp: 5, spd: 0, bomber: true, fuseAt: 9 };
+    G.enemies.push(bomber);
+    const prevHp = G.core.hp;
+    stepEnemies(G, derive(defaultStats(), 5), 0.016);
+    expect(G.core.hp).toBeLessThan(prevHp);
+    expect(bomber.hp).toBe(0);
+  });
+});
+
 describe('leech drain enemy', () => {
   it('CONFIG.leechDrainRate is 0.5', () => {
     expect(CONFIG.leechDrainRate).toBe(0.5);

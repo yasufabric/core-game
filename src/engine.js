@@ -36,6 +36,11 @@ export const CONFIG = {
   spawnFloorMin: 0.18,       // absolute minimum spawn interval (reached ~wave 25)
   bossEnrageThreshold: 0.3,  // boss enrages when HP drops below this fraction
   bossEnrageSpeedMult: 1.5,  // speed multiplier applied once when boss enrages
+  bomberChance: 0.04,        // spawn probability for bomber enemies (wave 5+)
+  bomberRange: 90,           // px from core at which bomber halts and starts fuse
+  bomberFuseTime: 1.5,       // seconds from halt to detonation
+  bomberDamage: 12,          // HP damage to core on detonation
+  bomberRadius: 120,         // px AoE radius of bomber explosion
 };
 
 // --- leveling -------------------------------------------------------------
@@ -235,18 +240,20 @@ export function createEnemy(d, wave, W, H, rng) {
   else if (edge === 1) { x = W + m;     y = rng() * H; }
   else if (edge === 2) { x = rng() * W; y = H + m; }
   else                 { x = -m;        y = rng() * H; }
-  const dart     = wave >= 8 && rng() < CONFIG.dartChance;
-  const tanky    = !dart && rng() < 0.12 + wave * 0.01;
-  const splitter = !dart && !tanky && rng() < 0.1 + wave * 0.005;
-  const shielded = !dart && !tanky && !splitter && wave >= 4 && rng() < 0.08 + 0.005 * wave;
-  const leech    = !dart && !tanky && !splitter && !shielded && wave >= 6 && rng() < 0.05;
-  const hp = d.enemyHp * (tanky ? 2.4 : splitter ? 1.5 : dart ? 0.4 : 1);
+  const bomber   = wave >= 5 && rng() < CONFIG.bomberChance;
+  const dart     = !bomber && wave >= 8 && rng() < CONFIG.dartChance;
+  const tanky    = !bomber && !dart && rng() < 0.12 + wave * 0.01;
+  const splitter = !bomber && !dart && !tanky && rng() < 0.1 + wave * 0.005;
+  const shielded = !bomber && !dart && !tanky && !splitter && wave >= 4 && rng() < 0.08 + 0.005 * wave;
+  const leech    = !bomber && !dart && !tanky && !splitter && !shielded && wave >= 6 && rng() < 0.05;
+  const hp = d.enemyHp * (tanky ? 2.4 : splitter ? 1.5 : dart ? 0.4 : bomber ? 0.8 : 1);
   return {
     x, y,
-    r:   tanky ? 13 : splitter ? 11 : 8,
+    r:   tanky ? 13 : splitter ? 11 : bomber ? 10 : 8,
     hp, maxHp: hp,
-    spd: d.enemySpeed * (tanky ? 0.7 : splitter ? 0.9 : dart ? 1.8 : 1),
-    tanky, splitter, dart, shielded, leech,
+    spd: d.enemySpeed * (tanky ? 0.7 : splitter ? 0.9 : dart ? 1.8 : bomber ? 0.8 : 1),
+    tanky, splitter, dart, shielded, leech, bomber,
+    fuseAt: null,
   };
 }
 
@@ -574,6 +581,24 @@ export function stepEnemies(G, d, dt) {
     }
     if (G.unlocked.includes('thorns') && dist(e.x, e.y, c.x, c.y) <= CONFIG.coreRadius + 50) {
       e.hp -= CONFIG.thornsAura * dt;
+    }
+    if (e.bomber) {
+      const dCore = dist(e.x, e.y, c.x, c.y);
+      if (dCore <= CONFIG.bomberRange) {
+        if (!e.fuseAt) e.fuseAt = G.t + CONFIG.bomberFuseTime;
+        e.spd = 0; // halt
+        if (G.t >= e.fuseAt) {
+          // detonate
+          if (G.t >= G.shieldUntil) { c.hp -= coreDamageTaken(G.stats, CONFIG.bomberDamage); coreHit = true; }
+          for (const other of G.enemies) {
+            if (other === e || other.hp <= 0) continue;
+            if (dist(other.x, other.y, e.x, e.y) <= CONFIG.bomberRadius) { other.hp -= CONFIG.bomberDamage * 0.5; other.hitFlash = G.t; }
+          }
+          G.fx.push({ kind: 'ring', x: e.x, y: e.y, r: 0, max: CONFIG.bomberRadius, born: G.t, life: 0.4, color: '#ff4400' });
+          e.hp = 0; e.consumed = true;
+          continue;
+        }
+      }
     }
     if (enemyHitsCore(e, c)) {
       if (G.t >= G.shieldUntil && !e.leech) { c.hp -= coreDamageTaken(G.stats, e.tanky ? 14 : 7); coreHit = true; }
