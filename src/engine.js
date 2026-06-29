@@ -34,6 +34,8 @@ export const CONFIG = {
   synergyXp: 3,              // bonus XP when 2 different skills are used within 1 second
   spawnFloorBase: 0.28,      // starting value for the spawn interval floor
   spawnFloorMin: 0.18,       // absolute minimum spawn interval (reached ~wave 25)
+  bossEnrageThreshold: 0.3,  // boss enrages when HP drops below this fraction
+  bossEnrageSpeedMult: 1.5,  // speed multiplier applied once when boss enrages
 };
 
 // --- leveling -------------------------------------------------------------
@@ -548,6 +550,10 @@ export function stepEnemies(G, d, dt) {
       G.fx.push({ kind: 'burst', x: e.x, y: e.y, color: col, born: G.t, life: 0.4, n: 7 });
       spawnedFromSplitters.push(...splitterChildren(e));
       continue;
+    }
+    if (e.boss && !e.enraged && e.hp / e.maxHp < CONFIG.bossEnrageThreshold) {
+      e.enraged = true;
+      e.spd *= CONFIG.bossEnrageSpeedMult;
     }
     if (e.vx || e.vy) {
       e.x += (e.vx || 0) * dt;

@@ -535,6 +535,35 @@ describe('boss wave cadence', () => {
   });
 });
 
+describe('boss enrage', () => {
+  it('CONFIG.bossEnrageThreshold is 0.3', () => {
+    expect(CONFIG.bossEnrageThreshold).toBe(0.3);
+  });
+
+  it('CONFIG.bossEnrageSpeedMult is 1.5', () => {
+    expect(CONFIG.bossEnrageSpeedMult).toBe(1.5);
+  });
+
+  it('boss enrages and speeds up when hp drops below 30%', () => {
+    const G = { t: 10, core: { x: 200, y: 200, hp: 100 }, enemies: [], fx: [], unlocked: [], shieldUntil: 0, slowUntil: 0, firstBloodDone: true };
+    const boss = { x: 200, y: 100, r: 28, hp: 29, maxHp: 100, spd: 10, boss: true, enraged: false };
+    G.enemies.push(boss);
+    const d = derive(defaultStats(), 5);
+    stepEnemies(G, d, 0.016);
+    expect(boss.enraged).toBe(true);
+    expect(boss.spd).toBeCloseTo(15, 1);
+  });
+
+  it('boss does not enrage twice', () => {
+    const G = { t: 10, core: { x: 200, y: 200, hp: 100 }, enemies: [], fx: [], unlocked: [], shieldUntil: 0, slowUntil: 0, firstBloodDone: true };
+    const boss = { x: 200, y: 100, r: 28, hp: 10, maxHp: 100, spd: 10, boss: true, enraged: true };
+    G.enemies.push(boss);
+    const d = derive(defaultStats(), 5);
+    stepEnemies(G, d, 0.016);
+    expect(boss.spd).toBeCloseTo(10, 1);
+  });
+});
+
 // Minimal G factory for testing engine step functions.
 function makeG(overrides = {}) {
   return {
