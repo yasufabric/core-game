@@ -66,8 +66,20 @@ describe('stats', () => {
     expect(b.spawnInterval).toBeLessThan(a.spawnInterval);
   });
 
-  it('spawnInterval never goes below floor', () => {
-    expect(derive(defaultStats(), 999).spawnInterval).toBeGreaterThanOrEqual(0.28);
+  it('spawnInterval never goes below absolute floor', () => {
+    expect(derive(defaultStats(), 999).spawnInterval).toBeGreaterThanOrEqual(CONFIG.spawnFloorMin);
+  });
+
+  it('CONFIG.spawnFloorBase is 0.28', () => {
+    expect(CONFIG.spawnFloorBase).toBe(0.28);
+  });
+
+  it('CONFIG.spawnFloorMin is 0.18', () => {
+    expect(CONFIG.spawnFloorMin).toBe(0.18);
+  });
+
+  it('spawnInterval at wave 33 is below 0.28 (floor now scales with wave)', () => {
+    expect(derive(defaultStats(), 33).spawnInterval).toBeLessThan(0.28);
   });
 
   it('wave 1 enemyHp is 1 with eased baseline', () => {

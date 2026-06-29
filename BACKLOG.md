@@ -7,6 +7,17 @@ Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
 
+<!-- ── 2026-06-29 review batch ────────────────────────────────── -->
+- [x] Make the spawn interval floor tighten per wave: in `derive()`, change the spawn interval floor from a fixed `0.28` to `Math.max(0.28 - G.wave * 0.004, 0.18)` so density keeps scaling past wave 20. Done = `CONFIG.spawnFloorBase = 0.28` and `CONFIG.spawnFloorMin = 0.18` exported from `engine.js` with tests pinning both values; `derive()` test confirms floor at wave 25 is less than at wave 1. Added CONFIG.spawnFloorBase/Min; derive() uses wave-scaled floor; 4 tests updated/added.
+
+- [ ] Add boss enrage: when a boss drops below 30% HP, set `e.enraged = true` and multiply `e.spd` by 1.5 once (flag prevents repeat). Done = `CONFIG.bossEnrageThreshold = 0.3` and `CONFIG.bossEnrageSpeedMult = 1.5` exported from `engine.js` with tests pinning both values; `stepEnemies` sets flag and speed boost; enraged boss visually distinct (renderer tints it orange).
+
+- [ ] Add bomber enemy type: spawns wave 5+, 4% chance per spawn; halts at 90px from core, then detonates after a 1.5s fuse dealing 12 damage to the core in a 120px radius. Done = `CONFIG.bomberFuseTime = 1.5`, `CONFIG.bomberRange = 90`, `CONFIG.bomberDamage = 12`, `CONFIG.bomberRadius = 120` exported with tests; `stepEnemies` handles halt + fuse countdown + AoE detonation; distinct renderer (red pentagon with shrinking fuse ring).
+
+- [ ] Float a "+N" XP pop text FX at the kill/event position rising 30px and fading over 0.6s whenever XP is awarded (kills, wave-clear, first-blood, synergy). Done = new `xpPop` FX kind pushed to `G.fx` with `{x, y, amount, born, life:0.6}`; `renderer.js` draws rising+fading gold text; visible at wave 1. Rendering-only; no engine test needed.
+
+- [ ] Lerp the core HP ring stroke color from white at 100% HP through amber (`#ffb347`) at 50% to red (`#ff4444`) at 30% and below. Done = `renderer.js` draws the HP arc with an interpolated `strokeStyle` computed from `c.hp / CONFIG.coreHp`; no engine test needed (rendering-only).
+
 <!-- ── FIXES (highest priority) ───────────────────────────────── -->
 - [x] Long-press to reposition: replace the tap-to-reposition trigger with a 200ms long-press.
       `pointerdown` records `G.holdStart = G.t`; `pointerup` only repositions when

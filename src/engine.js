@@ -32,6 +32,8 @@ export const CONFIG = {
   spikeHpMult: 1.5,          // HP multiplier for spike relative to base wave HP
   spikeSpeedMult: 1.3,       // speed multiplier for spike relative to base wave speed
   synergyXp: 3,              // bonus XP when 2 different skills are used within 1 second
+  spawnFloorBase: 0.28,      // starting value for the spawn interval floor
+  spawnFloorMin: 0.18,       // absolute minimum spawn interval (reached ~wave 25)
 };
 
 // --- leveling -------------------------------------------------------------
@@ -79,7 +81,7 @@ export function derive(stats, wave) {
     regenPerSec: stats.regen,
     enemyHp: CONFIG.baseEnemyHp + Math.floor(wave * CONFIG.enemyHpScale),
     enemySpeed: CONFIG.baseEnemySpeed + wave * CONFIG.enemySpeedScale,
-    spawnInterval: Math.max(0.28, CONFIG.baseSpawnInterval - wave * 0.06),
+    spawnInterval: Math.max(Math.max(CONFIG.spawnFloorBase - wave * 0.004, CONFIG.spawnFloorMin), CONFIG.baseSpawnInterval - wave * 0.06),
     critChance: stats.crit,
   };
 }
