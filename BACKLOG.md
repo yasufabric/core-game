@@ -16,7 +16,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 
 - [x] Float a "+N" XP pop text FX at the kill/event position rising 30px and fading over 0.6s whenever XP is awarded (kills, wave-clear, first-blood, synergy). Done = new `xpPop` FX kind pushed to `G.fx` with `{x, y, amount, born, life:0.6}`; `renderer.js` draws rising+fading gold text; visible at wave 1. Rendering-only; no engine test needed. xpPop pushed in step() on kill/firstBlood/waveClear; renderer draws gold rising text.
 
-- [ ] Lerp the core HP ring stroke color from white at 100% HP through amber (`#ffb347`) at 50% to red (`#ff4444`) at 30% and below. Done = `renderer.js` draws the HP arc with an interpolated `strokeStyle` computed from `c.hp / CONFIG.coreHp`; no engine test needed (rendering-only).
+- [x] Lerp the core HP ring stroke color from white at 100% HP through amber (`#ffb347`) at 50% to red (`#ff4444`) at 30% and below. Done = `renderer.js` draws the HP arc with an interpolated `strokeStyle` computed from `c.hp / CONFIG.coreHp`; no engine test needed (rendering-only). Two-segment lerp in renderer.js; ring color smoothly shifts from white→amber→red as HP falls.
 
 <!-- ── FIXES (highest priority) ───────────────────────────────── -->
 - [x] Long-press to reposition: replace the tap-to-reposition trigger with a 200ms long-press.

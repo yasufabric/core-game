@@ -171,9 +171,18 @@ export function draw(G, ctx, W, H, DPR, getCss) {
     ctx.closePath(); ctx.stroke();
     ctx.globalAlpha = 1;
   }
-  // hp ring
-  ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.arc(0, 0, CONFIG.coreRadius + 8, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (c.hp / CONFIG.coreHp)); ctx.stroke();
+  // hp ring — color lerps white→amber→red as HP falls
+  const hpFrac = c.hp / CONFIG.coreHp;
+  let hpR, hpG, hpB;
+  if (hpFrac >= 0.5) {
+    const t = (1 - hpFrac) * 2; // 0 at full HP, 1 at 50%
+    hpR = 255; hpG = Math.round(255 - (255 - 179) * t); hpB = Math.round(255 - (255 - 71) * t);
+  } else {
+    const t = (0.5 - hpFrac) * 2; // 0 at 50%, 1 at 0%
+    hpR = 255; hpG = Math.round(179 - 179 * t); hpB = Math.round(71 - 71 * t);
+  }
+  ctx.strokeStyle = `rgba(${hpR},${hpG},${hpB},.6)`; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(0, 0, CONFIG.coreRadius + 8, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * hpFrac); ctx.stroke();
   if (c.hp / CONFIG.coreHp < 0.3) {
     const pulse = 0.5 + 0.5 * Math.sin(G.t * 10);
     ctx.strokeStyle = `rgba(255,93,115,${0.25 + pulse * 0.35})`;
