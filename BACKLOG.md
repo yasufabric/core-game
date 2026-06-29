@@ -14,7 +14,7 @@ Keep items small and verifiable. A good item names *what done looks like*.
 
 - [x] Add bomber enemy type: spawns wave 5+, 4% chance per spawn; halts at 90px from core, then detonates after a 1.5s fuse dealing 12 damage to the core in a 120px radius. Done = `CONFIG.bomberFuseTime = 1.5`, `CONFIG.bomberRange = 90`, `CONFIG.bomberDamage = 12`, `CONFIG.bomberRadius = 120` exported with tests; `stepEnemies` handles halt + fuse countdown + AoE detonation; distinct renderer (red pentagon with shrinking fuse ring). 6 tests pass; fuse ring renders in renderer.js.
 
-- [ ] Float a "+N" XP pop text FX at the kill/event position rising 30px and fading over 0.6s whenever XP is awarded (kills, wave-clear, first-blood, synergy). Done = new `xpPop` FX kind pushed to `G.fx` with `{x, y, amount, born, life:0.6}`; `renderer.js` draws rising+fading gold text; visible at wave 1. Rendering-only; no engine test needed.
+- [x] Float a "+N" XP pop text FX at the kill/event position rising 30px and fading over 0.6s whenever XP is awarded (kills, wave-clear, first-blood, synergy). Done = new `xpPop` FX kind pushed to `G.fx` with `{x, y, amount, born, life:0.6}`; `renderer.js` draws rising+fading gold text; visible at wave 1. Rendering-only; no engine test needed. xpPop pushed in step() on kill/firstBlood/waveClear; renderer draws gold rising text.
 
 - [ ] Lerp the core HP ring stroke color from white at 100% HP through amber (`#ffb347`) at 50% to red (`#ff4444`) at 30% and below. Done = `renderer.js` draws the HP arc with an interpolated `strokeStyle` computed from `c.hp / CONFIG.coreHp`; no engine test needed (rendering-only).
 

@@ -66,6 +66,11 @@ export function draw(G, ctx, W, H, DPR, getCss) {
         ctx.beginPath(); ctx.arc(px, py, 2.5 * (1 - k * 0.5), 0, Math.PI * 2); ctx.fill();
       }
       ctx.globalAlpha = 1;
+    } else if (f.kind === 'xpPop') {
+      ctx.fillStyle = '#ffe066'; ctx.globalAlpha = 1 - k;
+      ctx.font = 'bold 13px system-ui'; ctx.textAlign = 'center';
+      ctx.fillText(f.amount, f.x, f.y - 30 * k);
+      ctx.globalAlpha = 1;
     }
   }
 

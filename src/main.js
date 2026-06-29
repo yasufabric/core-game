@@ -270,10 +270,20 @@ function step(dt) {
   stepMissiles(G, d, dt, Math.random);
 
   const result = stepEnemies(G, d, dt);
-  if (result.killCount > 0) { G.kills += result.killCount; applyXp(result.xpGained); sfx.kill(); }
-  if (result.firstBlood)    { applyXp(CONFIG.firstBloodXp); G.firstBloodDone = true; }
+  if (result.killCount > 0) {
+    G.kills += result.killCount; applyXp(result.xpGained); sfx.kill();
+    const amt = Math.round(result.xpGained);
+    G.fx.push({ kind: 'xpPop', x: G.core.x + (Math.random() - 0.5) * 50, y: G.core.y - 10, amount: '+' + amt, born: G.t, life: 0.6 });
+  }
+  if (result.firstBlood)    {
+    applyXp(CONFIG.firstBloodXp); G.firstBloodDone = true;
+    G.fx.push({ kind: 'xpPop', x: G.core.x, y: G.core.y - 30, amount: '+' + CONFIG.firstBloodXp, born: G.t, life: 0.6 });
+  }
   if (result.xpDrained > 0) { G.xp = Math.max(0, G.xp - result.xpDrained); }
-  if (result.waveClear)     { applyXp(CONFIG.waveClearXp); }
+  if (result.waveClear)     {
+    applyXp(CONFIG.waveClearXp);
+    G.fx.push({ kind: 'xpPop', x: G.core.x, y: G.core.y - 30, amount: '+' + CONFIG.waveClearXp, born: G.t, life: 0.6 });
+  }
   if (result.clutch)        { applyXp(CONFIG.clutchXp); }
   if (result.coreHit) {
     if (G.t + 0.2 > G.shakeUntil) G.shakeUntil = G.t + 0.2;
