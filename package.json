@@ -1,6 +1,6 @@
 {
   "name": "core-game",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CORE — a one-thumb survival-defense browser game. Logic is pure and unit-tested so an agent loop can verify its own changes.",
   "type": "module",
   "scripts": {
@@ -8,7 +8,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "verify": "vitest run",
-    "test:smoke": "playwright test --config playwright.config.js"
+    "test:smoke": "playwright test --config playwright.config.js",
+    "bump": "node scripts/bump-version.js",
+    "bump:minor": "node scripts/bump-version.js minor",
+    "bump:major": "node scripts/bump-version.js major"
   },
   "devDependencies": {
     "http-server": "^14.1.1",

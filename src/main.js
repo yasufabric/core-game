@@ -181,7 +181,7 @@ function openLevelUp(picksRemaining) {
   G.paused = true;
   setAiming(null);
   sfx.levelUp();
-  const offers = rollOffers(G.unlocked, Math.random);
+  const offers = rollOffers(G.unlocked, G.stats, Math.random);
   cardsEl.innerHTML = '';
   overlay.querySelector('h2').textContent = picksRemaining === 2 ? 'DOUBLE PICK!' : 'LEVEL UP';
   for (const o of offers) {

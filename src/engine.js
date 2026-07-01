@@ -129,18 +129,25 @@ export const STAT_CARDS = [
   { id: 'crit',   name: '+Crit',   apply: s => ({ ...s, crit: +(Math.min(0.9, s.crit + 0.12)).toFixed(2) }),          desc: 'Crit chance +12% (double damage)' },
   { id: 'armor',  name: '+Armor',  apply: s => ({ ...s, armor: +(Math.min(0.75, s.armor + 0.15)).toFixed(2) }),       desc: 'Core damage -15% (max 75%)' },
   { id: 'magnet',  name: '+Magnet',  apply: s => ({ ...s, magnet: +(s.magnet + 0.2).toFixed(2) }),                              desc: 'XP from kills +20%' },
-  { id: 'volley',  name: '+Volley',  apply: s => ({ ...s, shotCount: Math.min(3, (s.shotCount || 1) + 1) }),                   desc: 'Auto-fire +1 projectile per burst (max 3)' },
-  { id: 'salvo',   name: '+Salvo',   apply: s => ({ ...s, missileCount: 2 }),                                                  desc: '2 missiles launched per volley' },
-  { id: 'wingman', name: '+Wingman', apply: s => ({ ...s, droneCount: Math.min(3, (s.droneCount || 1) + 1) }),                 desc: '+1 orbiting drone (requires Drone skill)' },
+  { id: 'volley',  name: '+Volley',  apply: s => ({ ...s, shotCount: Math.min(3, (s.shotCount || 1) + 1) }),  isMaxed: s => (s.shotCount || 1) >= 3,          desc: 'Auto-fire +1 projectile per burst (max 3)' },
+  { id: 'salvo',   name: '+Salvo',   apply: s => ({ ...s, missileCount: 2 }),                                  isMaxed: s => (s.missileCount || 1) >= 2,       desc: '2 missiles launched per volley' },
+  { id: 'wingman', name: '+Wingman', apply: s => ({ ...s, droneCount: Math.min(3, (s.droneCount || 1) + 1) }), isMaxed: s => (s.droneCount || 1) >= 3,         desc: '+1 orbiting drone (requires Drone skill)' },
 ];
 
 // Offer generation: always 1 locked skill + 2 stat cards (when skills remain),
 // or 3 stat cards when all skills are unlocked.
-export function rollOffers(unlockedSkillIds, rng) {
+// Accepts (unlockedSkillIds, rng) or (unlockedSkillIds, currentStats, rng).
+// When currentStats is provided, maxed-out stat cards are excluded from offers.
+export function rollOffers(unlockedSkillIds, currentStatsOrRng, maybeRng) {
+  const hasStats = currentStatsOrRng !== null && typeof currentStatsOrRng === 'object';
+  const currentStats = hasStats ? currentStatsOrRng : null;
+  const rng = hasStats ? maybeRng : currentStatsOrRng;
   const lockedSkills = Object.values(SKILLS)
     .filter(sk => !unlockedSkillIds.includes(sk.id))
     .map(sk => ({ kind: 'skill', id: sk.id, name: sk.name, desc: sk.desc, tap: sk.tap }));
-  const stats = STAT_CARDS.map(c => ({ kind: 'stat', id: c.id, name: c.name, desc: c.desc }));
+  const stats = STAT_CARDS
+    .filter(c => !currentStats || !c.isMaxed || !c.isMaxed(currentStats))
+    .map(c => ({ kind: 'stat', id: c.id, name: c.name, desc: c.desc }));
 
   const picks = [];
   const used = new Set();
@@ -240,14 +247,17 @@ export function clamp(v, lo, hi) {
 
 // --- enemy factories (pure: no DOM, no random side effects) --------------
 
-export function createEnemy(d, wave, W, H, rng) {
+function spawnEdgePosition(W, H, margin, rng) {
   const edge = Math.floor(rng() * 4);
-  const m = 20;
-  let x, y;
-  if (edge === 0)      { x = rng() * W; y = -m; }
-  else if (edge === 1) { x = W + m;     y = rng() * H; }
-  else if (edge === 2) { x = rng() * W; y = H + m; }
-  else                 { x = -m;        y = rng() * H; }
+  const m = margin;
+  if (edge === 0) return { x: rng() * W, y: -m };
+  if (edge === 1) return { x: W + m,     y: rng() * H };
+  if (edge === 2) return { x: rng() * W, y: H + m };
+                  return { x: -m,        y: rng() * H };
+}
+
+export function createEnemy(d, wave, W, H, rng) {
+  const { x, y } = spawnEdgePosition(W, H, 20, rng);
   const bomber   = wave >= 5 && rng() < CONFIG.bomberChance;
   const dart     = !bomber && wave >= 8 && rng() < CONFIG.dartChance;
   const tanky    = !bomber && !dart && rng() < 0.12 + wave * 0.01;
@@ -266,25 +276,13 @@ export function createEnemy(d, wave, W, H, rng) {
 }
 
 export function createBoss(d, W, H, rng) {
-  const edge = Math.floor(rng() * 4);
-  const m = 40;
-  let x, y;
-  if (edge === 0)      { x = rng() * W; y = -m; }
-  else if (edge === 1) { x = W + m;     y = rng() * H; }
-  else if (edge === 2) { x = rng() * W; y = H + m; }
-  else                 { x = -m;        y = rng() * H; }
+  const { x, y } = spawnEdgePosition(W, H, 40, rng);
   const hp = d.enemyHp * 8;
   return { x, y, r: 28, hp, maxHp: hp, spd: d.enemySpeed * 0.35, tanky: false, boss: true };
 }
 
 export function createSpike(d, W, H, rng) {
-  const edge = Math.floor(rng() * 4);
-  const m = 20;
-  let x, y;
-  if (edge === 0)      { x = rng() * W; y = -m; }
-  else if (edge === 1) { x = W + m;     y = rng() * H; }
-  else if (edge === 2) { x = rng() * W; y = H + m; }
-  else                 { x = -m;        y = rng() * H; }
+  const { x, y } = spawnEdgePosition(W, H, 20, rng);
   const hp = d.enemyHp * CONFIG.spikeHpMult;
   return { x, y, r: 11, hp, maxHp: hp, spd: d.enemySpeed * CONFIG.spikeSpeedMult, spike: true };
 }

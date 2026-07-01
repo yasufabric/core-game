@@ -37,13 +37,17 @@ If you cannot fix it after **2 attempts**, stop:
 - Wait for the human before touching anything else
 
 ## STEP 4 — COMMIT AND PUSH TO MASTER
-1. Tick the item in `BACKLOG.md` (`- [x]`) and append a one-line note of what changed.
-2. Commit everything together (code + backlog tick):
+1. Bump the patch version:
    ```
-   git add <changed files> BACKLOG.md
+   npm run bump
+   ```
+2. Tick the item in `BACKLOG.md` (`- [x]`) and append a one-line note of what changed.
+3. Commit everything together (code + backlog tick + version bump):
+   ```
+   git add <changed files> BACKLOG.md package.json index.html
    git commit -m "feat: <item summary>"
    ```
-3. Push directly to master:
+4. Push directly to master:
    ```
    git push origin master
    ```

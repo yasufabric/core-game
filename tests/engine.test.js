@@ -406,6 +406,31 @@ describe('offers', () => {
     const b = rollOffers([], seq([0.1, 0.5, 0.9]));
     expect(a).toEqual(b);
   });
+
+  it('rollOffers excludes volley when shotCount is at max (3)', () => {
+    const maxStats = { ...defaultStats(), shotCount: 3 };
+    const offers = rollOffers([], maxStats, seq([0.0, 0.3, 0.6, 0.9]));
+    expect(offers.some(o => o.id === 'volley')).toBe(false);
+  });
+
+  it('rollOffers excludes salvo when missileCount is at max (2)', () => {
+    const maxStats = { ...defaultStats(), missileCount: 2 };
+    const offers = rollOffers([], maxStats, seq([0.0, 0.3, 0.6, 0.9]));
+    expect(offers.some(o => o.id === 'salvo')).toBe(false);
+  });
+
+  it('rollOffers excludes wingman when droneCount is at max (3)', () => {
+    const maxStats = { ...defaultStats(), droneCount: 3 };
+    const offers = rollOffers([], maxStats, seq([0.0, 0.3, 0.6, 0.9]));
+    expect(offers.some(o => o.id === 'wingman')).toBe(false);
+  });
+
+  it('rollOffers still offers volley when shotCount is below max', () => {
+    const stats = { ...defaultStats(), shotCount: 2 };
+    const allOfferIds = [];
+    for (let i = 0; i < 50; i++) allOfferIds.push(...rollOffers(Object.keys(SKILLS), stats, seq([i / 50])).map(o => o.id));
+    expect(allOfferIds).toContain('volley');
+  });
 });
 
 describe('geometry / collision', () => {
