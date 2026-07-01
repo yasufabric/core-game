@@ -7,6 +7,7 @@ function audioCtx() {
 }
 function tone(freq, type, vol, decay, freqEnd) {
   const c = audioCtx();
+  if (c.state !== 'running') return;
   const o = c.createOscillator();
   const g = c.createGain();
   o.type = type;

@@ -108,6 +108,7 @@ function onSkillTap(id, aimX, aimY) {
 
 // --- input -----------------------------------------------------------------
 cv.addEventListener('pointerdown', (e) => {
+  sfx.unlock();
   if (!G || !G.running || G.paused) return;
   const r = cv.getBoundingClientRect();
   const x = e.clientX - r.left, y = e.clientY - r.top;
