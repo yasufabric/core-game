@@ -255,6 +255,7 @@ function step(dt) {
   if (stepBossSpawn(G, d, W, H, Math.random)) {
     const e = G.enemies[G.enemies.length - 1];
     G.fx.push({ kind: 'ring', x: e.x, y: e.y, r: 0, max: 20, born: G.t, life: 0.15, color: '#ffffff' });
+    sfx.bossSpawn();
   }
   if (stepSpawn(G, d, W, H, Math.random)) {
     const e = G.enemies[G.enemies.length - 1];
@@ -283,15 +284,23 @@ function step(dt) {
   if (result.waveClear)     {
     applyXp(CONFIG.waveClearXp);
     G.fx.push({ kind: 'xpPop', x: G.core.x, y: G.core.y - 30, amount: '+' + CONFIG.waveClearXp, born: G.t, life: 0.6 });
+    sfx.waveClear();
   }
   if (result.clutch)        { applyXp(CONFIG.clutchXp); }
+  if (result.bomberExploded) sfx.bomberExplode();
   if (result.coreHit) {
     if (G.t + 0.2 > G.shakeUntil) G.shakeUntil = G.t + 0.2;
     G.fx.push({ kind: 'ring', x: G.core.x, y: G.core.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 30, born: G.t, life: 0.25, color: '#ff4444' });
     sfx.hit();
   }
 
+  for (const e of G.enemies) {
+    if (e.boss && e.enraged && !e.enrageSfxDone) { e.enrageSfxDone = true; sfx.enrage(); }
+  }
+
+  const prevZap = G.drone.lastZap;
   stepDrone(G, dt);
+  if (G.drone.lastZap !== prevZap) sfx.droneZap();
 
   G.fx = G.fx.filter(f => G.t - f.born < f.life);
   updateHUD();

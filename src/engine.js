@@ -544,7 +544,7 @@ export function stepMissiles(G, d, dt, rng) {
 export function stepEnemies(G, d, dt) {
   const c = G.core;
   const slow = G.t < G.slowUntil ? 0.4 : 1;
-  let totalXp = 0, xpDrained = 0, coreHit = false;
+  let totalXp = 0, xpDrained = 0, coreHit = false, bomberExploded = false;
   const survivors = [], spawnedFromSplitters = [];
 
   for (const e of G.enemies) {
@@ -595,7 +595,7 @@ export function stepEnemies(G, d, dt) {
             if (dist(other.x, other.y, e.x, e.y) <= CONFIG.bomberRadius) { other.hp -= CONFIG.bomberDamage * 0.5; other.hitFlash = G.t; }
           }
           G.fx.push({ kind: 'ring', x: e.x, y: e.y, r: 0, max: CONFIG.bomberRadius, born: G.t, life: 0.4, color: '#ff4400' });
-          e.hp = 0; e.consumed = true;
+          e.hp = 0; e.consumed = true; bomberExploded = true;
           continue;
         }
       }
@@ -640,7 +640,7 @@ export function stepEnemies(G, d, dt) {
     }
   }
 
-  return { xpGained: totalXp, xpDrained, killCount, firstBlood, waveClear, clutch, coreHit };
+  return { xpGained: totalXp, xpDrained, killCount, firstBlood, waveClear, clutch, coreHit, bomberExploded };
 }
 
 // Orbits the drone and zaps the nearest in-range enemy.
