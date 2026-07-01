@@ -240,14 +240,17 @@ export function clamp(v, lo, hi) {
 
 // --- enemy factories (pure: no DOM, no random side effects) --------------
 
-export function createEnemy(d, wave, W, H, rng) {
+function spawnEdgePosition(W, H, margin, rng) {
   const edge = Math.floor(rng() * 4);
-  const m = 20;
-  let x, y;
-  if (edge === 0)      { x = rng() * W; y = -m; }
-  else if (edge === 1) { x = W + m;     y = rng() * H; }
-  else if (edge === 2) { x = rng() * W; y = H + m; }
-  else                 { x = -m;        y = rng() * H; }
+  const m = margin;
+  if (edge === 0) return { x: rng() * W, y: -m };
+  if (edge === 1) return { x: W + m,     y: rng() * H };
+  if (edge === 2) return { x: rng() * W, y: H + m };
+                  return { x: -m,        y: rng() * H };
+}
+
+export function createEnemy(d, wave, W, H, rng) {
+  const { x, y } = spawnEdgePosition(W, H, 20, rng);
   const bomber   = wave >= 5 && rng() < CONFIG.bomberChance;
   const dart     = !bomber && wave >= 8 && rng() < CONFIG.dartChance;
   const tanky    = !bomber && !dart && rng() < 0.12 + wave * 0.01;
@@ -266,25 +269,13 @@ export function createEnemy(d, wave, W, H, rng) {
 }
 
 export function createBoss(d, W, H, rng) {
-  const edge = Math.floor(rng() * 4);
-  const m = 40;
-  let x, y;
-  if (edge === 0)      { x = rng() * W; y = -m; }
-  else if (edge === 1) { x = W + m;     y = rng() * H; }
-  else if (edge === 2) { x = rng() * W; y = H + m; }
-  else                 { x = -m;        y = rng() * H; }
+  const { x, y } = spawnEdgePosition(W, H, 40, rng);
   const hp = d.enemyHp * 8;
   return { x, y, r: 28, hp, maxHp: hp, spd: d.enemySpeed * 0.35, tanky: false, boss: true };
 }
 
 export function createSpike(d, W, H, rng) {
-  const edge = Math.floor(rng() * 4);
-  const m = 20;
-  let x, y;
-  if (edge === 0)      { x = rng() * W; y = -m; }
-  else if (edge === 1) { x = W + m;     y = rng() * H; }
-  else if (edge === 2) { x = rng() * W; y = H + m; }
-  else                 { x = -m;        y = rng() * H; }
+  const { x, y } = spawnEdgePosition(W, H, 20, rng);
   const hp = d.enemyHp * CONFIG.spikeHpMult;
   return { x, y, r: 11, hp, maxHp: hp, spd: d.enemySpeed * CONFIG.spikeSpeedMult, spike: true };
 }
