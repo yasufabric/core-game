@@ -78,8 +78,8 @@ describe('stats', () => {
     expect(CONFIG.spawnFloorMin).toBe(0.18);
   });
 
-  it('spawnInterval at wave 33 is below 0.28 (floor now scales with wave)', () => {
-    expect(derive(defaultStats(), 33).spawnInterval).toBeLessThan(0.28);
+  it('spawnInterval at wave 40 is below spawnFloorBase (floor regime active)', () => {
+    expect(derive(defaultStats(), 40).spawnInterval).toBeLessThan(CONFIG.spawnFloorBase);
   });
 
   it('wave 1 enemyHp is 1 with eased baseline', () => {
@@ -91,11 +91,11 @@ describe('stats', () => {
   });
 
   it('wave 1 enemySpeed reflects baseEnemySpeed + 1×scale', () => {
-    expect(derive(defaultStats(), 1).enemySpeed).toBe(26); // 22 + 1*4
+    expect(derive(defaultStats(), 1).enemySpeed).toBeCloseTo(22 + 1 * CONFIG.enemySpeedScale);
   });
 
   it('wave 1 spawnInterval matches raised baseline', () => {
-    expect(derive(defaultStats(), 1).spawnInterval).toBeCloseTo(2.14, 2); // 2.2 - 1*0.06
+    expect(derive(defaultStats(), 1).spawnInterval).toBeCloseTo(CONFIG.baseSpawnInterval - 1 * 0.06, 2);
   });
 
   it('defaultStats has crit at 0', () => {
@@ -902,5 +902,99 @@ describe('SKILLS auto flag', () => {
 
   it('pulse does not have auto:true', () => {
     expect(SKILLS.pulse.auto).toBeFalsy();
+  });
+});
+
+describe('balance tuning', () => {
+  it('CONFIG.baseSpawnInterval is 2.5', () => {
+    expect(CONFIG.baseSpawnInterval).toBe(2.5);
+  });
+
+  it('CONFIG.enemySpeedScale is 3.5', () => {
+    expect(CONFIG.enemySpeedScale).toBe(3.5);
+  });
+
+  it('CONFIG.coreDmgNormal is 5', () => {
+    expect(CONFIG.coreDmgNormal).toBe(5);
+  });
+
+  it('CONFIG.coreDmgTanky is 10', () => {
+    expect(CONFIG.coreDmgTanky).toBe(10);
+  });
+
+  it('normal enemy collision deals coreDmgNormal to core', () => {
+    const G = makeG({ t: 10, firstBloodDone: true });
+    G.shieldUntil = 0;
+    const startHp = G.core.hp;
+    const d = derive(defaultStats(), 1);
+    G.enemies.push({ x: G.core.x, y: G.core.y, r: 100, hp: 5, maxHp: 5, spd: 0, tanky: false });
+    G.enemies.push({ x: -500, y: -500, r: 8, hp: 50, maxHp: 50, spd: 0 }); // survives, prevents waveClear heal
+    stepEnemies(G, d, 0.016);
+    expect(G.core.hp).toBeCloseTo(startHp - CONFIG.coreDmgNormal);
+  });
+
+  it('tanky enemy collision deals coreDmgTanky to core', () => {
+    const G = makeG({ t: 10, firstBloodDone: true });
+    G.shieldUntil = 0;
+    const startHp = G.core.hp;
+    const d = derive(defaultStats(), 1);
+    G.enemies.push({ x: G.core.x, y: G.core.y, r: 100, hp: 5, maxHp: 5, spd: 0, tanky: true });
+    G.enemies.push({ x: -500, y: -500, r: 8, hp: 50, maxHp: 50, spd: 0 }); // survives, prevents waveClear heal
+    stepEnemies(G, d, 0.016);
+    expect(G.core.hp).toBeCloseTo(startHp - CONFIG.coreDmgTanky);
+  });
+});
+
+describe('collision XP', () => {
+  it('enemy that rams the core grants XP', () => {
+    const G = makeG({ t: 10, firstBloodDone: true });
+    G.shieldUntil = 0;
+    const d = derive(defaultStats(), 1);
+    G.enemies.push({ x: G.core.x, y: G.core.y, r: 100, hp: 5, maxHp: 5, spd: 0, tanky: false });
+    G.enemies.push({ x: -500, y: -500, r: 8, hp: 50, maxHp: 50, spd: 0 }); // survives so result reflects only ram kill
+    const result = stepEnemies(G, d, 0.016);
+    expect(result.xpGained).toBeGreaterThan(0);
+    expect(result.killCount).toBe(1);
+  });
+});
+
+describe('stat cards — volley / salvo / wingman', () => {
+  it('volley card increments shotCount', () => {
+    const s = applyStatCard(defaultStats(), 'volley');
+    expect(s.shotCount).toBe(2);
+  });
+
+  it('volley card caps shotCount at 3', () => {
+    let s = defaultStats();
+    for (let i = 0; i < 10; i++) s = applyStatCard(s, 'volley');
+    expect(s.shotCount).toBe(3);
+  });
+
+  it('salvo card sets missileCount to 2', () => {
+    const s = applyStatCard(defaultStats(), 'salvo');
+    expect(s.missileCount).toBe(2);
+  });
+
+  it('wingman card increments droneCount', () => {
+    const s = applyStatCard(defaultStats(), 'wingman');
+    expect(s.droneCount).toBe(2);
+  });
+
+  it('wingman card caps droneCount at 3', () => {
+    let s = defaultStats();
+    for (let i = 0; i < 10; i++) s = applyStatCard(s, 'wingman');
+    expect(s.droneCount).toBe(3);
+  });
+
+  it('defaultStats has shotCount 1', () => {
+    expect(defaultStats().shotCount).toBe(1);
+  });
+
+  it('defaultStats has missileCount 1', () => {
+    expect(defaultStats().missileCount).toBe(1);
+  });
+
+  it('defaultStats has droneCount 1', () => {
+    expect(defaultStats().droneCount).toBe(1);
   });
 });

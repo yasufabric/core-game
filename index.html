@@ -68,6 +68,15 @@
   #skills .skill .cd { position: absolute; inset: 0; background: rgba(10,14,20,.78); transform-origin: bottom; }
   #skills .skill .cd-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; pointer-events: none; }
   #skills .skill.aiming { border-color: var(--core); box-shadow: 0 0 0 1px var(--core); }
+  #fast-btn {
+    position: absolute; right: 16px; bottom: calc(18px + env(safe-area-inset-bottom));
+    pointer-events: auto;
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--card); border: 1px solid #1e2836;
+    color: var(--muted); font: inherit; font-size: 13px; font-weight: 700; letter-spacing: .04em;
+    cursor: pointer; transition: color .1s, border-color .1s;
+  }
+  #fast-btn.on { color: #ffe066; border-color: rgba(255,224,102,.5); }
 
   /* level-up overlay */
   #overlay {
@@ -130,6 +139,7 @@
     <div class="xpbar"><i id="xpfill"></i></div>
     <div id="waveflash"></div>
     <div id="skills"></div>
+    <button id="fast-btn">2×</button>
   </div>
 
   <div id="overlay">

@@ -7,8 +7,8 @@ export const CONFIG = {
   baseEnemyHp: 1,
   enemyHpScale: 0.6,         // hp added per wave number
   baseEnemySpeed: 22,        // px/sec at wave 1
-  enemySpeedScale: 4,        // px/sec added per wave number
-  baseSpawnInterval: 2.2,    // sec between spawns at wave 1
+  enemySpeedScale: 3.5,      // px/sec added per wave number
+  baseSpawnInterval: 2.5,    // sec between spawns at wave 1
   xpPerKill: 1,
   // XP needed for level N = round(base * growth^(N-1))
   xpBase: 5,
@@ -41,6 +41,8 @@ export const CONFIG = {
   bomberFuseTime: 1.5,       // seconds from halt to detonation
   bomberDamage: 12,          // HP damage to core on detonation
   bomberRadius: 120,         // px AoE radius of bomber explosion
+  coreDmgNormal: 5,          // HP damage to core when a normal enemy reaches it
+  coreDmgTanky: 10,          // HP damage to core when a tanky enemy reaches it
 };
 
 // --- leveling -------------------------------------------------------------
@@ -76,6 +78,9 @@ export function defaultStats() {
     crit: 0,       // probability per auto-shot to deal double damage (0–1)
     armor: 0,      // fraction of incoming core damage prevented (0–0.75)
     magnet: 0,     // bonus XP per kill until physical pickups exist
+    shotCount: 1,  // projectiles fired per auto-shot burst
+    missileCount: 1, // missiles launched per volley
+    droneCount: 1, // number of orbiting drones (requires drone skill)
   };
 }
 
@@ -123,7 +128,10 @@ export const STAT_CARDS = [
   { id: 'cooldn', name: '+Haste',  apply: s => ({ ...s, cooldown: +(Math.max(0.4, s.cooldown - 0.12)).toFixed(2) }), desc: 'Skill cooldown -12%' },
   { id: 'crit',   name: '+Crit',   apply: s => ({ ...s, crit: +(Math.min(0.9, s.crit + 0.12)).toFixed(2) }),          desc: 'Crit chance +12% (double damage)' },
   { id: 'armor',  name: '+Armor',  apply: s => ({ ...s, armor: +(Math.min(0.75, s.armor + 0.15)).toFixed(2) }),       desc: 'Core damage -15% (max 75%)' },
-  { id: 'magnet', name: '+Magnet', apply: s => ({ ...s, magnet: +(s.magnet + 0.2).toFixed(2) }),                     desc: 'XP from kills +20%' },
+  { id: 'magnet',  name: '+Magnet',  apply: s => ({ ...s, magnet: +(s.magnet + 0.2).toFixed(2) }),                              desc: 'XP from kills +20%' },
+  { id: 'volley',  name: '+Volley',  apply: s => ({ ...s, shotCount: Math.min(3, (s.shotCount || 1) + 1) }),                   desc: 'Auto-fire +1 projectile per burst (max 3)' },
+  { id: 'salvo',   name: '+Salvo',   apply: s => ({ ...s, missileCount: 2 }),                                                  desc: '2 missiles launched per volley' },
+  { id: 'wingman', name: '+Wingman', apply: s => ({ ...s, droneCount: Math.min(3, (s.droneCount || 1) + 1) }),                 desc: '+1 orbiting drone (requires Drone skill)' },
 ];
 
 // Offer generation: always 1 locked skill + 2 stat cards (when skills remain),
@@ -463,12 +471,19 @@ export function stepAutoFire(G, d, rng) {
       if (dd < bestD) { bestD = dd; best = e; }
     }
     if (best) {
-      const ang    = Math.atan2(best.y - c.y, best.x - c.x);
-      const isCrit = rng() < d.critChance;
-      G.shots.push({ x: c.x, y: c.y, vx: Math.cos(ang) * 420, vy: Math.sin(ang) * 420, dmg: isCrit ? d.autoDamage * 2 : d.autoDamage, crit: isCrit, life: 1.2 });
+      const ang = Math.atan2(best.y - c.y, best.x - c.x);
+      const count = G.stats.shotCount || 1;
+      const spread = count > 1 ? 0.09 : 0; // ~5° between shots
+      let anyCrit = false;
+      for (let i = 0; i < count; i++) {
+        const offset = (i - (count - 1) / 2) * spread;
+        const isCrit = rng() < d.critChance;
+        if (isCrit) anyCrit = true;
+        G.shots.push({ x: c.x, y: c.y, vx: Math.cos(ang + offset) * 420, vy: Math.sin(ang + offset) * 420, dmg: isCrit ? d.autoDamage * 2 : d.autoDamage, crit: isCrit, life: 1.2 });
+      }
       G.autoShotCount++;
-      if (isCrit && G.unlocked.includes('drone')) {
-        G.drone.lastZap = 0; // reset drone cooldown on crit so it fires immediately
+      if (anyCrit && G.unlocked.includes('drone')) {
+        G.drone.lastZap = 0;
       }
       if (G.unlocked.includes('overload') && G.autoShotCount % 8 === 0) {
         for (let i = 0; i < 8; i++) {
@@ -504,9 +519,16 @@ export function stepShots(G, dt, W, H) {
 export function stepMissiles(G, d, dt, rng) {
   const c = G.core;
   if (G.unlocked.includes('missile') && skillReady(G, 'missile') && G.enemies.length > 0) {
-    let target = null, targetD = Infinity;
-    for (const e of G.enemies) { const dd = dist(e.x, e.y, c.x, c.y); if (dd < targetD) { targetD = dd; target = e; } }
-    G.missiles.push({ x: c.x, y: c.y, vx: 0, vy: -120, target, tail: [], life: 8 });
+    let t1 = null, t1D = Infinity, t2 = null, t2D = Infinity;
+    for (const e of G.enemies) {
+      const dd = dist(e.x, e.y, c.x, c.y);
+      if (dd < t1D) { t2 = t1; t2D = t1D; t1 = e; t1D = dd; }
+      else if (dd < t2D) { t2 = e; t2D = dd; }
+    }
+    G.missiles.push({ x: c.x, y: c.y, vx: 0, vy: -120, target: t1, tail: [], life: 8 });
+    if ((G.stats.missileCount || 1) >= 2 && t2) {
+      G.missiles.push({ x: c.x, y: c.y, vx: 30, vy: -120, target: t2, tail: [], life: 8 });
+    }
     G.cooldowns['missile'] = G.t + SKILLS.missile.cooldown * G.stats.cooldown;
   }
   for (const m of G.missiles) {
@@ -601,7 +623,7 @@ export function stepEnemies(G, d, dt) {
       }
     }
     if (enemyHitsCore(e, c)) {
-      if (G.t >= G.shieldUntil && !e.leech) { c.hp -= coreDamageTaken(G.stats, e.tanky ? 14 : 7); coreHit = true; }
+      if (G.t >= G.shieldUntil && !e.leech) { c.hp -= coreDamageTaken(G.stats, e.tanky ? CONFIG.coreDmgTanky : CONFIG.coreDmgNormal); coreHit = true; }
       for (const other of G.enemies) {
         if (other === e || other.hp <= 0) continue;
         if (dist(other.x, other.y, c.x, c.y) <= 80) {
@@ -612,6 +634,7 @@ export function stepEnemies(G, d, dt) {
           other.stunUntil = G.t + 0.4;
         }
       }
+      totalXp += xpForKill(G.stats, e);
       e.hp = 0; e.consumed = true;
       G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 18, born: G.t, life: .3, color: '#ff5d73' });
       continue;
@@ -643,26 +666,33 @@ export function stepEnemies(G, d, dt) {
   return { xpGained: totalXp, xpDrained, killCount, firstBlood, waveClear, clutch, coreHit, bomberExploded };
 }
 
-// Orbits the drone and zaps the nearest in-range enemy.
+// Orbits the drone(s) and zaps the nearest in-range enemy.
 export function stepDrone(G, dt) {
   if (!G.unlocked.includes('drone')) return;
   const c = G.core;
   G.drone.angle += 1.4 * dt;
   const dr = CONFIG.coreRadius + 20;
-  const dx = c.x + Math.cos(G.drone.angle) * dr;
-  const dy = c.y + Math.sin(G.drone.angle) * dr;
   const zapInterval = SKILLS.drone.cooldown * G.stats.cooldown;
+  const count = G.stats.droneCount || 1;
+
   if (G.t - G.drone.lastZap >= zapInterval) {
-    let best = null, bestD = Infinity;
-    for (const e of G.enemies) {
-      if (e.hp <= 0) continue;
-      const dd = dist(dx, dy, e.x, e.y);
-      if (dd < 140 && dd < bestD) { bestD = dd; best = e; }
+    let anyZap = false;
+    for (let i = 0; i < count; i++) {
+      const angle = G.drone.angle + (i / count) * Math.PI * 2;
+      const dx = c.x + Math.cos(angle) * dr;
+      const dy = c.y + Math.sin(angle) * dr;
+      let best = null, bestD = Infinity;
+      for (const e of G.enemies) {
+        if (e.hp <= 0) continue;
+        const dd = dist(dx, dy, e.x, e.y);
+        if (dd < 140 && dd < bestD) { bestD = dd; best = e; }
+      }
+      if (best) {
+        best.hp -= CONFIG.droneDamageMult * G.stats.power; best.hitFlash = G.t;
+        G.fx.push({ kind: 'arc', x1: dx, y1: dy, x2: best.x, y2: best.y, born: G.t, life: .25 });
+        anyZap = true;
+      }
     }
-    if (best) {
-      best.hp -= CONFIG.droneDamageMult * G.stats.power; best.hitFlash = G.t;
-      G.fx.push({ kind: 'arc', x1: dx, y1: dy, x2: best.x, y2: best.y, born: G.t, life: .25 });
-      G.drone.lastZap = G.t;
-    }
+    if (anyZap) G.drone.lastZap = G.t;
   }
 }

@@ -16,6 +16,7 @@ const waveFlashEl = document.getElementById('waveflash');
 const overlay     = document.getElementById('overlay');
 const cardsEl     = document.getElementById('cards');
 const skillsEl    = document.getElementById('skills');
+const fastBtnEl   = document.getElementById('fast-btn');
 
 let W = 0, H = 0, DPR = 1;
 function resize() {
@@ -32,11 +33,8 @@ let G = null;
 let bestWave      = parseInt(localStorage.getItem('bestWave') || '0', 10);
 let waveFlashTimer = 0;
 let fastMode      = false;
-let fastTimer     = null;
 let holdStartMs   = 0, holdX = 0, holdY = 0;
 let lastWaveColored = -1;
-
-function cancelFast() { clearTimeout(fastTimer); fastTimer = null; fastMode = false; }
 
 function waveColor(w) {
   if (w <= 1)  return '#ffffff';
@@ -73,7 +71,8 @@ function newGame() {
     lastSpikeAt: -CONFIG.spikeCooldown,
     lastSkillAt: 0, lastSkillId: null,
   };
-  cancelFast();
+  fastMode = false;
+  fastBtnEl.classList.remove('on');
   renderSkillBar();
   overlay.classList.remove('show');
   waveFlashEl.classList.remove('show');
@@ -119,7 +118,6 @@ cv.addEventListener('pointerdown', (e) => {
   }
   holdX = x; holdY = y; holdStartMs = Date.now();
   cv.setPointerCapture(e.pointerId);
-  fastTimer = setTimeout(() => { fastMode = true; }, 150);
 });
 cv.addEventListener('pointerup', () => {
   if (G && G.running && !G.paused && holdStartMs &&
@@ -130,9 +128,8 @@ cv.addEventListener('pointerup', () => {
     G.reposLastAt = G.t;
   }
   holdStartMs = 0;
-  cancelFast();
 });
-cv.addEventListener('pointercancel', () => { holdStartMs = 0; cancelFast(); });
+cv.addEventListener('pointercancel', () => { holdStartMs = 0; });
 cv.addEventListener('contextmenu',   e => e.preventDefault());
 
 // --- HUD: skill bar --------------------------------------------------------
@@ -330,6 +327,14 @@ function getCss(v) {
 function drawScene() {
   drawFrame(G, ctx, W, H, DPR, getCss);
 }
+
+// --- fast mode button ------------------------------------------------------
+fastBtnEl.addEventListener('pointerdown', (e) => {
+  e.stopPropagation();
+  sfx.unlock();
+  fastMode = !fastMode;
+  fastBtnEl.classList.toggle('on', fastMode);
+});
 
 // --- bootstrap -------------------------------------------------------------
 document.getElementById('start').addEventListener('click', () => { sfx.unlock(); newGame(); });

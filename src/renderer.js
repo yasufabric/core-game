@@ -132,14 +132,18 @@ export function draw(G, ctx, W, H, DPR, getCss) {
     ctx.shadowBlur = 0;
   }
 
-  // drone
+  // drone(s)
   if (G.unlocked.includes('drone')) {
     const dr = CONFIG.coreRadius + 20;
-    const dx = c.x + Math.cos(G.drone.angle) * dr;
-    const dy = c.y + Math.sin(G.drone.angle) * dr;
+    const count = G.stats.droneCount || 1;
     ctx.fillStyle = '#7df9ff';
     ctx.shadowColor = '#7df9ff'; ctx.shadowBlur = 10;
-    ctx.beginPath(); ctx.arc(dx, dy, 4, 0, Math.PI * 2); ctx.fill();
+    for (let i = 0; i < count; i++) {
+      const angle = G.drone.angle + (i / count) * Math.PI * 2;
+      const dx = c.x + Math.cos(angle) * dr;
+      const dy = c.y + Math.sin(angle) * dr;
+      ctx.beginPath(); ctx.arc(dx, dy, 4, 0, Math.PI * 2); ctx.fill();
+    }
     ctx.shadowBlur = 0;
   }
 
