@@ -20,6 +20,18 @@ When you add a game rule (new stat, new enemy behavior, new XP curve), put the r
 - `npm run dev` — serve locally at http://localhost:8080 (open on a phone via LAN IP)
 - `npm test` — run vitest once (this is `npm run verify` too)
 - `npm run test:watch` — watch mode while iterating
+- `npm run bump` — patch version bump (x.y.Z); syncs `package.json` + `index.html`
+- `npm run bump:minor` — minor bump (x.Y.0) for significant new systems
+- `npm run bump:major` — major bump (X.0.0) for milestone releases
+
+## Version convention
+
+- **Patch** (`0.1.Z`): every `/loop` backlog item. Run `npm run bump` in the commit step.
+- **Minor** (`0.Y.0`): new game system or significant UX overhaul. Run manually.
+- **Major** (`X.0.0`): milestone release. Run manually.
+- **Refactors** (`/refactor`): no version bump — zero player-visible change.
+- The version in `package.json` and the `v…` label in `index.html` must always match.
+  `npm run bump` keeps them in sync automatically.
 
 ## Invariants (do not break these)
 
