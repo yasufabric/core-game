@@ -77,6 +77,7 @@ export function draw(G, ctx, W, H, DPR, getCss) {
   // enemies
   for (const e of G.enemies) {
     ctx.save(); ctx.translate(e.x, e.y);
+    if (e.phantom && G.t < e.phantomUntil) ctx.globalAlpha = 0.25;
     const flashing = e.hitFlash && G.t - e.hitFlash < 0.06;
     ctx.fillStyle = flashing ? '#fff' : (e.boss ? (e.enraged ? '#ff8c00' : '#ffd700') : (e.spike ? '#ff7700' : (e.tanky ? '#ff8a4d' : e.splitter ? '#f277ff' : e.dart ? '#ff44cc' : e.shielded ? '#66ddff' : e.leech ? '#2d9e3c' : e.bomber ? '#ff2200' : getCss('--enemy'))));
     if (e.boss && !flashing) { ctx.shadowColor = e.enraged ? '#ff8c00' : '#ffd700'; ctx.shadowBlur = e.enraged ? 24 : 16; }

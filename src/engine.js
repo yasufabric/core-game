@@ -45,6 +45,8 @@ export const CONFIG = {
   coreDmgNormal: 5,          // HP damage to core when a normal enemy reaches it
   coreDmgTanky: 10,          // HP damage to core when a tanky enemy reaches it
   waveXpScale: 0.04,         // XP multiplier gain per wave number (wave 10 → ×1.4)
+  phantomVisibleTime: 2.3,   // seconds phantom enemy is visible per cycle
+  phantomHiddenTime: 0.7,    // seconds phantom enemy is invisible (auto-shots pass through)
 };
 
 // --- leveling -------------------------------------------------------------
@@ -267,14 +269,17 @@ export function createEnemy(d, wave, W, H, rng) {
   const splitter = !bomber && !dart && !tanky && rng() < 0.1 + wave * 0.005;
   const shielded = !bomber && !dart && !tanky && !splitter && wave >= 4 && rng() < 0.08 + 0.005 * wave;
   const leech    = !bomber && !dart && !tanky && !splitter && !shielded && wave >= 6 && rng() < 0.05;
+  const phantom  = !bomber && !dart && !tanky && !splitter && !shielded && !leech && wave >= 10 && rng() < 0.06;
   const hp = d.enemyHp * (tanky ? 2.4 : splitter ? 1.5 : dart ? 0.4 : bomber ? 0.8 : 1);
   return {
     x, y,
     r:   tanky ? 13 : splitter ? 11 : bomber ? 10 : 8,
     hp, maxHp: hp,
     spd: d.enemySpeed * (tanky ? 0.7 : splitter ? 0.9 : dart ? 1.8 : bomber ? 0.8 : 1),
-    tanky, splitter, dart, shielded, leech, bomber,
+    tanky, splitter, dart, shielded, leech, bomber, phantom,
     fuseAt: null,
+    nextPhantomAt: null,
+    phantomUntil: 0,
   };
 }
 
@@ -503,6 +508,7 @@ export function stepShots(G, dt, W, H) {
   for (const s of G.shots) {
     for (const e of G.enemies) {
       if (e.hp > 0 && dist(s.x, s.y, e.x, e.y) < e.r + 3) {
+        if (e.phantom && G.t < e.phantomUntil) continue; // shot passes through during hidden phase
         if (e.shielded && isShieldBlocked(s, e, G.core)) {
           s.life = 0; // absorbed by shield
         } else {
@@ -580,6 +586,13 @@ export function stepEnemies(G, d, dt) {
       G.fx.push({ kind: 'burst', x: e.x, y: e.y, color: col, born: G.t, life: 0.4, n: 7 });
       spawnedFromSplitters.push(...splitterChildren(e));
       continue;
+    }
+    if (e.phantom) {
+      if (e.nextPhantomAt === null) e.nextPhantomAt = G.t + CONFIG.phantomVisibleTime;
+      if (G.t >= e.nextPhantomAt && G.t >= e.phantomUntil) {
+        e.phantomUntil = G.t + CONFIG.phantomHiddenTime;
+        e.nextPhantomAt = e.phantomUntil + CONFIG.phantomVisibleTime;
+      }
     }
     if (e.boss && !e.enraged && e.hp / e.maxHp < CONFIG.bossEnrageThreshold) {
       e.enraged = true;

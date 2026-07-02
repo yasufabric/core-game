@@ -1002,6 +1002,32 @@ describe('collision XP', () => {
   });
 });
 
+describe('phantom enemy', () => {
+  it('CONFIG.phantomVisibleTime is 2.3', () => {
+    expect(CONFIG.phantomVisibleTime).toBe(2.3);
+  });
+
+  it('CONFIG.phantomHiddenTime is 0.7', () => {
+    expect(CONFIG.phantomHiddenTime).toBe(0.7);
+  });
+
+  it('auto-shots pass through phantom during hidden phase (no damage)', () => {
+    const G = makeG({ t: 1.0 });
+    G.enemies.push({ x: 100, y: 100, r: 8, hp: 5, maxHp: 5, phantom: true, phantomUntil: 2.0, shielded: false });
+    G.shots = [{ x: 100, y: 100, vx: 0, vy: 0, dmg: 1, life: 1 }];
+    stepShots(G, 0, 400, 600);
+    expect(G.enemies[0].hp).toBe(5);
+  });
+
+  it('auto-shots damage phantom during visible phase (normal damage)', () => {
+    const G = makeG({ t: 3.0 });
+    G.enemies.push({ x: 100, y: 100, r: 8, hp: 5, maxHp: 5, phantom: true, phantomUntil: 2.0, shielded: false });
+    G.shots = [{ x: 100, y: 100, vx: 0, vy: 0, dmg: 1, life: 1 }];
+    stepShots(G, 0, 400, 600);
+    expect(G.enemies[0].hp).toBe(4);
+  });
+});
+
 describe('stat cards — volley / salvo / wingman', () => {
   it('volley card increments shotCount', () => {
     const s = applyStatCard(defaultStats(), 'volley');
