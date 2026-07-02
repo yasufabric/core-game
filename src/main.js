@@ -170,6 +170,13 @@ function updateSkillBar() {
     const remain = Math.max(0, (G.cooldowns[id] || 0) - G.t);
     cd.style.transform = `scaleY(${remain / total})`;
     if (cdText) cdText.textContent = remain > 0.5 ? Math.ceil(remain) + 's' : '';
+    if (remain > 0) {
+      b.dataset.wasOnCd = '1';
+    } else if (b.dataset.wasOnCd === '1') {
+      b.dataset.wasOnCd = '';
+      b.classList.add('skill-ready');
+      setTimeout(() => b.classList.remove('skill-ready'), 350);
+    }
   });
 }
 
