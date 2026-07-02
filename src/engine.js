@@ -48,6 +48,7 @@ export const CONFIG = {
   fortifyBonus: 0.5,         // bonus damage multiplier (× stats.power) per auto-shot while shield active
   phantomVisibleTime: 2.3,   // seconds phantom enemy is visible per cycle
   phantomHiddenTime: 0.7,    // seconds phantom enemy is invisible (auto-shots pass through)
+  milestoneInterval: 10,     // every Nth wave grants a free card pick
 };
 
 // --- leveling -------------------------------------------------------------
@@ -245,6 +246,10 @@ export function waveForTime(elapsedSec) {
 // Returns true for waves where a boss should spawn (every 5th wave, starting wave 5).
 export function isBossWave(wave) {
   return wave > 0 && wave % 5 === 0;
+}
+
+export function isMilestoneWave(wave) {
+  return wave > 0 && wave % CONFIG.milestoneInterval === 0;
 }
 
 // Clamp helper used by regen and shield logic.

@@ -3,7 +3,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   xpForLevel, gainXp, defaultStats, derive, rollOffers,
-  applyStatCard, dist, enemyHitsCore, coreDamageTaken, splitterChildren, xpForKill, waveForTime, clamp, SKILLS, CONFIG, isBossWave,
+  applyStatCard, dist, enemyHitsCore, coreDamageTaken, splitterChildren, xpForKill, waveForTime, clamp, SKILLS, CONFIG, isBossWave, isMilestoneWave,
   pointSegDist, createEnemy, createBoss, isShieldBlocked,
   skillReady, executeSkill,
   stepCore, stepEnemies, stepShots, stepAutoFire,
@@ -576,6 +576,26 @@ describe('boss wave cadence', () => {
     expect(waveForTime(wave5Start)).toBe(5);
     expect(isBossWave(waveForTime(wave5Start))).toBe(true);
     expect(isBossWave(waveForTime(wave5Start - 1))).toBe(false);
+  });
+});
+
+describe('milestone waves', () => {
+  it('CONFIG.milestoneInterval is 10', () => {
+    expect(CONFIG.milestoneInterval).toBe(10);
+  });
+
+  it('isMilestoneWave returns true for wave 10 and 20', () => {
+    expect(isMilestoneWave(10)).toBe(true);
+    expect(isMilestoneWave(20)).toBe(true);
+  });
+
+  it('isMilestoneWave returns false for wave 5 and 15', () => {
+    expect(isMilestoneWave(5)).toBe(false);
+    expect(isMilestoneWave(15)).toBe(false);
+  });
+
+  it('isMilestoneWave returns false for wave 0', () => {
+    expect(isMilestoneWave(0)).toBe(false);
   });
 });
 

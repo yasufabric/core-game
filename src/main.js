@@ -1,7 +1,7 @@
 import {
   CONFIG, xpForLevel, gainXp, defaultStats, derive,
   rollOffers, applyStatCard, waveForTime, clamp, SKILLS,
-  skillReady, executeSkill,
+  skillReady, executeSkill, isMilestoneWave,
   stepCore, stepBossSpawn, stepSpawn, stepSpikeSpawn, stepNovaDet, stepAutoFire,
   stepShots, stepMissiles, stepEnemies, stepDrone,
 } from './engine.js';
@@ -277,6 +277,15 @@ function step(dt) {
       waveFlashTimer = setTimeout(() => { waveFlashEl.classList.remove('show'); waveFlashEl.style.color = ''; }, 1500);
     } else {
       announceWave(G.wave);
+    }
+    if (isMilestoneWave(G.wave)) {
+      const header = 'MILESTONE — WAVE ' + G.wave;
+      if (G.paused) {
+        G.pendingLevels++;
+        G.pendingBossHeader = header;
+      } else {
+        openLevelUp(undefined, header);
+      }
     }
   }
   const d = derive(G.stats, G.wave);
