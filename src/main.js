@@ -66,7 +66,7 @@ function newGame() {
     drone: { angle: 0, lastZap: 0 },
     bossFlashUntil: 0, pendingLevels: 0, pendingBossHeader: null, bestBannerShown: false, waveGoldUntil: 0,
     reposLastAt: -CONFIG.reposCooldown, reposTarget: null, reposStart: null,
-    autoShotCount: 0,
+    autoShotCount: 0, autogunAt: 0,
     firstBloodDone: false,
     lastSpikeAt: -CONFIG.spikeCooldown,
     lastSkillAt: 0, lastSkillId: null,
@@ -101,6 +101,12 @@ function applyXp(amount) {
 function onSkillTap(id, aimX, aimY) {
   if (!skillReady(G, id)) return;
   sfx.skill();
+  const btn = skillsEl.querySelector(`[data-id="${id}"]`);
+  if (btn) {
+    btn.style.animation = '';
+    btn.classList.add('skill-tap');
+    btn.addEventListener('animationend', () => btn.classList.remove('skill-tap'), { once: true });
+  }
   executeSkill(G, id, aimX, aimY, W, H);
   applyXp(CONFIG.xpPerSkillUse);
   updateSkillBar();
@@ -209,6 +215,8 @@ function choose(o, picksRemaining) {
   } else {
     if (!G.unlocked.includes(o.id)) G.unlocked.push(o.id);
     renderSkillBar();
+    G.fx.push({ kind: 'burst', x: W / 2, y: H / 2, color: '#7df9ff', born: G.t, life: 0.4, n: 10 });
+    G.fx.push({ kind: 'ring', x: W / 2, y: H / 2, r: 20, max: 90, born: G.t, life: 0.45, color: '#7df9ff' });
   }
   const remaining = picksRemaining - 1;
   if (remaining > 0) { openLevelUp(remaining); return; }
