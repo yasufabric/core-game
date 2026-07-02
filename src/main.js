@@ -64,7 +64,7 @@ function newGame() {
     flashUntil: 0,
     kills: 0,
     drone: { angle: 0, lastZap: 0 },
-    bossFlashUntil: 0, pendingLevels: 0,
+    bossFlashUntil: 0, pendingLevels: 0, pendingBossHeader: null,
     reposLastAt: -CONFIG.reposCooldown, reposTarget: null, reposStart: null,
     autoShotCount: 0,
     firstBloodDone: false,
@@ -181,7 +181,7 @@ function updateSkillBar() {
 }
 
 // --- level up --------------------------------------------------------------
-function openLevelUp(picksRemaining) {
+function openLevelUp(picksRemaining, heading) {
   if (picksRemaining === undefined) {
     picksRemaining = Math.random() < CONFIG.doublePickChance ? 2 : 1;
   }
@@ -190,7 +190,7 @@ function openLevelUp(picksRemaining) {
   sfx.levelUp();
   const offers = rollOffers(G.unlocked, G.stats, Math.random);
   cardsEl.innerHTML = '';
-  overlay.querySelector('h2').textContent = picksRemaining === 2 ? 'DOUBLE PICK!' : 'LEVEL UP';
+  overlay.querySelector('h2').textContent = heading || (picksRemaining === 2 ? 'DOUBLE PICK!' : 'LEVEL UP');
   for (const o of offers) {
     const el = document.createElement('button');
     el.className = 'pick ' + o.kind;
@@ -213,7 +213,12 @@ function choose(o, picksRemaining) {
   if (remaining > 0) { openLevelUp(remaining); return; }
   overlay.classList.remove('show');
   G.paused = false;
-  if (G.pendingLevels > 0) { G.pendingLevels--; openLevelUp(); }
+  if (G.pendingLevels > 0) {
+    G.pendingLevels--;
+    const hdr = G.pendingBossHeader || null;
+    G.pendingBossHeader = null;
+    openLevelUp(undefined, hdr);
+  }
 }
 
 // --- HUD update ------------------------------------------------------------
@@ -299,6 +304,12 @@ function step(dt) {
     waveFlashEl.classList.add('show');
     clearTimeout(waveFlashTimer);
     waveFlashTimer = setTimeout(() => { waveFlashEl.classList.remove('show'); waveFlashEl.style.color = ''; }, 1200);
+    if (G.paused) {
+      G.pendingLevels++;
+      G.pendingBossHeader = 'BOSS CLEAR';
+    } else {
+      openLevelUp(undefined, 'BOSS CLEAR');
+    }
   }
   if (result.bomberExploded) sfx.bomberExplode();
   if (result.coreHit) {
