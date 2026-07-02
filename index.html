@@ -73,6 +73,8 @@
     100% { box-shadow: none; border-color: #1e2836; }
   }
   #skills .skill.skill-ready { animation: skill-ready-glow 350ms ease-out forwards; }
+  @keyframes skill-tap { 0% { transform: scale(1) } 60% { transform: scale(1.14) } 100% { transform: scale(1) } }
+  #skills .skill.skill-tap { animation: skill-tap 120ms ease-out forwards; }
   #fast-btn {
     position: absolute; right: 16px; bottom: calc(18px + env(safe-area-inset-bottom));
     pointer-events: auto;
@@ -162,7 +164,7 @@
     <div class="best" id="gametime"></div>
     <div class="best" id="bestscore"></div>
     <button class="go" id="start">START</button>
-    <div class="ver">v0.1.11</div>
+    <div class="ver">v0.1.12</div>
   </div>
 </div>
 

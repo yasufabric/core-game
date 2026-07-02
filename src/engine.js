@@ -49,6 +49,7 @@ export const CONFIG = {
   phantomVisibleTime: 2.3,   // seconds phantom enemy is visible per cycle
   phantomHiddenTime: 0.7,    // seconds phantom enemy is invisible (auto-shots pass through)
   milestoneInterval: 10,     // every Nth wave grants a free card pick
+  autogunInterval: 4,        // seconds between autogun burst fires
 };
 
 // --- leveling -------------------------------------------------------------
@@ -109,7 +110,7 @@ export function derive(stats, wave) {
 
 export const SKILLS = {
   pulse:   { id: 'pulse',   name: 'Pulse',    tap: 1, cooldown: 6,  desc: 'Ring of damage around the core' },
-  slow:    { id: 'slow',    name: 'Slowfield', tap: 1, cooldown: 10, desc: 'Slow all enemies for 3s' },
+  slow:    { id: 'slow',    name: 'Time Warp', tap: 1, cooldown: 10, desc: 'Freeze all enemies and pause skill cooldowns for 3s' },
   shield:  { id: 'shield',  name: 'Shield',   tap: 1, cooldown: 14, desc: 'Block all damage for 2.5s' },
   lance:   { id: 'lance',   name: 'Lance',    tap: 2, cooldown: 4,  desc: 'Aim, then fire a piercing beam' },
   bomb:    { id: 'bomb',    name: 'Bomb',     tap: 1, cooldown: 20, desc: 'Damage all enemies on screen' },
@@ -118,13 +119,14 @@ export const SKILLS = {
   flash:   { id: 'flash',   name: 'Flash',   tap: 1, cooldown: 12, desc: '12-shot burst + 3× auto-fire rate for 1.5s' },
   missile: { id: 'missile', name: 'Missile', tap: 1, cooldown: 6,   auto: true, desc: 'Fire a homing missile that tracks the nearest enemy' },
   drone:   { id: 'drone',   name: 'Drone',   tap: 1, cooldown: 1.5, auto: true, desc: 'Orbiting satellite that auto-zaps the nearest enemy in range' },
-  repulse:  { id: 'repulse',  name: 'Repulse',  tap: 1, cooldown: 18, desc: 'Blast all enemies outward from the core' },
+  repulse:  { id: 'repulse',  name: 'Vortex',   tap: 1, cooldown: 18, desc: 'Pull all enemies toward the core and deal 2× power damage' },
   heal:     { id: 'heal',     name: 'Heal',     tap: 1, cooldown: 22, desc: 'Restore up to 20 HP to the core' },
   thorns:   { id: 'thorns',   name: 'Thorns',   passive: true,       desc: 'Enemies within range of the core take 4 damage/sec' },
   overload: { id: 'overload', name: 'Overload', passive: true,       desc: 'Every 8th auto-shot fires a burst of 8 radial shots at half damage' },
   siphon:   { id: 'siphon',   name: 'Siphon',   passive: true,       desc: 'Killing an enemy within 60px of the core restores 1 HP' },
   leech:    { id: 'leech',    name: 'Leech',    passive: true,       desc: 'Every skill activation restores Math.round(0.3×power) HP to the core' },
   fortify:  { id: 'fortify',  name: 'Fortify',  passive: true,       desc: 'While shield is active, auto-shots deal bonus damage equal to 0.5× power' },
+  autogun:  { id: 'autogun',  name: 'Autogun',  passive: true, auto: true, desc: 'Automatically fires a 3-shot spread at the nearest enemy every 4s' },
 };
 
 export const STAT_CARDS = [
@@ -344,11 +346,12 @@ export function executeSkill(G, id, aimX, aimY, W, H) {
     G.fx.push({ kind: 'flash', born: G.t, life: .35 });
   } else if (id === 'repulse') {
     for (const e of G.enemies) {
+      e.hp -= 2 * G.stats.power; e.hitFlash = G.t;
       const edx = e.x - c.x, edy = e.y - c.y;
       const len = Math.sqrt(edx * edx + edy * edy) || 1;
-      e.x += (edx / len) * 220; e.y += (edy / len) * 220;
+      e.x -= (edx / len) * 160; e.y -= (edy / len) * 160;
     }
-    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: Math.max(W, H) * 0.6, born: G.t, life: .45, color: '#fff' });
+    G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: Math.max(W, H) * 0.55, born: G.t, life: .45, color: '#9d7bff' });
   } else if (id === 'heal') {
     c.hp = Math.min(CONFIG.coreHp, c.hp + Math.min(20, CONFIG.coreHp - c.hp));
     G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: 0, max: CONFIG.coreRadius + 40, born: G.t, life: .5, color: '#4cff91' });
@@ -411,6 +414,11 @@ export function executeSkill(G, id, aimX, aimY, W, H) {
 export function stepCore(G, dt) {
   const c = G.core;
   if (G.stats.regen) c.hp = clamp(c.hp + G.stats.regen * dt, 0, CONFIG.coreHp);
+  if (G.t < G.slowUntil) {
+    for (const id of Object.keys(G.cooldowns)) {
+      if (G.cooldowns[id] > G.t) G.cooldowns[id] += dt;
+    }
+  }
 
   if (G.reposTarget) {
     const elapsed = G.t - G.reposStart.t;
@@ -505,6 +513,24 @@ export function stepAutoFire(G, d, rng) {
         }
       }
       G.lastAuto = G.t;
+    }
+  }
+  if (G.unlocked.includes('autogun') && G.enemies.length > 0) {
+    const autogunAt = G.autogunAt ?? 0;
+    if (G.t - autogunAt >= CONFIG.autogunInterval) {
+      let best = null, bestD = Infinity;
+      for (const e of G.enemies) {
+        const dd = dist(e.x, e.y, c.x, c.y);
+        if (dd < bestD) { bestD = dd; best = e; }
+      }
+      if (best) {
+        const ang = Math.atan2(best.y - c.y, best.x - c.x);
+        const spread = 15 * Math.PI / 180;
+        for (let i = -1; i <= 1; i++) {
+          G.shots.push({ x: c.x, y: c.y, vx: Math.cos(ang + i * spread) * 420, vy: Math.sin(ang + i * spread) * 420, dmg: d.autoDamage, life: 1.2 });
+        }
+        G.autogunAt = G.t;
+      }
     }
   }
 }

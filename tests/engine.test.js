@@ -288,7 +288,7 @@ describe('SKILLS', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
     expect(SKILLS.nova).toBeDefined();
     expect(SKILLS.nova.tap).toBe(2);
-    const offers = rollOffers([], seq([0.39, 0.1, 0.5])); // 0.39 × 16 = 6.24 → floor 6 = nova in 16-skill pool
+    const offers = rollOffers([], seq([0.37, 0.1, 0.5])); // 0.37 × 18 = 6.66 → floor 6 = nova in 18-skill pool
     expect(offers).toContainEqual(expect.objectContaining({ kind: 'skill', id: 'nova', tap: 2 }));
   });
 
@@ -387,6 +387,29 @@ describe('SKILLS', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
     const offers = rollOffers(['siphon'], seq([0, 0.1, 0.4, 0.7]));
     expect(offers.filter(o => o.id === 'siphon')).toHaveLength(0);
+  });
+
+  it('repulse (Vortex) is still named Vortex', () => {
+    expect(SKILLS.repulse.name).toBe('Vortex');
+  });
+
+  it('autogun is a passive+auto skill and is offerable', () => {
+    expect(SKILLS.autogun).toBeDefined();
+    expect(SKILLS.autogun.passive).toBe(true);
+    expect(SKILLS.autogun.auto).toBe(true);
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers([], seq([0, 0.1, 0.5]));
+    expect(offers.some(o => o.kind === 'skill')).toBe(true);
+  });
+
+  it('autogun is not offered when already unlocked', () => {
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers(['autogun'], seq([0, 0.1, 0.4, 0.7]));
+    expect(offers.filter(o => o.id === 'autogun')).toHaveLength(0);
+  });
+
+  it('slow (Time Warp) name is Time Warp', () => {
+    expect(SKILLS.slow.name).toBe('Time Warp');
   });
 });
 
@@ -1102,6 +1125,78 @@ describe('phantom enemy', () => {
     G.shots = [{ x: 100, y: 100, vx: 0, vy: 0, dmg: 1, life: 1 }];
     stepShots(G, 0, 400, 600);
     expect(G.enemies[0].hp).toBe(4);
+  });
+});
+
+describe('Vortex (repulse redesign)', () => {
+  it('vortex pulls enemies toward the core', () => {
+    const G = makeG();
+    G.cooldowns['repulse'] = 0;
+    const enemy = { x: G.core.x + 200, y: G.core.y, r: 8, hp: 100, maxHp: 100, spd: 0, tanky: false };
+    G.enemies.push(enemy);
+    executeSkill(G, 'repulse', 0, 0, 400, 700);
+    expect(enemy.x).toBeLessThan(G.core.x + 200);
+  });
+
+  it('vortex deals 2 × power damage before pull', () => {
+    const G = makeG();
+    G.stats.power = 3;
+    G.cooldowns['repulse'] = 0;
+    const enemy = { x: G.core.x + 200, y: G.core.y, r: 8, hp: 100, maxHp: 100, spd: 0, tanky: false };
+    G.enemies.push(enemy);
+    executeSkill(G, 'repulse', 0, 0, 400, 700);
+    expect(enemy.hp).toBeCloseTo(100 - 2 * 3);
+  });
+});
+
+describe('Autogun passive', () => {
+  it('CONFIG.autogunInterval is 4', () => {
+    expect(CONFIG.autogunInterval).toBe(4);
+  });
+
+  it('autogun fires 3 shots when timer exceeds interval', () => {
+    const G = makeG({ t: 10, lastAuto: 9.9 }); // main auto-fire just fired; only autogun should trigger
+    G.autogunAt = 0;
+    G.unlocked = ['autogun'];
+    G.enemies.push({ x: G.core.x + 100, y: G.core.y, r: 8, hp: 10, maxHp: 10, spd: 0 });
+    const d = derive(defaultStats(), 1);
+    const shotsBefore = G.shots.length;
+    stepAutoFire(G, d, () => 0.5);
+    expect(G.shots.length - shotsBefore).toBe(3);
+    expect(G.autogunAt).toBeCloseTo(10);
+  });
+
+  it('autogun does not fire before interval has elapsed', () => {
+    const G = makeG({ t: 2, lastAuto: 1.9 }); // main auto-fire just fired; autogun interval not met
+    G.autogunAt = 0;
+    G.unlocked = ['autogun'];
+    G.enemies.push({ x: G.core.x + 100, y: G.core.y, r: 8, hp: 10, maxHp: 10, spd: 0 });
+    const d = derive(defaultStats(), 1);
+    const shotsBefore = G.shots.length;
+    stepAutoFire(G, d, () => 0.5);
+    expect(G.shots.length - shotsBefore).toBe(0);
+  });
+});
+
+describe('Time Warp (cooldown freeze)', () => {
+  it('stepCore freezes skill cooldowns while slow is active', () => {
+    const G = makeG({ t: 5 });
+    G.slowUntil = 10;
+    G.cooldowns['pulse'] = 8;
+    const remainBefore = G.cooldowns['pulse'] - G.t;
+    G.t = 6;
+    stepCore(G, 1);
+    const remainAfter = G.cooldowns['pulse'] - G.t;
+    expect(remainAfter).toBeCloseTo(remainBefore);
+  });
+
+  it('stepCore does not extend cooldowns when slow is inactive', () => {
+    const G = makeG({ t: 5 });
+    G.slowUntil = 0;
+    G.cooldowns['pulse'] = 8;
+    G.t = 6;
+    stepCore(G, 1);
+    expect(G.cooldowns['pulse']).toBeCloseTo(8);
   });
 });
 
