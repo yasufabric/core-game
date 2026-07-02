@@ -64,7 +64,7 @@ function newGame() {
     flashUntil: 0,
     kills: 0,
     drone: { angle: 0, lastZap: 0 },
-    bossFlashUntil: 0, pendingLevels: 0, pendingBossHeader: null,
+    bossFlashUntil: 0, pendingLevels: 0, pendingBossHeader: null, bestBannerShown: false, waveGoldUntil: 0,
     reposLastAt: -CONFIG.reposCooldown, reposTarget: null, reposStart: null,
     autoShotCount: 0,
     firstBloodDone: false,
@@ -228,6 +228,7 @@ function updateHUD() {
   const waveEl = document.getElementById('wave');
   waveEl.textContent = G.wave;
   if (G.wave !== lastWaveColored) { lastWaveColored = G.wave; waveEl.style.color = waveColor(G.wave); }
+  if (G.waveGoldUntil > G.t) waveEl.style.color = '#ffd700';
   document.getElementById('lv').textContent = G.level;
   document.getElementById('hp').textContent = Math.ceil(c.hp);
   document.getElementById('kills').textContent = G.kills;
@@ -258,7 +259,26 @@ function step(dt) {
   G.t += dt;
   if (!G.enemies.some(e => e.boss && e.hp > 0)) G.waveTime += dt;
   const nextWave = waveForTime(G.waveTime);
-  if (nextWave !== G.wave) { G.wave = nextWave; announceWave(G.wave); }
+  if (nextWave !== G.wave) {
+    G.wave = nextWave;
+    if (G.wave > bestWave && bestWave > 0 && !G.bestBannerShown) {
+      G.bestBannerShown = true;
+      waveFlashEl.textContent = 'NEW BEST';
+      waveFlashEl.style.color = '#ffd700';
+      waveFlashEl.classList.add('show');
+      clearTimeout(waveFlashTimer);
+      waveFlashTimer = setTimeout(() => { waveFlashEl.classList.remove('show'); waveFlashEl.style.color = ''; }, 2000);
+    } else if (G.wave === bestWave && bestWave > 0 && !G.bestBannerShown) {
+      G.waveGoldUntil = G.t + 1.5;
+      waveFlashEl.textContent = '= BEST';
+      waveFlashEl.style.color = '#ffd700';
+      waveFlashEl.classList.add('show');
+      clearTimeout(waveFlashTimer);
+      waveFlashTimer = setTimeout(() => { waveFlashEl.classList.remove('show'); waveFlashEl.style.color = ''; }, 1500);
+    } else {
+      announceWave(G.wave);
+    }
+  }
   const d = derive(G.stats, G.wave);
 
   stepCore(G, dt);
