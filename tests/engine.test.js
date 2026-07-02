@@ -221,8 +221,17 @@ describe('stats', () => {
     expect(CONFIG.clutchXp).toBe(8);
   });
 
-  it('CONFIG.waveClearHeal is 5', () => {
-    expect(CONFIG.waveClearHeal).toBe(5);
+  it('CONFIG.waveClearHealBase is 5', () => {
+    expect(CONFIG.waveClearHealBase).toBe(5);
+  });
+
+  it('CONFIG.waveClearHealMax is 20', () => {
+    expect(CONFIG.waveClearHealMax).toBe(20);
+  });
+
+  it('wave-clear heal at wave 20 is greater than at wave 1', () => {
+    const formula = w => Math.max(CONFIG.waveClearHealBase, Math.min(CONFIG.waveClearHealMax, Math.round(CONFIG.coreHp * 0.02 * Math.sqrt(w))));
+    expect(formula(20)).toBeGreaterThan(formula(1));
   });
 
   it('CONFIG.reposCooldown is 12', () => {

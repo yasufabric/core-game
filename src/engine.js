@@ -21,7 +21,8 @@ export const CONFIG = {
   dartChance: 0.08,          // probability per spawn of a dart enemy (wave 8+)
   waveClearXp: 3,            // bonus XP awarded when all enemies are wiped
   clutchXp: 8,               // bonus XP for wave-clear at ≤10% HP
-  waveClearHeal: 5,          // HP restored when all enemies are wiped
+  waveClearHealBase: 5,      // minimum HP restored on wave clear (wave 1)
+  waveClearHealMax: 20,      // maximum HP restored on wave clear (high waves)
   reposCooldown: 12,         // seconds between tap-to-reposition uses
   reposDuration: 0.8,        // seconds to slide core to new position
   thornsAura: 4,             // damage per second dealt to enemies within coreRadius+50px when thorns unlocked
@@ -656,7 +657,8 @@ export function stepEnemies(G, d, dt) {
       clutch = true;
       G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 55, born: G.t, life: 0.6, color: '#ff4400' });
     }
-    const healed = Math.min(CONFIG.waveClearHeal, CONFIG.coreHp - c.hp);
+    const healAmt = Math.max(CONFIG.waveClearHealBase, Math.min(CONFIG.waveClearHealMax, Math.round(CONFIG.coreHp * 0.02 * Math.sqrt(G.wave))));
+    const healed = Math.min(healAmt, CONFIG.coreHp - c.hp);
     if (healed > 0) {
       c.hp += healed;
       G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 30, born: G.t, life: 0.4, color: '#4cff91' });
