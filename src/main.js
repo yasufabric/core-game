@@ -76,6 +76,7 @@ function newGame() {
   renderSkillBar();
   overlay.classList.remove('show');
   waveFlashEl.classList.remove('show');
+  document.getElementById('gametime').textContent = '';
   document.getElementById('splash').classList.add('hidden');
 }
 
@@ -367,6 +368,7 @@ function gameOver() {
   if (G.wave > bestWave) { bestWave = G.wave; localStorage.setItem('bestWave', bestWave); }
   document.getElementById('deadmsg').textContent   = `CORE BREACHED · WAVE ${G.wave} · LV ${G.level}`;
   document.getElementById('killcount').textContent  = G.kills > 0 ? `KILLS  ${G.kills}` : '';
+  document.getElementById('gametime').textContent   = `TIME  ${Math.round(G.t)}s`;
   document.getElementById('bestscore').textContent  = bestWave > 0 ? `BEST  WAVE ${bestWave}` : '';
   document.getElementById('start').textContent      = 'RETRY';
   document.getElementById('splash').classList.remove('hidden');
