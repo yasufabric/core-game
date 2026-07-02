@@ -292,6 +292,14 @@ function step(dt) {
     sfx.waveClear();
   }
   if (result.clutch)        { applyXp(CONFIG.clutchXp); }
+  if (result.bossKilled) {
+    G.fx.push({ kind: 'flash', color: '#ffd700', born: G.t, life: 0.6 });
+    waveFlashEl.textContent = 'BOSS DOWN';
+    waveFlashEl.style.color = '#ffd700';
+    waveFlashEl.classList.add('show');
+    clearTimeout(waveFlashTimer);
+    waveFlashTimer = setTimeout(() => { waveFlashEl.classList.remove('show'); waveFlashEl.style.color = ''; }, 1200);
+  }
   if (result.bomberExploded) sfx.bomberExplode();
   if (result.coreHit) {
     if (G.t + 0.2 > G.shakeUntil) G.shakeUntil = G.t + 0.2;

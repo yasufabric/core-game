@@ -573,12 +573,12 @@ export function stepMissiles(G, d, dt, rng) {
 }
 
 // Moves enemies toward the core, applies thorns, resolves core collisions, handles deaths.
-// Returns { xpGained, killCount, waveClear, clutch, coreHit }
+// Returns { xpGained, killCount, waveClear, clutch, coreHit, bossKilled }
 // coreHit signals main.js to trigger screen-shake and hit sfx.
 export function stepEnemies(G, d, dt) {
   const c = G.core;
   const slow = G.t < G.slowUntil ? 0.4 : 1;
-  let totalXp = 0, xpDrained = 0, coreHit = false, bomberExploded = false;
+  let totalXp = 0, xpDrained = 0, coreHit = false, bomberExploded = false, bossKilled = false;
   const survivors = [], spawnedFromSplitters = [];
 
   for (const e of G.enemies) {
@@ -589,6 +589,11 @@ export function stepEnemies(G, d, dt) {
       }
       const col = e.boss ? '#ffd700' : e.tanky ? '#ff8a4d' : e.splitter ? '#f277ff' : '#ff5d73';
       G.fx.push({ kind: 'burst', x: e.x, y: e.y, color: col, born: G.t, life: 0.4, n: 7 });
+      if (e.boss) {
+        bossKilled = true;
+        G.fx.push({ kind: 'burst', x: e.x, y: e.y, color: '#ffd700', born: G.t, life: 0.7, n: 20 });
+        G.fx.push({ kind: 'ring', x: e.x, y: e.y, r: 0, max: 80, born: G.t, life: 0.5, color: '#ffd700' });
+      }
       spawnedFromSplitters.push(...splitterChildren(e));
       continue;
     }
@@ -683,7 +688,7 @@ export function stepEnemies(G, d, dt) {
     }
   }
 
-  return { xpGained: totalXp, xpDrained, killCount, firstBlood, waveClear, clutch, coreHit, bomberExploded };
+  return { xpGained: totalXp, xpDrained, killCount, firstBlood, waveClear, clutch, coreHit, bomberExploded, bossKilled };
 }
 
 // Orbits the drone(s) and zaps the nearest in-range enemy.

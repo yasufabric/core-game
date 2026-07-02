@@ -952,6 +952,22 @@ describe('first-blood XP', () => {
     const result = stepEnemies(G, d, 0.016);
     expect(result.firstBlood).toBe(false);
   });
+
+  it('stepEnemies returns bossKilled=true when a boss dies', () => {
+    const G = makeG({ firstBloodDone: true });
+    const d = derive(defaultStats(), 5);
+    G.enemies.push({ x: 300, y: 300, r: 28, hp: 0, maxHp: 80, spd: 0, boss: true, tanky: false, splitter: false });
+    const result = stepEnemies(G, d, 0.016);
+    expect(result.bossKilled).toBe(true);
+  });
+
+  it('stepEnemies returns bossKilled=false when only a normal enemy dies', () => {
+    const G = makeG({ firstBloodDone: true });
+    const d = derive(defaultStats(), 1);
+    G.enemies.push({ x: 0, y: 0, r: 8, hp: 0, maxHp: 5, spd: 0, tanky: false });
+    const result = stepEnemies(G, d, 0.016);
+    expect(result.bossKilled).toBe(false);
+  });
 });
 
 describe('collision knockback + stun', () => {

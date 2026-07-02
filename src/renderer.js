@@ -42,7 +42,7 @@ export function draw(G, ctx, W, H, DPR, getCss) {
       ctx.fillStyle = '#fff'; ctx.globalAlpha = 1 - k;
       ctx.beginPath(); ctx.arc(f.x, f.y, 3 * (1 - k) + 1, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
     } else if (f.kind === 'flash') {
-      ctx.fillStyle = '#fff'; ctx.globalAlpha = (1 - k) * 0.28;
+      ctx.fillStyle = f.color || '#fff'; ctx.globalAlpha = (1 - k) * 0.28;
       ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1;
     } else if (f.kind === 'arc') {
       ctx.strokeStyle = '#ffe066'; ctx.globalAlpha = (1 - k) * 0.9; ctx.lineWidth = 2.5 * (1 - k) + 0.5;
