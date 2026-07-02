@@ -203,6 +203,16 @@ describe('stats', () => {
     expect(xp).toBeCloseTo(CONFIG.xpPerKill * 1.5);
   });
 
+  it('CONFIG.waveXpScale is 0.04', () => {
+    expect(CONFIG.waveXpScale).toBe(0.04);
+  });
+
+  it('xpForKill yields more XP at wave 10 than wave 1 for the same enemy', () => {
+    const xpW1  = xpForKill(defaultStats(), {}, 1);
+    const xpW10 = xpForKill(defaultStats(), {}, 10);
+    expect(xpW10).toBeGreaterThan(xpW1);
+  });
+
   it('CONFIG.waveClearXp is 3', () => {
     expect(CONFIG.waveClearXp).toBe(3);
   });

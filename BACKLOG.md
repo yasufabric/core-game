@@ -7,6 +7,17 @@ Keep items small and verifiable. A good item names *what done looks like*.
 
 ## Up next
 
+<!-- ── 2026-07-02 review batch ────────────────────────────────── -->
+- [x] Scale kill XP with wave: add `wave` as a third parameter to `xpForKill` and multiply the return value by `1 + wave * 0.04`, threading `wave` through all call sites in `engine.js` and `stepEnemies`. Done = `CONFIG.waveXpScale = 0.04` exported from `engine.js` with a test pinning the value; a test confirms wave-10 kill yields more XP than wave-1 kill for the same enemy type; all existing xpForKill call sites pass wave correctly. Added CONFIG.waveXpScale=0.04; xpForKill takes wave param (default 0); both stepEnemies call sites pass G.wave; 2 new tests (160 total).
+
+- [ ] Scale wave-clear heal with wave: replace the flat `CONFIG.waveClearHeal = 5` with a dynamic formula — `Math.max(CONFIG.waveClearHealBase, Math.min(CONFIG.waveClearHealMax, Math.round(CONFIG.coreHp * 0.02 * Math.sqrt(wave))))` — evaluated inside `stepEnemies` where the wave-clear heal is applied. Done = `CONFIG.waveClearHealBase = 5` and `CONFIG.waveClearHealMax = 20` exported from `engine.js` with tests pinning both values; a test confirms wave-20 heal is greater than wave-1 heal.
+
+- [ ] Add phantom enemy type: a new enemy variant (`e.phantom = true`) spawning wave 10+, 6% chance, that cycles visible (2.3 s) / invisible (0.7 s) via `e.phantomUntil` timestamp; `stepShots` skips collision while `G.t < e.phantomUntil`; renderer draws at 25% opacity during hidden phase. Done = `CONFIG.phantomVisibleTime = 2.3` and `CONFIG.phantomHiddenTime = 0.7` exported from `engine.js` with tests pinning both values; a test confirms auto-shots do zero damage during the hidden phase and full damage during visible phase.
+
+- [ ] Add Fortify passive skill: `SKILLS.fortify` (`passive: true`) — while shield is active (`G.t < G.shieldUntil`), each auto-shot that hits an enemy deals `CONFIG.fortifyBonus = 0.5` × `stats.power` bonus damage (additive line in `stepShots`). Done = `SKILLS.fortify` defined in `engine.js`, offerable before unlock and not after (2 tests); `CONFIG.fortifyBonus = 0.5` exported with a test pinning the value; a test confirms bonus damage is applied when shield is active and not when inactive.
+
+- [ ] Add skill-ready glow on cooldown expiry: when a skill button transitions from on-cooldown to ready, add the CSS class `skill-ready` for 350 ms then remove it; `@keyframes skill-ready-glow` animates `box-shadow` from `0 0 8px var(--core)` to none. Done = animation is visible in the browser when a skill's CD expires during play; gate the class add with a per-button `data-was-on-cd` attribute to prevent repeated triggers.
+
 <!-- ── 2026-06-29 review batch ────────────────────────────────── -->
 - [x] Make the spawn interval floor tighten per wave: in `derive()`, change the spawn interval floor from a fixed `0.28` to `Math.max(0.28 - G.wave * 0.004, 0.18)` so density keeps scaling past wave 20. Done = `CONFIG.spawnFloorBase = 0.28` and `CONFIG.spawnFloorMin = 0.18` exported from `engine.js` with tests pinning both values; `derive()` test confirms floor at wave 25 is less than at wave 1. Added CONFIG.spawnFloorBase/Min; derive() uses wave-scaled floor; 4 tests updated/added.
 

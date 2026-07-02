@@ -43,6 +43,7 @@ export const CONFIG = {
   bomberRadius: 120,         // px AoE radius of bomber explosion
   coreDmgNormal: 5,          // HP damage to core when a normal enemy reaches it
   coreDmgTanky: 10,          // HP damage to core when a tanky enemy reaches it
+  waveXpScale: 0.04,         // XP multiplier gain per wave number (wave 10 → ×1.4)
 };
 
 // --- leveling -------------------------------------------------------------
@@ -221,14 +222,15 @@ export function splitterChildren(enemy) {
   ];
 }
 
-export function xpForKill(stats, enemy) {
+export function xpForKill(stats, enemy, wave = 0) {
   const typeMult = enemy
     ? (enemy.boss ? 5 : enemy.tanky ? 2 : enemy.splitter ? 1.5 : enemy.dart ? 0.8 : 1)
     : 1;
   const speedMult = (enemy && enemy.spd)
     ? Math.min(1.5, 1 + 0.1 * (enemy.spd / CONFIG.baseEnemySpeed - 1))
     : 1;
-  return CONFIG.xpPerKill * typeMult * speedMult * (1 + (stats.magnet || 0));
+  const waveMult = 1 + wave * CONFIG.waveXpScale;
+  return CONFIG.xpPerKill * typeMult * speedMult * waveMult * (1 + (stats.magnet || 0));
 }
 
 export function waveForTime(elapsedSec) {
@@ -569,7 +571,7 @@ export function stepEnemies(G, d, dt) {
 
   for (const e of G.enemies) {
     if (e.hp <= 0) {
-      totalXp += xpForKill(G.stats, e);
+      totalXp += xpForKill(G.stats, e, G.wave);
       if (G.unlocked.includes('siphon') && dist(e.x, e.y, c.x, c.y) < 60) {
         c.hp = Math.min(CONFIG.coreHp, c.hp + 1);
       }
@@ -632,7 +634,7 @@ export function stepEnemies(G, d, dt) {
           other.stunUntil = G.t + 0.4;
         }
       }
-      totalXp += xpForKill(G.stats, e);
+      totalXp += xpForKill(G.stats, e, G.wave);
       e.hp = 0; e.consumed = true;
       G.fx.push({ kind: 'ring', x: c.x, y: c.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 18, born: G.t, life: .3, color: '#ff5d73' });
       continue;
