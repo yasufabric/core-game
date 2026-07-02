@@ -45,6 +45,7 @@ export const CONFIG = {
   coreDmgNormal: 5,          // HP damage to core when a normal enemy reaches it
   coreDmgTanky: 10,          // HP damage to core when a tanky enemy reaches it
   waveXpScale: 0.04,         // XP multiplier gain per wave number (wave 10 → ×1.4)
+  fortifyBonus: 0.5,         // bonus damage multiplier (× stats.power) per auto-shot while shield active
   phantomVisibleTime: 2.3,   // seconds phantom enemy is visible per cycle
   phantomHiddenTime: 0.7,    // seconds phantom enemy is invisible (auto-shots pass through)
 };
@@ -122,6 +123,7 @@ export const SKILLS = {
   overload: { id: 'overload', name: 'Overload', passive: true,       desc: 'Every 8th auto-shot fires a burst of 8 radial shots at half damage' },
   siphon:   { id: 'siphon',   name: 'Siphon',   passive: true,       desc: 'Killing an enemy within 60px of the core restores 1 HP' },
   leech:    { id: 'leech',    name: 'Leech',    passive: true,       desc: 'Every skill activation restores Math.round(0.3×power) HP to the core' },
+  fortify:  { id: 'fortify',  name: 'Fortify',  passive: true,       desc: 'While shield is active, auto-shots deal bonus damage equal to 0.5× power' },
 };
 
 export const STAT_CARDS = [
@@ -514,6 +516,9 @@ export function stepShots(G, dt, W, H) {
         } else {
           e.hp -= s.dmg; e.hitFlash = G.t; s.life = 0;
           G.fx.push({ kind: 'spark', x: s.x, y: s.y, born: G.t, life: .2 });
+          if (G.unlocked.includes('fortify') && G.t < G.shieldUntil) {
+            e.hp -= CONFIG.fortifyBonus * G.stats.power;
+          }
         }
         break;
       }

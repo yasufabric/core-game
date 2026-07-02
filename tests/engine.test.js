@@ -804,6 +804,47 @@ describe('SKILLS.leech passive', () => {
   });
 });
 
+describe('SKILLS.fortify passive', () => {
+  it('fortify is a passive skill and is offerable', () => {
+    expect(SKILLS.fortify).toBeDefined();
+    expect(SKILLS.fortify.passive).toBe(true);
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers([], seq([0.99, 0.1, 0.5]));
+    expect(offers.some(o => o.kind === 'skill')).toBe(true);
+  });
+
+  it('fortify is not offered when already unlocked', () => {
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers(['fortify'], seq([0, 0.1, 0.4, 0.7]));
+    expect(offers.filter(o => o.id === 'fortify')).toHaveLength(0);
+  });
+
+  it('CONFIG.fortifyBonus is 0.5', () => {
+    expect(CONFIG.fortifyBonus).toBe(0.5);
+  });
+
+  it('fortify deals bonus damage when shield is active', () => {
+    const G = makeG({ t: 1.0 });
+    G.shieldUntil = 5.0;
+    G.unlocked = ['fortify'];
+    G.enemies.push({ x: 100, y: 100, r: 8, hp: 10, maxHp: 10, shielded: false });
+    G.shots = [{ x: 100, y: 100, vx: 0, vy: 0, dmg: 1, life: 1 }];
+    stepShots(G, 0, 400, 600);
+    // base dmg 1 + fortify bonus 0.5 * 1 (default power) = 1.5 total damage
+    expect(G.enemies[0].hp).toBeCloseTo(10 - 1 - CONFIG.fortifyBonus * G.stats.power);
+  });
+
+  it('fortify does not deal bonus damage when shield is inactive', () => {
+    const G = makeG({ t: 1.0 });
+    G.shieldUntil = 0; // shield not active
+    G.unlocked = ['fortify'];
+    G.enemies.push({ x: 100, y: 100, r: 8, hp: 10, maxHp: 10, shielded: false });
+    G.shots = [{ x: 100, y: 100, vx: 0, vy: 0, dmg: 1, life: 1 }];
+    stepShots(G, 0, 400, 600);
+    expect(G.enemies[0].hp).toBe(9); // only base dmg 1
+  });
+});
+
 describe('synergy XP', () => {
   it('CONFIG.synergyXp is 3', () => {
     expect(CONFIG.synergyXp).toBe(3);
