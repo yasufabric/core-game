@@ -50,6 +50,7 @@ export const CONFIG = {
   phantomHiddenTime: 0.7,    // seconds phantom enemy is invisible (auto-shots pass through)
   milestoneInterval: 10,     // every Nth wave grants a free card pick
   autogunInterval: 4,        // seconds between autogun burst fires
+  enemySpeedCap: 160,        // absolute maximum enemySpeed regardless of wave
 };
 
 // --- leveling -------------------------------------------------------------
@@ -99,7 +100,7 @@ export function derive(stats, wave) {
     autoRange: 140 * stats.range,      // px
     regenPerSec: stats.regen,
     enemyHp: CONFIG.baseEnemyHp + Math.floor(wave * CONFIG.enemyHpScale),
-    enemySpeed: CONFIG.baseEnemySpeed + wave * CONFIG.enemySpeedScale,
+    enemySpeed: Math.min(CONFIG.baseEnemySpeed + wave * CONFIG.enemySpeedScale, CONFIG.enemySpeedCap),
     spawnInterval: Math.max(Math.max(CONFIG.spawnFloorBase - wave * 0.004, CONFIG.spawnFloorMin), CONFIG.baseSpawnInterval - wave * 0.06),
     critChance: stats.crit,
   };

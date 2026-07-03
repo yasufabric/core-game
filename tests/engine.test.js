@@ -98,6 +98,17 @@ describe('stats', () => {
     expect(derive(defaultStats(), 1).spawnInterval).toBeCloseTo(CONFIG.baseSpawnInterval - 1 * 0.06, 2);
   });
 
+  it('CONFIG.enemySpeedCap is 160', () => {
+    expect(CONFIG.enemySpeedCap).toBe(160);
+  });
+
+  it('enemySpeed is clamped to enemySpeedCap at high waves', () => {
+    const a = derive(defaultStats(), 100).enemySpeed;
+    const b = derive(defaultStats(), 200).enemySpeed;
+    expect(a).toBe(CONFIG.enemySpeedCap);
+    expect(b).toBe(CONFIG.enemySpeedCap);
+  });
+
   it('defaultStats has crit at 0', () => {
     expect(defaultStats().crit).toBe(0);
   });
