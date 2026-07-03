@@ -17,6 +17,7 @@ const overlay     = document.getElementById('overlay');
 const cardsEl     = document.getElementById('cards');
 const skillsEl    = document.getElementById('skills');
 const fastBtnEl   = document.getElementById('fast-btn');
+const coachEl     = document.getElementById('coach');
 
 let W = 0, H = 0, DPR = 1;
 function resize() {
@@ -77,6 +78,7 @@ function newGame() {
   renderSkillBar();
   overlay.classList.remove('show');
   waveFlashEl.classList.remove('show');
+  coachEl.classList.remove('show');
   document.getElementById('gametime').textContent = '';
   document.getElementById('splash').classList.add('hidden');
 }
@@ -99,9 +101,23 @@ function applyXp(amount) {
 }
 
 // --- skills ----------------------------------------------------------------
+function hideCoach() {
+  if (!localStorage.getItem('coreSeenCoach')) {
+    localStorage.setItem('coreSeenCoach', '1');
+  }
+  coachEl.classList.remove('show');
+}
+
+function maybeShowCoach() {
+  if (localStorage.getItem('coreSeenCoach')) return;
+  if (skillsEl.children.length === 0) return; // no active skill button yet
+  coachEl.classList.add('show');
+}
+
 function onSkillTap(id, aimX, aimY) {
   if (!skillReady(G, id)) return;
   sfx.skill();
+  hideCoach();
   const btn = skillsEl.querySelector(`[data-id="${id}"]`);
   if (btn) {
     btn.style.animation = '';
@@ -223,6 +239,7 @@ function choose(o, picksRemaining) {
   if (remaining > 0) { openLevelUp(remaining); return; }
   overlay.classList.remove('show');
   G.paused = false;
+  maybeShowCoach();
   if (G.pendingLevels > 0) {
     G.pendingLevels--;
     const hdr = G.pendingBossHeader || null;
