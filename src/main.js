@@ -117,6 +117,7 @@ function maybeShowCoach() {
 function onSkillTap(id, aimX, aimY) {
   if (!skillReady(G, id)) return;
   sfx.skill();
+  if ('vibrate' in navigator) navigator.vibrate(15);
   hideCoach();
   const btn = skillsEl.querySelector(`[data-id="${id}"]`);
   if (btn) {
@@ -372,6 +373,7 @@ function step(dt) {
     if (G.t + 0.2 > G.shakeUntil) G.shakeUntil = G.t + 0.2;
     G.fx.push({ kind: 'ring', x: G.core.x, y: G.core.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 30, born: G.t, life: 0.25, color: '#ff4444' });
     sfx.hit();
+    if ('vibrate' in navigator) navigator.vibrate([30, 20, 30]);
   }
   if (result.lastStand) {
     G.fx.push({ kind: 'flash', color: '#ffffff', born: G.t, life: 0.6 });
