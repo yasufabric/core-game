@@ -6,7 +6,7 @@ import {
   applyStatCard, dist, enemyHitsCore, coreDamageTaken, splitterChildren, xpForKill, waveForTime, clamp, SKILLS, CONFIG, isBossWave, isMilestoneWave,
   pointSegDist, createEnemy, createBoss, isShieldBlocked,
   skillReady, executeSkill,
-  stepCore, stepEnemies, stepShots, stepAutoFire,
+  stepCore, stepEnemies, stepShots, stepAutoFire, stepNovaDet,
 } from '../src/engine.js';
 
 describe('xp / leveling', () => {
@@ -299,7 +299,7 @@ describe('SKILLS', () => {
     const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
     expect(SKILLS.nova).toBeDefined();
     expect(SKILLS.nova.tap).toBe(2);
-    const offers = rollOffers([], seq([0.37, 0.1, 0.5])); // 0.37 × 18 = 6.66 → floor 6 = nova in 18-skill pool
+    const offers = rollOffers([], seq([0.33, 0.1, 0.5])); // 0.33 × 19 = 6.27 → floor 6 = nova in 19-skill pool
     expect(offers).toContainEqual(expect.objectContaining({ kind: 'skill', id: 'nova', tap: 2 }));
   });
 
@@ -421,6 +421,20 @@ describe('SKILLS', () => {
 
   it('slow (Time Warp) name is Time Warp', () => {
     expect(SKILLS.slow.name).toBe('Time Warp');
+  });
+
+  it('resonance is a passive skill and is offerable', () => {
+    expect(SKILLS.resonance).toBeDefined();
+    expect(SKILLS.resonance.passive).toBe(true);
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers([], seq([0, 0.1, 0.5]));
+    expect(offers.some(o => o.kind === 'skill')).toBe(true);
+  });
+
+  it('resonance is not offered when already unlocked', () => {
+    const seq = (arr) => { let i = 0; return () => arr[i++ % arr.length]; };
+    const offers = rollOffers(['resonance'], seq([0, 0.1, 0.4, 0.7]));
+    expect(offers.filter(o => o.id === 'resonance')).toHaveLength(0);
   });
 });
 
@@ -1161,6 +1175,36 @@ describe('Last Stand', () => {
     const result = stepEnemies(G, d, 0.016);
     expect(G.core.hp).toBeLessThanOrEqual(0);
     expect(result.lastStand).toBe(false);
+  });
+});
+
+describe('Resonance (Nova + Vortex synergy)', () => {
+  it('CONFIG.resonanceMult is 1.5', () => {
+    expect(CONFIG.resonanceMult).toBe(1.5);
+  });
+
+  it('deals 1.5x nova damage to an enemy with 2+ neighbors within 90px when resonance unlocked', () => {
+    const G = makeG({ t: 5 });
+    G.unlocked = ['resonance'];
+    const target = { x: 100, y: 100, r: 8, hp: 1000, maxHp: 1000 };
+    const n1 = { x: 120, y: 100, r: 8, hp: 10, maxHp: 10 };
+    const n2 = { x: 100, y: 120, r: 8, hp: 10, maxHp: 10 };
+    G.enemies.push(target, n1, n2);
+    G.fx.push({ kind: 'nova', x: 100, y: 100, r: 0, max: 120, born: 4, life: .85, hitAt: 4.45, hit: false, damage: 18 });
+    stepNovaDet(G);
+    expect(target.hp).toBeCloseTo(1000 - 18 * CONFIG.resonanceMult);
+  });
+
+  it('deals normal nova damage when resonance is not unlocked', () => {
+    const G = makeG({ t: 5 });
+    G.unlocked = [];
+    const target = { x: 100, y: 100, r: 8, hp: 1000, maxHp: 1000 };
+    const n1 = { x: 120, y: 100, r: 8, hp: 10, maxHp: 10 };
+    const n2 = { x: 100, y: 120, r: 8, hp: 10, maxHp: 10 };
+    G.enemies.push(target, n1, n2);
+    G.fx.push({ kind: 'nova', x: 100, y: 100, r: 0, max: 120, born: 4, life: .85, hitAt: 4.45, hit: false, damage: 18 });
+    stepNovaDet(G);
+    expect(target.hp).toBeCloseTo(1000 - 18);
   });
 });
 

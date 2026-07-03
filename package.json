@@ -1,6 +1,6 @@
 {
   "name": "core-game",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "CORE — a one-thumb survival-defense browser game. Logic is pure and unit-tested so an agent loop can verify its own changes.",
   "type": "module",
   "scripts": {

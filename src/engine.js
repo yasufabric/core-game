@@ -51,6 +51,7 @@ export const CONFIG = {
   milestoneInterval: 10,     // every Nth wave grants a free card pick
   autogunInterval: 4,        // seconds between autogun burst fires
   enemySpeedCap: 160,        // absolute maximum enemySpeed regardless of wave
+  resonanceMult: 1.5,        // nova damage multiplier vs enemies with 2+ neighbors within 90px
 };
 
 // --- leveling -------------------------------------------------------------
@@ -128,6 +129,7 @@ export const SKILLS = {
   leech:    { id: 'leech',    name: 'Leech',    passive: true,       desc: 'Every skill activation restores Math.round(0.3×power) HP to the core' },
   fortify:  { id: 'fortify',  name: 'Fortify',  passive: true,       desc: 'While shield is active, auto-shots deal bonus damage equal to 0.5× power' },
   autogun:  { id: 'autogun',  name: 'Autogun',  passive: true, auto: true, desc: 'Automatically fires a 3-shot spread at the nearest enemy every 4s' },
+  resonance: { id: 'resonance', name: 'Resonance', passive: true, desc: 'Nova deals 1.5× damage to enemies with 2+ neighbors within 90px' },
 };
 
 export const STAT_CARDS = [
@@ -474,7 +476,14 @@ export function stepNovaDet(G) {
     if (f.kind === 'nova' && !f.hit && G.t >= f.hitAt) {
       f.hit = true;
       for (const e of G.enemies) {
-        if (dist(e.x, e.y, f.x, f.y) <= f.max + e.r) { e.hp -= f.damage; e.hitFlash = G.t; }
+        if (dist(e.x, e.y, f.x, f.y) <= f.max + e.r) {
+          let dmg = f.damage;
+          if (G.unlocked.includes('resonance')) {
+            const neighbors = G.enemies.filter(o => o !== e && o.hp > 0 && dist(o.x, o.y, e.x, e.y) <= 90).length;
+            if (neighbors >= 2) dmg *= CONFIG.resonanceMult;
+          }
+          e.hp -= dmg; e.hitFlash = G.t;
+        }
       }
       G.fx.push({ kind: 'ring', x: f.x, y: f.y, r: 24, max: f.max, born: G.t, life: .25, color: '#ffec99' });
     }
