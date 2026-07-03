@@ -1139,6 +1139,31 @@ describe('phantom enemy', () => {
   });
 });
 
+describe('Last Stand', () => {
+  it('clamps core hp to 1 on a lethal hit when lastStandUsed is false', () => {
+    const G = makeG({ t: 10, firstBloodDone: true, lastStandUsed: false });
+    G.core.hp = 5;
+    const d = derive(defaultStats(), 1);
+    G.enemies.push({ x: G.core.x, y: G.core.y, r: 100, hp: 5, maxHp: 5, spd: 0, tanky: false });
+    G.enemies.push({ x: -500, y: -500, r: 8, hp: 50, maxHp: 50, spd: 0 }); // survives, prevents waveClear heal
+    const result = stepEnemies(G, d, 0.016);
+    expect(G.core.hp).toBe(1);
+    expect(G.lastStandUsed).toBe(true);
+    expect(result.lastStand).toBe(true);
+  });
+
+  it('does not save twice — a second lethal hit reduces hp to 0 normally', () => {
+    const G = makeG({ t: 10, firstBloodDone: true, lastStandUsed: true });
+    G.core.hp = 1;
+    const d = derive(defaultStats(), 1);
+    G.enemies.push({ x: G.core.x, y: G.core.y, r: 100, hp: 5, maxHp: 5, spd: 0, tanky: false });
+    G.enemies.push({ x: -500, y: -500, r: 8, hp: 50, maxHp: 50, spd: 0 }); // survives, prevents waveClear heal
+    const result = stepEnemies(G, d, 0.016);
+    expect(G.core.hp).toBeLessThanOrEqual(0);
+    expect(result.lastStand).toBe(false);
+  });
+});
+
 describe('Vortex (repulse redesign)', () => {
   it('vortex pulls enemies toward the core', () => {
     const G = makeG();

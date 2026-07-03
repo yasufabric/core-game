@@ -68,6 +68,7 @@ function newGame() {
     reposLastAt: -CONFIG.reposCooldown, reposTarget: null, reposStart: null,
     autoShotCount: 0, autogunAt: 0,
     firstBloodDone: false,
+    lastStandUsed: false,
     lastSpikeAt: -CONFIG.spikeCooldown,
     lastSkillAt: 0, lastSkillId: null,
   };
@@ -354,6 +355,14 @@ function step(dt) {
     if (G.t + 0.2 > G.shakeUntil) G.shakeUntil = G.t + 0.2;
     G.fx.push({ kind: 'ring', x: G.core.x, y: G.core.y, r: CONFIG.coreRadius, max: CONFIG.coreRadius + 30, born: G.t, life: 0.25, color: '#ff4444' });
     sfx.hit();
+  }
+  if (result.lastStand) {
+    G.fx.push({ kind: 'flash', color: '#ffffff', born: G.t, life: 0.6 });
+    waveFlashEl.textContent = 'LAST STAND';
+    waveFlashEl.style.color = '#ff4444';
+    waveFlashEl.classList.add('show');
+    clearTimeout(waveFlashTimer);
+    waveFlashTimer = setTimeout(() => { waveFlashEl.classList.remove('show'); waveFlashEl.style.color = ''; }, 1500);
   }
 
   for (const e of G.enemies) {

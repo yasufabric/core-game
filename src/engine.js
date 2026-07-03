@@ -610,8 +610,18 @@ export function stepMissiles(G, d, dt, rng) {
 export function stepEnemies(G, d, dt) {
   const c = G.core;
   const slow = G.t < G.slowUntil ? 0.4 : 1;
-  let totalXp = 0, xpDrained = 0, coreHit = false, bomberExploded = false, bossKilled = false;
+  let totalXp = 0, xpDrained = 0, coreHit = false, bomberExploded = false, bossKilled = false, lastStand = false;
   const survivors = [], spawnedFromSplitters = [];
+
+  function applyCoreDamage(dmg) {
+    c.hp -= dmg;
+    coreHit = true;
+    if (c.hp <= 0 && !G.lastStandUsed) {
+      c.hp = 1;
+      G.lastStandUsed = true;
+      lastStand = true;
+    }
+  }
 
   for (const e of G.enemies) {
     if (e.hp <= 0) {
@@ -667,7 +677,7 @@ export function stepEnemies(G, d, dt) {
         e.spd = 0; // halt
         if (G.t >= e.fuseAt) {
           // detonate
-          if (G.t >= G.shieldUntil) { c.hp -= coreDamageTaken(G.stats, CONFIG.bomberDamage); coreHit = true; }
+          if (G.t >= G.shieldUntil) { applyCoreDamage(coreDamageTaken(G.stats, CONFIG.bomberDamage)); }
           for (const other of G.enemies) {
             if (other === e || other.hp <= 0) continue;
             if (dist(other.x, other.y, e.x, e.y) <= CONFIG.bomberRadius) { other.hp -= CONFIG.bomberDamage * 0.5; other.hitFlash = G.t; }
@@ -679,7 +689,7 @@ export function stepEnemies(G, d, dt) {
       }
     }
     if (enemyHitsCore(e, c)) {
-      if (G.t >= G.shieldUntil && !e.leech) { c.hp -= coreDamageTaken(G.stats, e.tanky ? CONFIG.coreDmgTanky : CONFIG.coreDmgNormal); coreHit = true; }
+      if (G.t >= G.shieldUntil && !e.leech) { applyCoreDamage(coreDamageTaken(G.stats, e.tanky ? CONFIG.coreDmgTanky : CONFIG.coreDmgNormal)); }
       for (const other of G.enemies) {
         if (other === e || other.hp <= 0) continue;
         if (dist(other.x, other.y, c.x, c.y) <= 80) {
@@ -720,7 +730,7 @@ export function stepEnemies(G, d, dt) {
     }
   }
 
-  return { xpGained: totalXp, xpDrained, killCount, firstBlood, waveClear, clutch, coreHit, bomberExploded, bossKilled };
+  return { xpGained: totalXp, xpDrained, killCount, firstBlood, waveClear, clutch, coreHit, bomberExploded, bossKilled, lastStand };
 }
 
 // Orbits the drone(s) and zaps the nearest in-range enemy.
