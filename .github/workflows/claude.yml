@@ -7,35 +7,53 @@ on:
   issues:
     types: [opened, assigned]
 
+# Deny everything by default; the job below grants only what it needs.
+permissions: {}
+
 jobs:
   claude:
-    # only react to humans mentioning @claude, never to bots (incl. itself)
+    # Only react to humans mentioning @claude, never to bots (incl. itself),
+    # and only when the author is the repo OWNER / a MEMBER / a COLLABORATOR.
+    # Anyone can comment on a public repo, so without the author_association
+    # check an outsider could drive the agent (prompt injection) while it holds
+    # contents:write and ANTHROPIC_API_KEY.
     if: |
       github.actor != 'claude[bot]' &&
       github.actor != 'github-actions[bot]' &&
       (
-        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-        (github.event_name == 'issues' && contains(github.event.issue.body, '@claude'))
+        (github.event_name == 'issue_comment' &&
+          contains(github.event.comment.body, '@claude') &&
+          contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+        (github.event_name == 'pull_request_review_comment' &&
+          contains(github.event.comment.body, '@claude') &&
+          contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+        (github.event_name == 'issues' &&
+          contains(github.event.issue.body, '@claude') &&
+          contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association))
       )
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: write
-      pull-requests: write
-      issues: read
+      contents: write       # push the work branch
+      pull-requests: write  # open / update the PR
+      issues: write         # post the progress comment on the triggering issue
+      id-token: write       # the action exchanges an OIDC token for its GitHub App token
     steps:
-      - uses: actions/checkout@v4
+      # actions/checkout v4.3.1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-node@v4
+      # actions/setup-node v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 22.23.4
 
-      - run: npm install
+      # Install exactly what package-lock.json pins.
+      - run: npm ci
 
-      - uses: anthropics/claude-code-action@v1
+      # anthropics/claude-code-action v1.0.261 (v1 as of 2026-10-24)
+      - uses: anthropics/claude-code-action@16f9f71ab9c490faf367f94dd294897edc25be33
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
